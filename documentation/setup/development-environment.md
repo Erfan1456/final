@@ -45,4 +45,4 @@ These commands inspect the local toolchain. They do not start implementation wor
 
 MongoDB Atlas development infrastructure has been configured externally by the user.
 
-No credentials or connection URI belong in this document. This snapshot does not attempt a database connection.
+No credentials or connection URI belong in this document. Backend connectivity uses `MONGODB_URI` from the server environment or an ignored local `backend/.env`. See [../database/mongodb-atlas-integration.md](../database/mongodb-atlas-integration.md).

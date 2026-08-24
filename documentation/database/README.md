@@ -15,4 +15,9 @@ Planned coverage includes:
 * database security
 * development vs production considerations
 
-Actual MongoDB schemas and collections will be documented once implementation begins. No database schema has been defined in TASK 001.
+Actual MongoDB schemas and collections will be documented once implementation begins. No database schema has been defined yet.
+
+## Current documents
+
+* [mongodb-atlas-integration.md](mongodb-atlas-integration.md) — backend connectivity foundation, driver, secrets, lifecycle, and health versus readiness.
+* [../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md](../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md) — accepted driver and connection-lifecycle decision.

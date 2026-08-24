@@ -6,12 +6,15 @@ This directory is the Dart Frog backend API for the Home Cleaning Service Market
 
 Current API version: `/api/v1`
 
-MongoDB Atlas connectivity is planned but not implemented. Do not place a MongoDB URI, passwords, or other secrets in this package.
+MongoDB Atlas is the persistence provider. `mongo_dart` is the backend driver. No product models, repositories, or CRUD operations exist yet.
+
+Do not place a real MongoDB URI, passwords, or other secrets in this package. Flutter never receives the MongoDB connection URI.
 
 ## Current endpoints
 
 * `GET /` — service descriptor
-* `GET /api/v1/health` — health check
+* `GET /api/v1/health` — liveness; database-independent
+* `GET /api/v1/ready` — readiness; MongoDB ping
 
 No authentication, booking, or other product endpoints exist yet.
 
@@ -24,9 +27,25 @@ Public, non-secret process environment variables currently supported:
 
 `ALLOWED_ORIGINS` is not a secret. In development, if it is absent, localhost and 127.0.0.1 origins are permitted. Production must set an explicit allow-list and never rely on `Access-Control-Allow-Origin: *`.
 
-`MONGODB_URI` is not active configuration yet.
+Secret / deployment environment variables:
+
+* `MONGODB_URI` — required for database readiness (`GET /api/v1/ready`)
+
+There is no default MongoDB URI. The process can still start and serve liveness health when `MONGODB_URI` is missing or MongoDB is unreachable.
 
 ## Local development
+
+Local development may load `backend/.env`. Production and other deployed environments should use real process environment variables instead of a committed file.
+
+`.env` must never be committed. Copy the placeholders from `.env.example`:
+
+```text
+APP_ENV=development
+ALLOWED_ORIGINS=
+MONGODB_URI=mongodb+srv://USERNAME:PASSWORD@CLUSTER_HOST/home_cleaning_marketplace
+```
+
+Replace the placeholders with values from your private Atlas configuration. Do not commit the real file.
 
 From this directory:
 
@@ -44,7 +63,8 @@ When the Flutter Android emulator later calls this API, use `http://10.0.2.2:808
 ## Architecture directories
 
 * `routes/` — Dart Frog HTTP entrypoints
-* `lib/src/config/` — non-secret server configuration
+* `lib/src/config/` — environment loading and server configuration
+* `lib/src/database/` — MongoDB connection lifecycle
 * `lib/src/http/` — JSON and CORS helpers
 * `test/` — backend tests
 
@@ -52,7 +72,7 @@ Business logic should not accumulate in route handlers. Future features should a
 
 ## Current limitations
 
-* No MongoDB integration
+* MongoDB connectivity and ping readiness only; no CRUD
 * No authentication
 * No product resources
 * CORS is a small development-oriented foundation, not a complete production security policy

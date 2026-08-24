@@ -35,7 +35,7 @@ Flutter/Dart mobile application. This is the current Flutter package root (`pubs
 
 ### `backend/`
 
-Dart Frog backend API (`home_cleaning_marketplace_api`). HTTP routes live under `backend/routes/`. Reusable backend code lives under `backend/lib/src/`. MongoDB integration is not implemented yet.
+Dart Frog backend API (`home_cleaning_marketplace_api`). HTTP routes live under `backend/routes/`. Reusable backend code lives under `backend/lib/src/`. MongoDB Atlas connectivity is implemented as a backend-only connection lifecycle; product collections and CRUD are not implemented yet.
 
 ### `documentation/`
 

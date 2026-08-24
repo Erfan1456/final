@@ -23,6 +23,9 @@ No endpoints are defined in TASK 001. Endpoint documentation should be added whe
 The Dart Frog backend currently implements:
 
 * `GET /` — JSON service descriptor
-* `GET /api/v1/health` — JSON health check
+* `GET /api/v1/health` — liveness; database-independent process check
+* `GET /api/v1/ready` — readiness; MongoDB ping
+
+`/api/v1/health` remains available even when MongoDB is unconfigured or unreachable. `/api/v1/ready` returns HTTP 200 when ping succeeds and HTTP 503 when the database is unconfigured or unavailable.
 
 These are infrastructure routes only. Authentication and product endpoints are not implemented.

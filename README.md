@@ -15,11 +15,11 @@ Those roles and product features have not been implemented yet. The project is c
 ```text
 Mobile client: Flutter + Dart
 Backend API: Dart + Dart Frog
-Database: MongoDB Atlas — integration not implemented yet
+Database: MongoDB Atlas — backend connectivity foundation implemented
 Primary Android development environment: Android Studio / Android Emulator
 ```
 
-The Dart Frog backend lives in `backend/`. MongoDB Atlas is not connected yet.
+The Dart Frog backend lives in `backend/`. MongoDB Atlas connectivity is implemented in the backend only. Authentication and product CRUD are not implemented.
 
 ## Intended High-Level Architecture
 

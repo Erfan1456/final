@@ -9,6 +9,41 @@ void main() {
       expect(config.environment, equals('development'));
       expect(config.isDevelopment, isTrue);
       expect(config.allowedOrigins, isEmpty);
+      expect(config.hasMongoUri, isFalse);
+      expect(config.mongoUri, isEmpty);
+    });
+
+    test('hasMongoUri is false when MONGODB_URI is absent', () {
+      final config = ServerConfig.fromEnvironment(const <String, String>{
+        'APP_ENV': 'development',
+      });
+
+      expect(config.hasMongoUri, isFalse);
+    });
+
+    test('hasMongoUri is true when a fake MONGODB_URI is present', () {
+      const fakeUri = 'mongodb://example.invalid:27017/test';
+      final config = ServerConfig.fromEnvironment(const <String, String>{
+        'MONGODB_URI': fakeUri,
+      });
+
+      expect(config.hasMongoUri, isTrue);
+      expect(config.mongoUri, equals(fakeUri));
+      expect(config.toString(), isNot(contains(fakeUri)));
+      expect(config.toString(), contains('hasMongoUri: true'));
+    });
+
+    test('accepts an explicit fake MongoDB URI through the constructor', () {
+      const fakeUri = 'mongodb://example.invalid:27017/test';
+      const config = ServerConfig(
+        environment: 'development',
+        allowedOrigins: <String>[],
+        mongoUri: fakeUri,
+      );
+
+      expect(config.hasMongoUri, isTrue);
+      expect(config.mongoUri, equals(fakeUri));
+      expect('$config', isNot(contains(fakeUri)));
     });
 
     test('uses explicit APP_ENV', () {

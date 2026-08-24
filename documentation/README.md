@@ -36,6 +36,10 @@ Current documents:
 
 Stores MongoDB architecture, collections, schemas/models, indexes, relationships/references, validation rules, migrations or migration-equivalent strategies, and database decisions.
 
+Current documents:
+
+* [mongodb-atlas-integration.md](database/mongodb-atlas-integration.md)
+
 ### `api/`
 
 Stores backend API documentation including endpoints, requests, responses, validation, authentication requirements, errors, and API conventions.
@@ -53,6 +57,7 @@ Current documents:
 * [ADR-001-initial-stack-and-repository-layout.md](decisions/ADR-001-initial-stack-and-repository-layout.md)
 * [ADR-003-flutter-client-architecture.md](decisions/ADR-003-flutter-client-architecture.md)
 * [ADR-004-dart-backend-framework.md](decisions/ADR-004-dart-backend-framework.md)
+* [ADR-005-mongodb-driver-and-connection-lifecycle.md](decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md)
 
 ### `workflows/`
 

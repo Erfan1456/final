@@ -1,21 +1,23 @@
 import 'dart:io';
 
-/// Non-secret server/runtime configuration.
+/// Server/runtime configuration.
 ///
-/// Supported process environment variables:
+/// Supported environment variables:
 /// - `APP_ENV` — defaults to `development` when absent
 /// - `ALLOWED_ORIGINS` — comma-separated origin list
+/// - `MONGODB_URI` — MongoDB Atlas connection URI (secret; never logged)
 ///
-/// MongoDB URIs, JWT secrets, and other credentials are not part of this
-/// configuration.
+/// The MongoDB URI has no default. When it is absent, [hasMongoUri] is false
+/// and liveness health can still succeed.
 class ServerConfig {
   /// Creates an explicit configuration, useful for tests.
   const ServerConfig({
     required this.environment,
     required this.allowedOrigins,
+    this.mongoUri = '',
   });
 
-  /// Reads non-secret settings from [environmentVariables], or from
+  /// Reads settings from [environmentVariables], or from
   /// [Platform.environment] when omitted.
   factory ServerConfig.fromEnvironment([
     Map<String, String>? environmentVariables,
@@ -35,9 +37,12 @@ class ServerConfig {
               .where((value) => value.isNotEmpty)
               .toList(growable: false);
 
+    final mongoUri = env['MONGODB_URI']?.trim() ?? '';
+
     return ServerConfig(
       environment: environment,
       allowedOrigins: allowedOrigins,
+      mongoUri: mongoUri,
     );
   }
 
@@ -49,6 +54,14 @@ class ServerConfig {
 
   /// Explicit CORS allow-list parsed from `ALLOWED_ORIGINS`.
   final List<String> allowedOrigins;
+
+  /// MongoDB connection URI from `MONGODB_URI`, or empty when unset.
+  ///
+  /// Do not print, log, or include this value in HTTP responses.
+  final String mongoUri;
+
+  /// Whether a non-empty MongoDB URI was configured.
+  bool get hasMongoUri => mongoUri.isNotEmpty;
 
   /// Whether [environment] is the development default.
   bool get isDevelopment => environment == defaultEnvironment;
@@ -87,4 +100,8 @@ class ServerConfig {
     }
     return uri.host == 'localhost' || uri.host == '127.0.0.1';
   }
+
+  @override
+  String toString() =>
+      'ServerConfig(environment: $environment, hasMongoUri: $hasMongoUri)';
 }

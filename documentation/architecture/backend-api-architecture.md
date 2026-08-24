@@ -2,7 +2,7 @@
 
 This document describes the Dart Frog backend for the Home Cleaning Service Marketplace.
 
-TASK 006 established backend infrastructure and a health endpoint only. Authentication, product resources, and MongoDB integration are not implemented.
+TASK 006 established backend infrastructure and a health endpoint. TASK 007 added MongoDB Atlas connectivity and a database-backed readiness endpoint. Authentication and product resources are not implemented.
 
 ## Current Architecture
 
@@ -11,12 +11,16 @@ Flutter client
      ↓ HTTP
 Dart Frog routes
      ↓
-Application/backend layers
+MongoDatabase
      ↓
-Future MongoDB integration
+mongo_dart
+     ↓
+MongoDB Atlas
 ```
 
-MongoDB credentials will exist only on the backend/server environment. Flutter will never receive the MongoDB URI.
+MongoDB credentials exist only on the backend/server environment. Flutter will never receive the MongoDB URI.
+
+See [../database/mongodb-atlas-integration.md](../database/mongodb-atlas-integration.md) and [../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md](../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md).
 
 ## Dart Frog Responsibilities
 
@@ -26,6 +30,7 @@ MongoDB credentials will exist only on the backend/server environment. Flutter w
 * request/response abstraction
 * development server (`dart_frog dev`)
 * production build support
+* shared `MongoDatabase` provider for future data-backed routes
 
 ## Folder Responsibilities
 
@@ -37,7 +42,7 @@ Route handlers should stay thin. Business logic should not accumulate here. Futu
 
 ### `backend/lib/src/`
 
-Reusable application/backend implementation, including configuration and HTTP helpers. Feature-specific models, repositories, and services are added only when real functionality requires them.
+Reusable application/backend implementation, including configuration, environment loading, MongoDB lifecycle, and HTTP helpers. Feature-specific models, repositories, and services are added only when real functionality requires them.
 
 ## API Versioning
 
@@ -52,16 +57,22 @@ Current implemented routes:
 ```text
 GET /
 GET /api/v1/health
+GET /api/v1/ready
 ```
+
+`GET /api/v1/health` is liveness and does not depend on MongoDB. `GET /api/v1/ready` is readiness and performs a MongoDB ping.
 
 ## Configuration
 
-Current non-secret process environment variables:
+Process environment variables:
 
 * `APP_ENV` — defaults to `development` when absent
 * `ALLOWED_ORIGINS` — comma-separated CORS origins
+* `MONGODB_URI` — Atlas connection URI; required for readiness, never logged
 
-These are public server settings, not secrets. Database URIs and authentication secrets are not part of TASK 006 configuration.
+Local development may additionally load `backend/.env`. Process environment values take precedence over file values. Production should use deployment environment variables. Absence of `.env` must not prevent startup.
+
+These public settings are not secrets. `MONGODB_URI` is a secret and must not appear in Git, Flutter, logs, or HTTP responses.
 
 ## Security Boundary
 
@@ -73,4 +84,4 @@ Flutter will never receive the MongoDB URI. The Flutter client will call this AP
 
 ## Current State
 
-Only backend infrastructure and a health endpoint exist. No authentication or database integration exists yet.
+Backend infrastructure, liveness health, MongoDB connectivity, and ping readiness exist. No authentication or product CRUD exists yet.
