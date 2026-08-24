@@ -15,9 +15,11 @@ Planned coverage includes:
 * database security
 * development vs production considerations
 
-Actual MongoDB schemas and collections will be documented once implementation begins. No database schema has been defined yet.
+The first implemented collection is `users`. Additional schemas will be documented as they are implemented.
 
 ## Current documents
 
 * [mongodb-atlas-integration.md](mongodb-atlas-integration.md) — backend connectivity foundation, driver, secrets, lifecycle, and health versus readiness.
+* [users-collection.md](users-collection.md) — user account identity collection, email uniqueness index, and repository operations.
 * [../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md](../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md) — accepted driver and connection-lifecycle decision.
+* [../decisions/ADR-006-user-account-persistence-model.md](../decisions/ADR-006-user-account-persistence-model.md) — accepted user account persistence model.

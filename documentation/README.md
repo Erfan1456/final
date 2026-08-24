@@ -39,6 +39,7 @@ Stores MongoDB architecture, collections, schemas/models, indexes, relationships
 Current documents:
 
 * [mongodb-atlas-integration.md](database/mongodb-atlas-integration.md)
+* [users-collection.md](database/users-collection.md)
 
 ### `api/`
 
@@ -58,6 +59,7 @@ Current documents:
 * [ADR-003-flutter-client-architecture.md](decisions/ADR-003-flutter-client-architecture.md)
 * [ADR-004-dart-backend-framework.md](decisions/ADR-004-dart-backend-framework.md)
 * [ADR-005-mongodb-driver-and-connection-lifecycle.md](decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md)
+* [ADR-006-user-account-persistence-model.md](decisions/ADR-006-user-account-persistence-model.md)
 
 ### `workflows/`
 

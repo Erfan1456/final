@@ -31,3 +31,4 @@ No such decisions are made in TASK 001. Decision records should be added when th
 * [ADR-003-flutter-client-architecture.md](ADR-003-flutter-client-architecture.md) — accepted Flutter client architecture: feature-oriented layering, Riverpod, go_router, and Dio.
 * [ADR-004-dart-backend-framework.md](ADR-004-dart-backend-framework.md) — accepted Dart Frog backend in `backend/` as a sibling of the Flutter client.
 * [ADR-005-mongodb-driver-and-connection-lifecycle.md](ADR-005-mongodb-driver-and-connection-lifecycle.md) — accepted mongo_dart Atlas connectivity with a reusable lazy connection lifecycle.
+* [ADR-006-user-account-persistence-model.md](ADR-006-user-account-persistence-model.md) — accepted `users` collection model, unique normalized-email index, and repository contract.

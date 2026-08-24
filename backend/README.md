@@ -6,7 +6,7 @@ This directory is the Dart Frog backend API for the Home Cleaning Service Market
 
 Current API version: `/api/v1`
 
-MongoDB Atlas is the persistence provider. `mongo_dart` is the backend driver. No product models, repositories, or CRUD operations exist yet.
+MongoDB Atlas is the persistence provider. `mongo_dart` is the backend driver. A users persistence foundation now exists (account model, repository, unique normalized-email index). There are still no signup/login APIs. Password hashing remains unimplemented. TASK 008 did not create real user documents.
 
 Do not place a real MongoDB URI, passwords, or other secrets in this package. Flutter never receives the MongoDB connection URI.
 
@@ -64,15 +64,19 @@ When the Flutter Android emulator later calls this API, use `http://10.0.2.2:808
 
 * `routes/` — Dart Frog HTTP entrypoints
 * `lib/src/config/` — environment loading and server configuration
-* `lib/src/database/` — MongoDB connection lifecycle
+* `lib/src/database/` — MongoDB connection lifecycle and collection names
+* `lib/src/features/users/` — user account persistence model and repository
 * `lib/src/http/` — JSON and CORS helpers
+* `tool/` — controlled database index setup
 * `test/` — backend tests
 
 Business logic should not accumulate in route handlers. Future features should add services and repositories under `lib/src/` when they are needed.
 
 ## Current limitations
 
-* MongoDB connectivity and ping readiness only; no CRUD
+* Users persistence foundation (no signup/login APIs)
+* Unique `users.email_normalized` index
+* Password hashing unimplemented
 * No authentication
 * No product resources
 * CORS is a small development-oriented foundation, not a complete production security policy

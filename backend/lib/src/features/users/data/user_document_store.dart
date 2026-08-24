@@ -1,0 +1,66 @@
+import 'package:home_cleaning_marketplace_api/src/database/collection_names.dart';
+import 'package:mongo_dart/mongo_dart.dart' hide ServerConfig;
+
+/// Result of inserting a user document without exposing driver types.
+class UserInsertResult {
+  const UserInsertResult._({
+    required this.isSuccess,
+    required this.isDuplicateKey,
+  });
+
+  /// Insert acknowledged without write errors.
+  const UserInsertResult.success()
+    : this._(isSuccess: true, isDuplicateKey: false);
+
+  /// Unique index rejected the insert (MongoDB code 11000).
+  const UserInsertResult.duplicate()
+    : this._(isSuccess: false, isDuplicateKey: true);
+
+  /// Insert failed for a non-duplicate reason.
+  const UserInsertResult.failed()
+    : this._(isSuccess: false, isDuplicateKey: false);
+
+  /// Whether the write completed successfully.
+  final bool isSuccess;
+
+  /// Whether the failure was a duplicate-key error.
+  final bool isDuplicateKey;
+}
+
+/// Narrow collection access used by MongoUserRepository.
+abstract class UserDocumentStore {
+  /// Finds a single document matching [selector], or `null`.
+  Future<Map<String, dynamic>?> findOne(Map<String, dynamic> selector);
+
+  /// Inserts [document]. Must not log document contents.
+  Future<UserInsertResult> insertOne(Map<String, dynamic> document);
+}
+
+/// mongo_dart-backed [UserDocumentStore].
+class MongoUserDocumentStore implements UserDocumentStore {
+  /// Wraps an already-selected collection.
+  MongoUserDocumentStore(this._collection);
+
+  /// Convenience constructor using [CollectionNames.users].
+  MongoUserDocumentStore.fromDb(Db db)
+    : _collection = db.collection(CollectionNames.users);
+
+  final DbCollection _collection;
+
+  @override
+  Future<Map<String, dynamic>?> findOne(Map<String, dynamic> selector) {
+    return _collection.findOne(selector);
+  }
+
+  @override
+  Future<UserInsertResult> insertOne(Map<String, dynamic> document) async {
+    final result = await _collection.insertOne(document);
+    if (result.writeError?.code == 11000) {
+      return const UserInsertResult.duplicate();
+    }
+    if (!result.isSuccess) {
+      return const UserInsertResult.failed();
+    }
+    return const UserInsertResult.success();
+  }
+}
