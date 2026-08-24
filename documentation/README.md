@@ -21,6 +21,7 @@ Stores system architecture documentation, diagrams, module relationships, applic
 Current documents:
 
 * [repository-layout.md](architecture/repository-layout.md)
+* [flutter-client-architecture.md](architecture/flutter-client-architecture.md)
 
 ### `setup/`
 
@@ -49,6 +50,7 @@ Stores important technical decisions and the reasoning behind them.
 Current documents:
 
 * [ADR-001-initial-stack-and-repository-layout.md](decisions/ADR-001-initial-stack-and-repository-layout.md)
+* [ADR-003-flutter-client-architecture.md](decisions/ADR-003-flutter-client-architecture.md)
 
 ### `workflows/`
 

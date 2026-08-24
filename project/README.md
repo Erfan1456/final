@@ -8,7 +8,23 @@ Repository-level documentation lives at [`../documentation/`](../documentation/)
 
 Flutter commands should be executed from this directory.
 
-The application is currently at the foundation stage. Product features have not been implemented yet.
+The application currently has an architecture foundation only. No backend integration or product features are implemented yet.
+
+## Architecture
+
+The client uses:
+
+* Riverpod for state management and dependency injection
+* go_router for declarative navigation
+* Dio for HTTP transport
+
+Major `lib/` directories:
+
+* `lib/app/` — application shell, routing, and theme
+* `lib/core/` — shared configuration and networking infrastructure
+* `lib/features/` — feature-oriented product code, added as features are implemented
+
+`API_BASE_URL` is public runtime configuration supplied at compile time. It is not a secret. The Flutter client must never contain a MongoDB URI or other private credentials.
 
 ## Commands
 

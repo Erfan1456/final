@@ -21,3 +21,4 @@ No architecture has been chosen in TASK 001. Concrete architecture documents sho
 ## Current documents
 
 * [repository-layout.md](repository-layout.md) — current Git repository layout and the distinction between the Git root and the Flutter package root.
+* [flutter-client-architecture.md](flutter-client-architecture.md) — Flutter client feature-oriented architecture, layering, Riverpod, go_router, and Dio.
