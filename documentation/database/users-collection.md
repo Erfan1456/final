@@ -2,7 +2,7 @@
 
 This document describes the first persistence/domain boundary for the Home Cleaning Service Marketplace: user account identity records.
 
-TASK 008 established the collection model, repository contract, and unique email index. Signup, login, password hashing, and authentication HTTP routes are not implemented.
+TASK 008 established the collection model, repository contract, and unique email index. TASK 009 established Argon2id password hashing primitives. Signup, login, and authentication HTTP routes are not implemented.
 
 ## Purpose
 
@@ -17,7 +17,7 @@ _id              ObjectId
 role             string   (customer | cleaner | admin)
 email            string   (user-facing form)
 email_normalized string   (trim + lowercase)
-password_hash    string   (already-generated hash; never plaintext)
+password_hash    string   (Argon2id encoded PHC form; never plaintext)
 account_status   string   (active | suspended | deactivated)
 email_verified   bool
 created_at       DateTime (UTC)
@@ -73,7 +73,7 @@ This database-enforced unique index is the concurrency-safe duplicate-email boun
 
 ## Password Security
 
-Only password hashes are stored. TASK 008 does not hash passwords, accept plaintext passwords, or compare passwords.
+Only encoded Argon2id password hashes are stored in `password_hash`. The encoded value includes algorithm, parameters, salt, and derived hash. See [../architecture/password-security.md](../architecture/password-security.md) and [../decisions/ADR-007-password-hashing-and-policy.md](../decisions/ADR-007-password-hashing-and-policy.md).
 
 Public serializers (`UserAccount.toPublicJson`) never expose `password_hash` or `passwordHash`. `toString` also omits the hash.
 
@@ -92,7 +92,6 @@ Index setup is deliberate via `dart run tool/ensure_database_indexes.dart`, not 
 ## Deferred
 
 * authentication service
-* password hashing
 * signup/login routes
 * sessions/tokens
 * password reset

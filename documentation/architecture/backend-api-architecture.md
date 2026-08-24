@@ -20,7 +20,7 @@ MongoDB Atlas
 
 MongoDB credentials exist only on the backend/server environment. Flutter will never receive the MongoDB URI.
 
-See [../database/mongodb-atlas-integration.md](../database/mongodb-atlas-integration.md), [../database/users-collection.md](../database/users-collection.md), [../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md](../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md), and [../decisions/ADR-006-user-account-persistence-model.md](../decisions/ADR-006-user-account-persistence-model.md).
+See [../database/mongodb-atlas-integration.md](../database/mongodb-atlas-integration.md), [../database/users-collection.md](../database/users-collection.md), [password-security.md](password-security.md), [../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md](../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md), [../decisions/ADR-006-user-account-persistence-model.md](../decisions/ADR-006-user-account-persistence-model.md), and [../decisions/ADR-007-password-hashing-and-policy.md](../decisions/ADR-007-password-hashing-and-policy.md).
 
 ## Dart Frog Responsibilities
 
@@ -42,7 +42,7 @@ Route handlers should stay thin. Business logic should not accumulate here. Futu
 
 ### `backend/lib/src/`
 
-Reusable application/backend implementation, including configuration, environment loading, MongoDB lifecycle, HTTP helpers, and the users persistence feature. Feature-specific models, repositories, and services are added only when real functionality requires them.
+Reusable application/backend implementation, including configuration, environment loading, MongoDB lifecycle, HTTP helpers, users persistence, and password-security primitives. Feature-specific models, repositories, and services are added only when real functionality requires them.
 
 ## API Versioning
 
@@ -84,4 +84,4 @@ Flutter will never receive the MongoDB URI. The Flutter client will call this AP
 
 ## Current State
 
-Backend infrastructure, liveness health, MongoDB connectivity, ping readiness, and a users persistence foundation exist. No authentication HTTP routes or product CRUD exist yet.
+Backend infrastructure, liveness health, MongoDB connectivity, ping readiness, users persistence, and Argon2id password-security primitives exist. No authentication HTTP routes or product CRUD exist yet.
