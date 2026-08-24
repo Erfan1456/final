@@ -14,19 +14,19 @@ Those roles and product features have not been implemented yet. The project is c
 
 ```text
 Mobile client: Flutter + Dart
-Backend: Dart — framework not selected yet
-Database: MongoDB Atlas
+Backend API: Dart + Dart Frog
+Database: MongoDB Atlas — integration not implemented yet
 Primary Android development environment: Android Studio / Android Emulator
 ```
 
-The Dart backend has not been created yet. Unselected packages are not listed here.
+The Dart Frog backend lives in `backend/`. MongoDB Atlas is not connected yet.
 
 ## Intended High-Level Architecture
 
 ```text
 Flutter mobile client
         ↓
-Dart backend API
+Dart Frog backend API
         ↓
 MongoDB Atlas
 ```
@@ -37,6 +37,7 @@ The Flutter client must not contain the MongoDB database URI. Database credentia
 
 ```text
 final/
+├── backend/
 ├── documentation/
 ├── project/
 ├── README.md
@@ -45,9 +46,9 @@ final/
 
 `project/` is the Flutter package root. Flutter commands must be run from that directory.
 
-`documentation/` contains project technical documentation and Cursor task history.
+`backend/` is the Dart Frog API package root. Backend commands must be run from that directory.
 
-A backend sibling directory is expected later. It has not been created yet, and its detailed structure will be decided in a later task.
+`documentation/` contains project technical documentation and Cursor task history.
 
 ## Running the Current Flutter Project
 
@@ -61,6 +62,20 @@ flutter run
 ```
 
 Use a connected device or emulator available on the local machine. This README does not assume that a specific emulator is currently running.
+
+## Running the Current Backend
+
+From the Git repository root:
+
+```bash
+cd backend
+dart pub get
+dart_frog dev
+dart analyze
+dart test
+```
+
+When an Android emulator later calls this API on the Windows development host, use `http://10.0.2.2:<port>` instead of `http://localhost:<port>`. Do not hardcode that emulator address into production Flutter code.
 
 ## Documentation
 

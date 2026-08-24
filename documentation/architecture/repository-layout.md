@@ -22,6 +22,7 @@ These are not the same directory. Git operations belong at the repository root. 
 
 ```text
 final/
+├── backend/
 ├── documentation/
 ├── project/
 ├── README.md
@@ -31,6 +32,10 @@ final/
 ### `project/`
 
 Flutter/Dart mobile application. This is the current Flutter package root (`pubspec.yaml` lives here). Platform folders such as Android, iOS, web, Windows, Linux, and macOS remain inside this package.
+
+### `backend/`
+
+Dart Frog backend API (`home_cleaning_marketplace_api`). HTTP routes live under `backend/routes/`. Reusable backend code lives under `backend/lib/src/`. MongoDB integration is not implemented yet.
 
 ### `documentation/`
 
@@ -46,16 +51,14 @@ Repository-wide security and local-development ignore policy. It protects secret
 
 ## Future backend sibling
 
-A later task is expected to add a Dart backend as a sibling of `project/`, conceptually:
+TASK 006 created the Dart Frog backend as:
 
 ```text
 final/
 ├── documentation/
 ├── project/
-└── <future Dart backend directory>
+└── backend/
 ```
-
-No backend directory exists yet. Its final name and internal structure have not been decided.
 
 ## Why the nested Flutter package is preserved in TASK 002
 
@@ -64,3 +67,5 @@ The existing nested Flutter package is being kept in `project/` rather than move
 * the repository already exists in this layout;
 * moving it would create unnecessary churn before architecture is decided;
 * tooling can operate correctly by running Flutter commands from `project/`.
+
+The backend sibling directory is `backend/`, created in TASK 006. Its internal feature structure will grow as API functionality is implemented.

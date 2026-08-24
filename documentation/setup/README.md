@@ -16,6 +16,10 @@ Planned coverage includes:
 
 Do not record credentials, MongoDB connection strings, API keys, tokens, passwords, or other secrets in this documentation.
 
+Backend process environment variables currently used for local development are documented in [../backend/README.md](../../backend/README.md): `APP_ENV` and `ALLOWED_ORIGINS`. MongoDB connection settings are not active yet.
+
+Android emulator access to a backend running on the Windows development host typically uses `http://10.0.2.2:<port>` instead of `http://localhost:<port>`.
+
 ## Current documents
 
 * [development-environment.md](development-environment.md) — dated local toolchain snapshot, not permanent version requirements.

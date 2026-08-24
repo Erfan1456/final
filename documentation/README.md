@@ -22,6 +22,7 @@ Current documents:
 
 * [repository-layout.md](architecture/repository-layout.md)
 * [flutter-client-architecture.md](architecture/flutter-client-architecture.md)
+* [backend-api-architecture.md](architecture/backend-api-architecture.md)
 
 ### `setup/`
 
@@ -51,6 +52,7 @@ Current documents:
 
 * [ADR-001-initial-stack-and-repository-layout.md](decisions/ADR-001-initial-stack-and-repository-layout.md)
 * [ADR-003-flutter-client-architecture.md](decisions/ADR-003-flutter-client-architecture.md)
+* [ADR-004-dart-backend-framework.md](decisions/ADR-004-dart-backend-framework.md)
 
 ### `workflows/`
 

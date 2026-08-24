@@ -17,3 +17,12 @@ Planned coverage includes:
 * API versioning if adopted later
 
 No endpoints are defined in TASK 001. Endpoint documentation should be added when the API is designed and implemented.
+
+## Current routes
+
+The Dart Frog backend currently implements:
+
+* `GET /` — JSON service descriptor
+* `GET /api/v1/health` — JSON health check
+
+These are infrastructure routes only. Authentication and product endpoints are not implemented.

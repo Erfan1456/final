@@ -29,3 +29,4 @@ No such decisions are made in TASK 001. Decision records should be added when th
 * [ADR-001-initial-stack-and-repository-layout.md](ADR-001-initial-stack-and-repository-layout.md) — accepted initial stack and repository-layout baseline. Remaining framework and library choices remain deferred.
 * [ADR-002-flutter-package-identity.md](ADR-002-flutter-package-identity.md) — accepted Dart package name `home_cleaning_marketplace`; physical `project/` directory and native platform identifiers remain unchanged.
 * [ADR-003-flutter-client-architecture.md](ADR-003-flutter-client-architecture.md) — accepted Flutter client architecture: feature-oriented layering, Riverpod, go_router, and Dio.
+* [ADR-004-dart-backend-framework.md](ADR-004-dart-backend-framework.md) — accepted Dart Frog backend in `backend/` as a sibling of the Flutter client.
