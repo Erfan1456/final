@@ -27,3 +27,4 @@ No such decisions are made in TASK 001. Decision records should be added when th
 ## Current documents
 
 * [ADR-001-initial-stack-and-repository-layout.md](ADR-001-initial-stack-and-repository-layout.md) — accepted initial stack and repository-layout baseline. Remaining framework and library choices remain deferred.
+* [ADR-002-flutter-package-identity.md](ADR-002-flutter-package-identity.md) — accepted Dart package name `home_cleaning_marketplace`; physical `project/` directory and native platform identifiers remain unchanged.

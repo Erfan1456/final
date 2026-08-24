@@ -1,17 +1,20 @@
-# project
+# Home Cleaning Service Marketplace — Flutter Client
 
-A new Flutter project.
+This directory is the Flutter/Dart mobile client for the Home Cleaning Service Marketplace.
 
-## Getting Started
+Its Dart package name is `home_cleaning_marketplace`. The physical directory name remains `project/`.
 
-This project is a starting point for a Flutter application.
+Repository-level documentation lives at [`../documentation/`](../documentation/).
 
-A few resources to get you started if this is your first Flutter project:
+Flutter commands should be executed from this directory.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+The application is currently at the foundation stage. Product features have not been implemented yet.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Commands
+
+```bash
+flutter pub get
+flutter analyze
+flutter test
+flutter run
+```
