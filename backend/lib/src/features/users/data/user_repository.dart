@@ -21,4 +21,13 @@ abstract class UserRepository {
   /// Inserts a new account. Duplicate normalized emails fail with
   /// [DuplicateUserEmailException].
   Future<UserAccount> create(CreateUserAccountData data);
+
+  /// Replaces only `password_hash` and `updated_at` for [userId].
+  ///
+  /// Does not change role, status, or email fields.
+  Future<void> updatePasswordHash({
+    required ObjectId userId,
+    required String passwordHash,
+    required DateTime updatedAt,
+  });
 }

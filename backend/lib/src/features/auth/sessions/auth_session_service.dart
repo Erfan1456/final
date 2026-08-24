@@ -95,6 +95,11 @@ class AuthSessionService {
     throw const InvalidRefreshTokenException();
   }
 
+  /// Revokes the logical session [sessionId] without inspecting a raw token.
+  Future<void> revokeById(ObjectId sessionId) async {
+    await _sessions.revokeById(sessionId, now: _clock().toUtc());
+  }
+
   /// Revokes the logical session identified by the presented refresh token.
   Future<void> revokeSession(String rawRefreshToken) async {
     final now = _clock().toUtc();

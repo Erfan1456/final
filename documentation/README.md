@@ -25,6 +25,7 @@ Current documents:
 * [backend-api-architecture.md](architecture/backend-api-architecture.md)
 * [password-security.md](architecture/password-security.md)
 * [auth-token-and-session-security.md](architecture/auth-token-and-session-security.md)
+* [authentication-application-flow.md](architecture/authentication-application-flow.md)
 
 ### `setup/`
 
@@ -42,10 +43,15 @@ Current documents:
 
 * [mongodb-atlas-integration.md](database/mongodb-atlas-integration.md)
 * [users-collection.md](database/users-collection.md)
+* [user-sessions-collection.md](database/user-sessions-collection.md)
 
 ### `api/`
 
 Stores backend API documentation including endpoints, requests, responses, validation, authentication requirements, errors, and API conventions.
+
+Current documents:
+
+* [authentication-api.md](api/authentication-api.md)
 
 ### `features/`
 
@@ -64,6 +70,7 @@ Current documents:
 * [ADR-006-user-account-persistence-model.md](decisions/ADR-006-user-account-persistence-model.md)
 * [ADR-007-password-hashing-and-policy.md](decisions/ADR-007-password-hashing-and-policy.md)
 * [ADR-008-access-and-refresh-token-strategy.md](decisions/ADR-008-access-and-refresh-token-strategy.md)
+* [ADR-009-authentication-application-flow.md](decisions/ADR-009-authentication-application-flow.md)
 
 ### `workflows/`
 

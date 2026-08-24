@@ -79,23 +79,21 @@ Public serializers (`UserAccount.toPublicJson`) never expose `password_hash` or 
 
 ## Current Operations
 
-`UserRepository` / `MongoUserRepository` support only:
+`UserRepository` / `MongoUserRepository` support:
 
 * lookup by id
 * lookup/existence by email (normalized internally)
 * create account
+* update password hash (`password_hash` and `updated_at` only)
 
-No signup API exists yet. TASK 008 did not insert real user documents into Atlas.
+Public signup/login now exist. TASK 011 tests do not insert, update, or delete live Atlas user documents.
 
-Index setup is deliberate via `dart run tool/ensure_database_indexes.dart`, not per HTTP request.
+Index setup remains deliberate via `dart run tool/ensure_database_indexes.dart`, not per HTTP request.
 
 ## Deferred
 
-* authentication service
-* signup/login routes
-* sessions/tokens
-* password reset
 * email verification mechanism
+* password reset
 * customer/cleaner profiles
 * admin provisioning process
 * additional indexes

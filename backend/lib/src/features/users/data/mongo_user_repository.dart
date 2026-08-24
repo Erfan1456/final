@@ -64,6 +64,26 @@ class MongoUserRepository implements UserRepository {
     return account;
   }
 
+  @override
+  Future<void> updatePasswordHash({
+    required ObjectId userId,
+    required String passwordHash,
+    required DateTime updatedAt,
+  }) async {
+    final result = await _documents.updateOne(
+      selector: <String, dynamic>{'_id': userId},
+      update: <String, dynamic>{
+        r'$set': <String, dynamic>{
+          'password_hash': passwordHash,
+          'updated_at': updatedAt.toUtc(),
+        },
+      },
+    );
+    if (!result.isSuccess) {
+      throw const UserAccountWriteException();
+    }
+  }
+
   Future<UserAccount?> _find(Map<String, dynamic> selector) async {
     final document = await _documents.findOne(selector);
     if (document == null) {

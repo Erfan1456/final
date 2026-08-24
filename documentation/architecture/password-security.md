@@ -68,7 +68,7 @@ Verification uses hashlib `argon2Verify` against the encoded hash. It does not c
 
 `needsRehash` is true when the encoded hash is malformed, uses a different algorithm, or uses weaker/different cost parameters than the approved target. It is false for a hash produced by the current hasher.
 
-TASK 009 does not rehash or update stored users. Future successful login can replace an older hash when `needsRehash` is true.
+Successful login now replaces an outdated hash after password verification and an active-account check. The update writes only `password_hash` and `updated_at`. Wrong passwords and missing users never trigger a rehash.
 
 ## Security Boundaries
 
@@ -83,7 +83,6 @@ Never derive salt from email, user id, timestamp, or password.
 * compromised-password blocklist
 * pepper
 * MFA
-* rate limiting
-* login
-* signup
-* session/token handling
+* production rate limiting
+* password reset
+* email verification enforcement

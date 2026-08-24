@@ -2,7 +2,7 @@
 
 This document describes the Dart Frog backend for the Home Cleaning Service Marketplace.
 
-TASK 006 established backend infrastructure and a health endpoint. TASK 007 added MongoDB Atlas connectivity and a database-backed readiness endpoint. Authentication and product resources are not implemented.
+TASK 006 established backend infrastructure and a health endpoint. TASK 007 added MongoDB Atlas connectivity and a database-backed readiness endpoint. TASK 011 added public authentication HTTP routes. Product resources and authentication middleware are not implemented.
 
 ## Current Architecture
 
@@ -20,7 +20,7 @@ MongoDB Atlas
 
 MongoDB credentials exist only on the backend/server environment. Flutter will never receive the MongoDB URI.
 
-See [../database/mongodb-atlas-integration.md](../database/mongodb-atlas-integration.md), [../database/users-collection.md](../database/users-collection.md), [../database/user-sessions-collection.md](../database/user-sessions-collection.md), [password-security.md](password-security.md), [auth-token-and-session-security.md](auth-token-and-session-security.md), [../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md](../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md), [../decisions/ADR-006-user-account-persistence-model.md](../decisions/ADR-006-user-account-persistence-model.md), [../decisions/ADR-007-password-hashing-and-policy.md](../decisions/ADR-007-password-hashing-and-policy.md), and [../decisions/ADR-008-access-and-refresh-token-strategy.md](../decisions/ADR-008-access-and-refresh-token-strategy.md).
+See [../database/mongodb-atlas-integration.md](../database/mongodb-atlas-integration.md), [../database/users-collection.md](../database/users-collection.md), [../database/user-sessions-collection.md](../database/user-sessions-collection.md), [password-security.md](password-security.md), [auth-token-and-session-security.md](auth-token-and-session-security.md), [authentication-application-flow.md](authentication-application-flow.md), [../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md](../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md), [../decisions/ADR-006-user-account-persistence-model.md](../decisions/ADR-006-user-account-persistence-model.md), [../decisions/ADR-007-password-hashing-and-policy.md](../decisions/ADR-007-password-hashing-and-policy.md), [../decisions/ADR-008-access-and-refresh-token-strategy.md](../decisions/ADR-008-access-and-refresh-token-strategy.md), and [../decisions/ADR-009-authentication-application-flow.md](../decisions/ADR-009-authentication-application-flow.md).
 
 ## Dart Frog Responsibilities
 
@@ -58,9 +58,13 @@ Current implemented routes:
 GET /
 GET /api/v1/health
 GET /api/v1/ready
+POST /api/v1/auth/signup
+POST /api/v1/auth/login
+POST /api/v1/auth/refresh
+POST /api/v1/auth/logout
 ```
 
-`GET /api/v1/health` is liveness and does not depend on MongoDB. `GET /api/v1/ready` is readiness and performs a MongoDB ping.
+`GET /api/v1/health` is liveness and does not depend on MongoDB. `GET /api/v1/ready` is readiness and performs a MongoDB ping. Authentication routes are documented in [../api/authentication-api.md](../api/authentication-api.md). See also [authentication-application-flow.md](authentication-application-flow.md) and [../decisions/ADR-009-authentication-application-flow.md](../decisions/ADR-009-authentication-application-flow.md).
 
 ## Configuration
 
@@ -85,4 +89,13 @@ Flutter will never receive the MongoDB URI. The Flutter client will call this AP
 
 ## Current State
 
-Backend infrastructure, liveness health, MongoDB connectivity, ping readiness, users persistence, Argon2id password-security primitives, and access-token/refresh-session primitives exist. No authentication HTTP routes or product CRUD exist yet.
+Backend infrastructure, liveness health, MongoDB connectivity, ping readiness, users persistence, Argon2id password-security primitives, access-token/refresh-session primitives, and authentication HTTP routes exist:
+
+```text
+POST /api/v1/auth/signup
+POST /api/v1/auth/login
+POST /api/v1/auth/refresh
+POST /api/v1/auth/logout
+```
+
+There is still no authentication middleware, `/me` endpoint, or product CRUD. These auth endpoints are not ready for unrestricted public internet exposure until production rate limiting is added.

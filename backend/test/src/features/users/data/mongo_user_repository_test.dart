@@ -34,6 +34,38 @@ class _MemoryUserDocuments implements UserDocumentStore {
     return const UserInsertResult.success();
   }
 
+  Map<String, dynamic>? lastUpdateSelector;
+  Map<String, dynamic>? lastUpdate;
+  UserUpdateResult? updateResult;
+  int updateCalls = 0;
+
+  @override
+  Future<UserUpdateResult> updateOne({
+    required Map<String, dynamic> selector,
+    required Map<String, dynamic> update,
+  }) async {
+    updateCalls += 1;
+    lastUpdateSelector = selector;
+    lastUpdate = update;
+    final forced = updateResult;
+    if (forced != null) {
+      return forced;
+    }
+    for (final document in documents) {
+      if (!_matches(document, selector)) {
+        continue;
+      }
+      final set = update[r'$set'];
+      if (set is Map) {
+        set.forEach((key, value) {
+          document[key.toString()] = value;
+        });
+      }
+      return const UserUpdateResult.success();
+    }
+    return const UserUpdateResult.notFound();
+  }
+
   bool _matches(Map<String, dynamic> document, Map<String, dynamic> selector) {
     for (final entry in selector.entries) {
       if (document[entry.key] != entry.value) {
@@ -198,6 +230,73 @@ void main() {
       expect(publicJson.containsKey('passwordHash'), isFalse);
       expect(publicJson.containsKey('password_hash'), isFalse);
       expect('$created', isNot(contains('fake-password-hash-not-real')));
+    });
+  });
+
+  group('MongoUserRepository.updatePasswordHash', () {
+    test('updates only password_hash and updated_at by _id', () async {
+      final store = _MemoryUserDocuments()..documents.add(storedCustomer());
+      final repository = MongoUserRepository(documents: store);
+      final updatedAt = DateTime.utc(2026, 8, 25, 15);
+
+      await repository.updatePasswordHash(
+        userId: existingId,
+        passwordHash: 'replacement-password-hash-not-real',
+        updatedAt: updatedAt,
+      );
+
+      expect(store.updateCalls, equals(1));
+      expect(
+        store.lastUpdateSelector,
+        equals(<String, dynamic>{'_id': existingId}),
+      );
+      expect(
+        store.lastUpdate,
+        equals(<String, dynamic>{
+          r'$set': <String, dynamic>{
+            'password_hash': 'replacement-password-hash-not-real',
+            'updated_at': updatedAt,
+          },
+        }),
+      );
+      expect(
+        store.documents.single['password_hash'],
+        equals('replacement-password-hash-not-real'),
+      );
+      expect(store.documents.single['updated_at'], equals(updatedAt));
+      expect(store.documents.single['role'], equals('customer'));
+      expect(store.documents.single['email'], equals('Person@example.com'));
+      expect(store.documents.single['account_status'], equals('active'));
+      expect(store.documents.single['email_verified'], isFalse);
+    });
+
+    test('throws when no document matches', () async {
+      final repository = MongoUserRepository(documents: _MemoryUserDocuments());
+
+      expect(
+        () => repository.updatePasswordHash(
+          userId: existingId,
+          passwordHash: 'replacement-password-hash-not-real',
+          updatedAt: DateTime.utc(2026, 8, 25),
+        ),
+        throwsA(isA<UserAccountWriteException>()),
+      );
+    });
+
+    test('throws when the write fails', () async {
+      final store = _MemoryUserDocuments()
+        ..documents.add(storedCustomer())
+        ..updateResult = const UserUpdateResult.failed();
+      final repository = MongoUserRepository(documents: store);
+
+      expect(
+        () => repository.updatePasswordHash(
+          userId: existingId,
+          passwordHash: 'replacement-password-hash-not-real',
+          updatedAt: DateTime.utc(2026, 8, 25),
+        ),
+        throwsA(isA<UserAccountWriteException>()),
+      );
     });
   });
 }

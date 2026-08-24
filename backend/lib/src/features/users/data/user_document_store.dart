@@ -27,6 +27,29 @@ class UserInsertResult {
   final bool isDuplicateKey;
 }
 
+/// Result of updating a user document without exposing driver types.
+class UserUpdateResult {
+  const UserUpdateResult._({
+    required this.isSuccess,
+    required this.matched,
+  });
+
+  /// Update acknowledged and matched one document.
+  const UserUpdateResult.success() : this._(isSuccess: true, matched: true);
+
+  /// Selector matched no document.
+  const UserUpdateResult.notFound() : this._(isSuccess: false, matched: false);
+
+  /// Update failed for a write or driver reason.
+  const UserUpdateResult.failed() : this._(isSuccess: false, matched: false);
+
+  /// Whether the write completed successfully against a matched document.
+  final bool isSuccess;
+
+  /// Whether a document matched the selector.
+  final bool matched;
+}
+
 /// Narrow collection access used by MongoUserRepository.
 abstract class UserDocumentStore {
   /// Finds a single document matching [selector], or `null`.
@@ -34,6 +57,12 @@ abstract class UserDocumentStore {
 
   /// Inserts [document]. Must not log document contents.
   Future<UserInsertResult> insertOne(Map<String, dynamic> document);
+
+  /// Updates one document matching [selector]. Must not log contents.
+  Future<UserUpdateResult> updateOne({
+    required Map<String, dynamic> selector,
+    required Map<String, dynamic> update,
+  });
 }
 
 /// mongo_dart-backed [UserDocumentStore].
@@ -62,5 +91,20 @@ class MongoUserDocumentStore implements UserDocumentStore {
       return const UserInsertResult.failed();
     }
     return const UserInsertResult.success();
+  }
+
+  @override
+  Future<UserUpdateResult> updateOne({
+    required Map<String, dynamic> selector,
+    required Map<String, dynamic> update,
+  }) async {
+    final result = await _collection.updateOne(selector, update);
+    if (!result.isSuccess) {
+      return const UserUpdateResult.failed();
+    }
+    if (result.nMatched < 1) {
+      return const UserUpdateResult.notFound();
+    }
+    return const UserUpdateResult.success();
   }
 }

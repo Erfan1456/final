@@ -92,4 +92,4 @@ Cursor task reports live in [documentation/cursor/](documentation/cursor/).
 
 ## Current Status
 
-The repository is still at the foundation stage. Product functionality has not yet been implemented.
+The repository is still at the foundation-plus-authentication-API stage. Marketplace product features and Flutter auth UI are not implemented.

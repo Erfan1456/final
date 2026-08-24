@@ -41,6 +41,11 @@ class JwtAccessTokenService implements AccessTokenService {
   }
 
   @override
+  void ensureConfigured() {
+    _ensureSecret(_secret);
+  }
+
+  @override
   String issue({
     required ObjectId userId,
     required ObjectId sessionId,

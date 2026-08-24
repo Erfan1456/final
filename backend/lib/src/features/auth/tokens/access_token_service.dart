@@ -7,6 +7,12 @@ import 'package:mongo_dart/mongo_dart.dart' hide ServerConfig;
 ///
 /// Future routes and middleware must call this instead of dart_jsonwebtoken.
 abstract interface class AccessTokenService {
+  /// Confirms the signing secret is present and long enough.
+  ///
+  /// Call this before persisting a new user or session so a missing secret
+  /// cannot create an account and then fail while issuing tokens.
+  void ensureConfigured();
+
   /// Issues a signed access JWT for [userId], [sessionId], and [role].
   String issue({
     required ObjectId userId,
