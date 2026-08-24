@@ -11,6 +11,9 @@ void main() {
       expect(config.allowedOrigins, isEmpty);
       expect(config.hasMongoUri, isFalse);
       expect(config.mongoUri, isEmpty);
+      expect(config.hasAccessTokenSecret, isFalse);
+      expect(config.accessTokenSecret, isEmpty);
+      expect(config.toString(), contains('hasAccessTokenSecret: false'));
     });
 
     test('hasMongoUri is false when MONGODB_URI is absent', () {
@@ -53,6 +56,43 @@ void main() {
 
       expect(config.environment, equals('production'));
       expect(config.isDevelopment, isFalse);
+    });
+
+    test(
+      'hasAccessTokenSecret is false when ACCESS_TOKEN_SECRET is absent',
+      () {
+        final config = ServerConfig.fromEnvironment(const <String, String>{
+          'APP_ENV': 'development',
+        });
+
+        expect(config.hasAccessTokenSecret, isFalse);
+        expect(config.accessTokenSecret, isEmpty);
+        expect(config.toString(), isNot(contains('ACCESS_TOKEN_SECRET')));
+      },
+    );
+
+    test('hasAccessTokenSecret is true when a fake secret is present', () {
+      const fakeSecret = 'test-access-token-secret-32bytes';
+      final config = ServerConfig.fromEnvironment(const <String, String>{
+        'ACCESS_TOKEN_SECRET': fakeSecret,
+      });
+
+      expect(config.hasAccessTokenSecret, isTrue);
+      expect(config.accessTokenSecret, equals(fakeSecret));
+      expect(config.toString(), isNot(contains(fakeSecret)));
+      expect(config.toString(), contains('hasAccessTokenSecret: true'));
+    });
+
+    test('constructor toString omits a fake access-token secret', () {
+      const fakeSecret = 'test-access-token-secret-32bytes';
+      const config = ServerConfig(
+        environment: 'development',
+        allowedOrigins: <String>[],
+        accessTokenSecret: fakeSecret,
+      );
+
+      expect(config.hasAccessTokenSecret, isTrue);
+      expect('$config', isNot(contains(fakeSecret)));
     });
 
     test('parses comma-separated ALLOWED_ORIGINS', () {

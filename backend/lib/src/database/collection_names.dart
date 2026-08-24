@@ -4,4 +4,7 @@
 abstract final class CollectionNames {
   /// Authentication identity collection.
   static const String users = 'users';
+
+  /// Logical login/device refresh sessions.
+  static const String userSessions = 'user_sessions';
 }

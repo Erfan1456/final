@@ -33,3 +33,4 @@ No such decisions are made in TASK 001. Decision records should be added when th
 * [ADR-005-mongodb-driver-and-connection-lifecycle.md](ADR-005-mongodb-driver-and-connection-lifecycle.md) — accepted mongo_dart Atlas connectivity with a reusable lazy connection lifecycle.
 * [ADR-006-user-account-persistence-model.md](ADR-006-user-account-persistence-model.md) — accepted `users` collection model, unique normalized-email index, and repository contract.
 * [ADR-007-password-hashing-and-policy.md](ADR-007-password-hashing-and-policy.md) — accepted Argon2id hashing, encoded hash storage, and 15–128 Unicode-code-point password policy.
+* [ADR-008-access-and-refresh-token-strategy.md](ADR-008-access-and-refresh-token-strategy.md) — accepted HS256 access JWTs, opaque refresh tokens, `user_sessions`, atomic rotation, and replay detection.

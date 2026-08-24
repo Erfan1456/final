@@ -6,15 +6,21 @@ import 'dart:io';
 /// - `APP_ENV` — defaults to `development` when absent
 /// - `ALLOWED_ORIGINS` — comma-separated origin list
 /// - `MONGODB_URI` — MongoDB Atlas connection URI (secret; never logged)
+/// - `ACCESS_TOKEN_SECRET` — HS256 signing secret (secret; never logged)
 ///
 /// The MongoDB URI has no default. When it is absent, [hasMongoUri] is false
 /// and liveness health can still succeed.
+///
+/// [accessTokenSecret] has no default. The process can start without it
+/// because no authentication route is active yet. Token services must reject
+/// missing or short secrets themselves.
 class ServerConfig {
   /// Creates an explicit configuration, useful for tests.
   const ServerConfig({
     required this.environment,
     required this.allowedOrigins,
     this.mongoUri = '',
+    this.accessTokenSecret = '',
   });
 
   /// Reads settings from [environmentVariables], or from
@@ -38,11 +44,13 @@ class ServerConfig {
               .toList(growable: false);
 
     final mongoUri = env['MONGODB_URI']?.trim() ?? '';
+    final accessTokenSecret = env['ACCESS_TOKEN_SECRET']?.trim() ?? '';
 
     return ServerConfig(
       environment: environment,
       allowedOrigins: allowedOrigins,
       mongoUri: mongoUri,
+      accessTokenSecret: accessTokenSecret,
     );
   }
 
@@ -60,8 +68,17 @@ class ServerConfig {
   /// Do not print, log, or include this value in HTTP responses.
   final String mongoUri;
 
+  /// HS256 access-token signing secret from `ACCESS_TOKEN_SECRET`.
+  ///
+  /// Do not print, log, or include this value in [toString], exceptions, or
+  /// HTTP responses. There is no development default.
+  final String accessTokenSecret;
+
   /// Whether a non-empty MongoDB URI was configured.
   bool get hasMongoUri => mongoUri.isNotEmpty;
+
+  /// Whether a non-empty access-token secret was configured.
+  bool get hasAccessTokenSecret => accessTokenSecret.isNotEmpty;
 
   /// Whether [environment] is the development default.
   bool get isDevelopment => environment == defaultEnvironment;
@@ -103,5 +120,6 @@ class ServerConfig {
 
   @override
   String toString() =>
-      'ServerConfig(environment: $environment, hasMongoUri: $hasMongoUri)';
+      'ServerConfig(environment: $environment, hasMongoUri: $hasMongoUri, '
+      'hasAccessTokenSecret: $hasAccessTokenSecret)';
 }

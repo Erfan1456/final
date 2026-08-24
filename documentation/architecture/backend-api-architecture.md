@@ -20,7 +20,7 @@ MongoDB Atlas
 
 MongoDB credentials exist only on the backend/server environment. Flutter will never receive the MongoDB URI.
 
-See [../database/mongodb-atlas-integration.md](../database/mongodb-atlas-integration.md), [../database/users-collection.md](../database/users-collection.md), [password-security.md](password-security.md), [../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md](../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md), [../decisions/ADR-006-user-account-persistence-model.md](../decisions/ADR-006-user-account-persistence-model.md), and [../decisions/ADR-007-password-hashing-and-policy.md](../decisions/ADR-007-password-hashing-and-policy.md).
+See [../database/mongodb-atlas-integration.md](../database/mongodb-atlas-integration.md), [../database/users-collection.md](../database/users-collection.md), [../database/user-sessions-collection.md](../database/user-sessions-collection.md), [password-security.md](password-security.md), [auth-token-and-session-security.md](auth-token-and-session-security.md), [../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md](../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md), [../decisions/ADR-006-user-account-persistence-model.md](../decisions/ADR-006-user-account-persistence-model.md), [../decisions/ADR-007-password-hashing-and-policy.md](../decisions/ADR-007-password-hashing-and-policy.md), and [../decisions/ADR-008-access-and-refresh-token-strategy.md](../decisions/ADR-008-access-and-refresh-token-strategy.md).
 
 ## Dart Frog Responsibilities
 
@@ -42,7 +42,7 @@ Route handlers should stay thin. Business logic should not accumulate here. Futu
 
 ### `backend/lib/src/`
 
-Reusable application/backend implementation, including configuration, environment loading, MongoDB lifecycle, HTTP helpers, users persistence, and password-security primitives. Feature-specific models, repositories, and services are added only when real functionality requires them.
+Reusable application/backend implementation, including configuration, environment loading, MongoDB lifecycle, HTTP helpers, users persistence, password-security primitives, and access-token/refresh-session primitives. Feature-specific models, repositories, and services are added only when real functionality requires them.
 
 ## API Versioning
 
@@ -69,10 +69,11 @@ Process environment variables:
 * `APP_ENV` — defaults to `development` when absent
 * `ALLOWED_ORIGINS` — comma-separated CORS origins
 * `MONGODB_URI` — Atlas connection URI; required for readiness, never logged
+* `ACCESS_TOKEN_SECRET` — HS256 signing secret; required only when the token service is constructed, never logged, no default
 
 Local development may additionally load `backend/.env`. Process environment values take precedence over file values. Production should use deployment environment variables. Absence of `.env` must not prevent startup.
 
-These public settings are not secrets. `MONGODB_URI` is a secret and must not appear in Git, Flutter, logs, or HTTP responses.
+These public settings are not secrets. `MONGODB_URI` and `ACCESS_TOKEN_SECRET` are secrets and must not appear in Git, Flutter, logs, or HTTP responses.
 
 ## Security Boundary
 
@@ -84,4 +85,4 @@ Flutter will never receive the MongoDB URI. The Flutter client will call this AP
 
 ## Current State
 
-Backend infrastructure, liveness health, MongoDB connectivity, ping readiness, users persistence, and Argon2id password-security primitives exist. No authentication HTTP routes or product CRUD exist yet.
+Backend infrastructure, liveness health, MongoDB connectivity, ping readiness, users persistence, Argon2id password-security primitives, and access-token/refresh-session primitives exist. No authentication HTTP routes or product CRUD exist yet.

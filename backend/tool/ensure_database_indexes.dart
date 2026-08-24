@@ -5,8 +5,8 @@ import 'package:home_cleaning_marketplace_api/src/config/server_config.dart';
 import 'package:home_cleaning_marketplace_api/src/database/collection_names.dart';
 import 'package:home_cleaning_marketplace_api/src/database/database_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/database/mongo_database.dart';
+import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/session_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/user_indexes.dart';
-import 'package:mongo_dart/mongo_dart.dart' hide ServerConfig;
 
 /// Ensures approved MongoDB indexes. Prints only sanitized operational status.
 ///
@@ -31,7 +31,24 @@ Future<void> main() async {
     }
 
     await ensureApprovedDatabaseIndexes(db);
-    if (!await _usersEmailNormalizedUniqueIndexExists(db)) {
+    final usersIndexes = await db
+        .collection(CollectionNames.users)
+        .getIndexes();
+    final sessionIndexes = await db
+        .collection(CollectionNames.userSessions)
+        .getIndexes();
+
+    if (!_hasNamedIndex(usersIndexes, usersEmailNormalizedUniqueIndexName) ||
+        !_hasNamedIndex(
+          sessionIndexes,
+          userSessionsRefreshTokenHashUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(
+          sessionIndexes,
+          userSessionsUsedRefreshTokenHashesIndexName,
+        ) ||
+        !_hasNamedIndex(sessionIndexes, userSessionsUserIdIndexName) ||
+        !_hasNamedIndex(sessionIndexes, userSessionsExpiresAtTtlIndexName)) {
       stderr.writeln('Database indexes could not be ensured.');
       exitCode = 1;
       return;
@@ -41,7 +58,17 @@ Future<void> main() async {
       ..writeln('Database indexes ensured successfully.')
       ..writeln('$usersEmailNormalizedUniqueIndexName exists')
       ..writeln('unique = true')
-      ..writeln('key = $usersEmailNormalizedField ascending');
+      ..writeln('key = $usersEmailNormalizedField ascending')
+      ..writeln('$userSessionsRefreshTokenHashUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('key = $userSessionsRefreshTokenHashField ascending')
+      ..writeln('$userSessionsUsedRefreshTokenHashesIndexName exists')
+      ..writeln('key = $userSessionsUsedRefreshTokenHashesField ascending')
+      ..writeln('$userSessionsUserIdIndexName exists')
+      ..writeln('key = $userSessionsUserIdField ascending')
+      ..writeln('$userSessionsExpiresAtTtlIndexName exists')
+      ..writeln('key = $userSessionsExpiresAtField ascending')
+      ..writeln('expireAfterSeconds = 0');
   } catch (_) {
     stderr.writeln('Database indexes could not be ensured.');
     exitCode = 1;
@@ -50,9 +77,6 @@ Future<void> main() async {
   }
 }
 
-Future<bool> _usersEmailNormalizedUniqueIndexExists(Db db) async {
-  final indexes = await db.collection(CollectionNames.users).getIndexes();
-  return indexes.any(
-    (index) => index['name'] == usersEmailNormalizedUniqueIndexName,
-  );
+bool _hasNamedIndex(List<Map<String, dynamic>> indexes, String name) {
+  return indexes.any((index) => index['name'] == name);
 }

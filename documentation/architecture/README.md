@@ -22,5 +22,6 @@ No architecture has been chosen in TASK 001. Concrete architecture documents sho
 
 * [repository-layout.md](repository-layout.md) — current Git repository layout and the distinction between the Git root and the Flutter package root.
 * [flutter-client-architecture.md](flutter-client-architecture.md) — Flutter client feature-oriented architecture, layering, Riverpod, go_router, and Dio.
-* [backend-api-architecture.md](backend-api-architecture.md) — Dart Frog backend infrastructure, `/api/v1`, health, readiness, and users persistence.
+* [backend-api-architecture.md](backend-api-architecture.md) — Dart Frog backend infrastructure, `/api/v1`, health, readiness, users persistence, password hashing, and token/session primitives.
 * [password-security.md](password-security.md) — Argon2id password hashing, policy, verification, and rehash detection.
+* [auth-token-and-session-security.md](auth-token-and-session-security.md) — HS256 access JWTs, opaque refresh tokens, atomic rotation, and replay detection.

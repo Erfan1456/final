@@ -24,6 +24,7 @@ Current documents:
 * [flutter-client-architecture.md](architecture/flutter-client-architecture.md)
 * [backend-api-architecture.md](architecture/backend-api-architecture.md)
 * [password-security.md](architecture/password-security.md)
+* [auth-token-and-session-security.md](architecture/auth-token-and-session-security.md)
 
 ### `setup/`
 
@@ -62,6 +63,7 @@ Current documents:
 * [ADR-005-mongodb-driver-and-connection-lifecycle.md](decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md)
 * [ADR-006-user-account-persistence-model.md](decisions/ADR-006-user-account-persistence-model.md)
 * [ADR-007-password-hashing-and-policy.md](decisions/ADR-007-password-hashing-and-policy.md)
+* [ADR-008-access-and-refresh-token-strategy.md](decisions/ADR-008-access-and-refresh-token-strategy.md)
 
 ### `workflows/`
 
