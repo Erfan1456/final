@@ -17,3 +17,7 @@ Planned coverage includes:
 * architecture diagrams
 
 No architecture has been chosen in TASK 001. Concrete architecture documents should be added only when those decisions and implementations exist.
+
+## Current documents
+
+* [repository-layout.md](repository-layout.md) — current Git repository layout and the distinction between the Git root and the Flutter package root.

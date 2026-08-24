@@ -18,9 +18,17 @@ Each Cursor task must eventually have its own numbered report describing the pro
 
 Stores system architecture documentation, diagrams, module relationships, application layering, component responsibilities, and major structural explanations.
 
+Current documents:
+
+* [repository-layout.md](architecture/repository-layout.md)
+
 ### `setup/`
 
 Stores environment setup and development setup instructions, such as Flutter, Dart, Android Studio, MongoDB Atlas, backend setup, environment variables, and local execution instructions.
+
+Current documents:
+
+* [development-environment.md](setup/development-environment.md)
 
 ### `database/`
 
@@ -38,6 +46,14 @@ Stores documentation explaining how each product feature works technically and f
 
 Stores important technical decisions and the reasoning behind them.
 
+Current documents:
+
+* [ADR-001-initial-stack-and-repository-layout.md](decisions/ADR-001-initial-stack-and-repository-layout.md)
+
 ### `workflows/`
 
 Stores development, testing, Git, release, deployment, and other engineering workflows.
+
+Current documents:
+
+* [cursor-development-workflow.md](workflows/cursor-development-workflow.md)

@@ -14,3 +14,7 @@ Planned coverage includes:
 * database maintenance workflow
 
 TASK 001 does not create deployment automation or CI. Workflow documents should be added when those processes are defined.
+
+## Current documents
+
+* [cursor-development-workflow.md](cursor-development-workflow.md) — ChatGPT/Cursor task cycle, review, and commit-checkpoint workflow.

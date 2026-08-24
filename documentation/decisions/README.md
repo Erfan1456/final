@@ -23,3 +23,7 @@ Each significant decision should record:
 * consequences
 
 No such decisions are made in TASK 001. Decision records should be added when those choices are actually made.
+
+## Current documents
+
+* [ADR-001-initial-stack-and-repository-layout.md](ADR-001-initial-stack-and-repository-layout.md) — accepted initial stack and repository-layout baseline. Remaining framework and library choices remain deferred.

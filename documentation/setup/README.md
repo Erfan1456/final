@@ -15,3 +15,7 @@ Planned coverage includes:
 * troubleshooting
 
 Do not record credentials, MongoDB connection strings, API keys, tokens, passwords, or other secrets in this documentation.
+
+## Current documents
+
+* [development-environment.md](development-environment.md) — dated local toolchain snapshot, not permanent version requirements.
