@@ -52,4 +52,10 @@ abstract final class CollectionNames {
 
   /// Verified completed-booking customer reviews.
   static const String reviews = 'reviews';
+
+  /// Booking-scoped operational disputes. One document per booking.
+  static const String disputes = 'disputes';
+
+  /// Append-only administrative audit records.
+  static const String auditLogs = 'audit_logs';
 }

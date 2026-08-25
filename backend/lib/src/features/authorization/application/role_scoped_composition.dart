@@ -3,13 +3,18 @@ import 'package:home_cleaning_marketplace_api/src/config/server_config.dart';
 import 'package:home_cleaning_marketplace_api/src/database/mongo_database.dart';
 import 'package:home_cleaning_marketplace_api/src/features/account/application/account_composition.dart';
 import 'package:home_cleaning_marketplace_api/src/features/addresses/data/address_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/audit/application/audit_log_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/audit/data/audit_log_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/application/auth_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/http/access_authenticator.dart';
+import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/auth_session_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/mongo_user_session_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/authorization/approved_cleaner_policy.dart';
 import 'package:home_cleaning_marketplace_api/src/features/authorization/current_authenticated_user_resolver.dart';
 import 'package:home_cleaning_marketplace_api/src/features/authorization/role_request_authorizer.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/application/cleaner_availability_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/data/availability_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/application/admin_booking_operations_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/application/cleaner_booking_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/application/customer_booking_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/data/booking_repository.dart';
@@ -25,6 +30,9 @@ import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/application/customer_account_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/discovery/application/cleaner_discovery_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/disputes/application/admin_dispute_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/disputes/application/booking_dispute_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/disputes/data/dispute_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/notifications/application/notification_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/notifications/data/notification_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/admin_payment_service.dart';
@@ -43,6 +51,7 @@ import 'package:home_cleaning_marketplace_api/src/features/reviews/application/c
 import 'package:home_cleaning_marketplace_api/src/features/reviews/application/customer_review_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/reviews/data/review_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/data/service_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/users/application/admin_user_management_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/mongo_user_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/user_repository.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide ServerConfig;
@@ -72,6 +81,11 @@ class RoleScopedComposition {
   static CustomerReviewService? _customerReviews;
   static CleanerReviewService? _cleanerReviews;
   static AdminReviewModerationService? _adminReviews;
+  static AuditLogService? _audit;
+  static BookingDisputeService? _bookingDisputes;
+  static AdminDisputeService? _adminDisputes;
+  static AdminUserManagementService? _adminUsers;
+  static AdminBookingOperationsService? _adminBookings;
 
   /// Builds a [RoleRequestAuthorizer] from request providers.
   ///
@@ -135,6 +149,7 @@ class RoleScopedComposition {
     return _admin = AdminCleanerReviewService(
       profiles: MongoCleanerProfileRepository.fromDb(db),
       users: MongoUserRepository.fromDb(db),
+      audit: await audit(mongo: mongo),
     );
   }
 
@@ -283,6 +298,7 @@ class RoleScopedComposition {
       bookings: wired.bookings,
       webhooks: wired.webhooks,
       provider: wired.provider,
+      audit: await audit(mongo: mongo),
     );
   }
 
@@ -412,6 +428,106 @@ class RoleScopedComposition {
     final db = await _requireDb(mongo);
     return _adminReviews = AdminReviewModerationService(
       reviews: MongoReviewRepository.fromDb(db),
+      audit: await audit(mongo: mongo),
+    );
+  }
+
+  /// Shared append-only audit log service.
+  static Future<AuditLogService> audit({required MongoDatabase mongo}) async {
+    final cached = _audit;
+    if (cached != null) {
+      return cached;
+    }
+    final db = await _requireDb(mongo);
+    return _audit = AuditLogService(
+      logs: MongoAuditLogRepository.fromDb(db),
+    );
+  }
+
+  /// Shared participant dispute service.
+  static Future<BookingDisputeService> bookingDisputes({
+    required MongoDatabase mongo,
+  }) async {
+    final cached = _bookingDisputes;
+    if (cached != null) {
+      return cached;
+    }
+    final db = await _requireDb(mongo);
+    return _bookingDisputes = BookingDisputeService(
+      bookings: MongoBookingRepository.fromDb(db),
+      disputes: MongoDisputeRepository.fromDb(db),
+      customerProfiles: MongoCustomerProfileRepository.fromDb(db),
+      cleanerProfiles: MongoCleanerProfileRepository.fromDb(db),
+      notifications: await notifications(mongo: mongo),
+    );
+  }
+
+  /// Shared admin dispute queue.
+  static Future<AdminDisputeService> adminDisputes({
+    required MongoDatabase mongo,
+  }) async {
+    final cached = _adminDisputes;
+    if (cached != null) {
+      return cached;
+    }
+    final db = await _requireDb(mongo);
+    return _adminDisputes = AdminDisputeService(
+      disputes: MongoDisputeRepository.fromDb(db),
+      bookings: MongoBookingRepository.fromDb(db),
+      customerProfiles: MongoCustomerProfileRepository.fromDb(db),
+      cleanerProfiles: MongoCleanerProfileRepository.fromDb(db),
+      notifications: await notifications(mongo: mongo),
+      audit: await audit(mongo: mongo),
+    );
+  }
+
+  /// Shared admin user moderation.
+  static Future<AdminUserManagementService> adminUsers({
+    required MongoDatabase mongo,
+  }) async {
+    final cached = _adminUsers;
+    if (cached != null) {
+      return cached;
+    }
+    final db = await _requireDb(mongo);
+    final sessions = AuthSessionService(
+      sessions: MongoUserSessionRepository.fromDb(db),
+    );
+    return _adminUsers = AdminUserManagementService(
+      users: MongoUserRepository.fromDb(db),
+      customerProfiles: MongoCustomerProfileRepository.fromDb(db),
+      cleanerProfiles: MongoCleanerProfileRepository.fromDb(db),
+      bookings: MongoBookingRepository.fromDb(db),
+      payments: MongoPaymentRepository.fromDb(db),
+      disputes: MongoDisputeRepository.fromDb(db),
+      revokeAllSessions: sessions.revokeAllForUser,
+      audit: await audit(mongo: mongo),
+    );
+  }
+
+  /// Shared admin booking operations.
+  static Future<AdminBookingOperationsService> adminBookings({
+    required MongoDatabase mongo,
+    required ServerConfig config,
+  }) async {
+    final cached = _adminBookings;
+    if (cached != null) {
+      return cached;
+    }
+    final wired = await _paymentStack(mongo: mongo, config: config);
+    return _adminBookings = AdminBookingOperationsService(
+      bookings: wired.bookings,
+      payments: wired.payments,
+      disputes: MongoDisputeRepository.fromDb(await _requireDb(mongo)),
+      customerProfiles: MongoCustomerProfileRepository.fromDb(
+        await _requireDb(mongo),
+      ),
+      cleanerProfiles: MongoCleanerProfileRepository.fromDb(
+        await _requireDb(mongo),
+      ),
+      cancellation: await bookingCancellation(mongo: mongo, config: config),
+      notifications: await notifications(mongo: mongo),
+      audit: await audit(mongo: mongo),
     );
   }
 

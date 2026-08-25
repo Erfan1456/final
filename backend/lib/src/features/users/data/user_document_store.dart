@@ -55,8 +55,12 @@ abstract class UserDocumentStore {
   /// Finds a single document matching [selector], or `null`.
   Future<Map<String, dynamic>?> findOne(Map<String, dynamic> selector);
 
-  /// Finds documents matching [selector].
-  Future<List<Map<String, dynamic>>> findMany(Map<String, dynamic> selector);
+  /// Finds documents matching [selector], optionally sorted and limited.
+  Future<List<Map<String, dynamic>>> findMany(
+    Map<String, dynamic> selector, {
+    Map<String, int>? sort,
+    int? limit,
+  });
 
   /// Inserts [document]. Must not log document contents.
   Future<UserInsertResult> insertOne(Map<String, dynamic> document);
@@ -85,8 +89,18 @@ class MongoUserDocumentStore implements UserDocumentStore {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> findMany(Map<String, dynamic> selector) {
-    return _collection.find(selector).toList();
+  Future<List<Map<String, dynamic>>> findMany(
+    Map<String, dynamic> selector, {
+    Map<String, int>? sort,
+    int? limit,
+  }) {
+    return _collection
+        .modernFind(
+          filter: selector,
+          sort: sort == null ? null : Map<String, Object>.from(sort),
+          limit: limit,
+        )
+        .toList();
   }
 
   @override

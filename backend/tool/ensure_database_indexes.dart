@@ -6,6 +6,7 @@ import 'package:home_cleaning_marketplace_api/src/database/collection_names.dart
 import 'package:home_cleaning_marketplace_api/src/database/database_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/database/mongo_database.dart';
 import 'package:home_cleaning_marketplace_api/src/features/addresses/data/address_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/audit/data/audit_log_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/session_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/data/availability_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/data/booking_indexes.dart';
@@ -15,6 +16,7 @@ import 'package:home_cleaning_marketplace_api/src/features/chat/data/message_ind
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/disputes/data/dispute_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/notifications/data/notification_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_refund_request_indexes.dart';
@@ -97,8 +99,15 @@ Future<void> main() async {
     final reviewIndexes = await db
         .collection(CollectionNames.reviews)
         .getIndexes();
+    final disputeIndexes = await db
+        .collection(CollectionNames.disputes)
+        .getIndexes();
+    final auditIndexes = await db
+        .collection(CollectionNames.auditLogs)
+        .getIndexes();
 
     if (!_hasNamedIndex(usersIndexes, usersEmailNormalizedUniqueIndexName) ||
+        !_hasNamedIndex(usersIndexes, usersRoleStatusIdDescIndexName) ||
         !_hasNamedIndex(
           sessionIndexes,
           userSessionsRefreshTokenHashUniqueIndexName,
@@ -235,7 +244,19 @@ Future<void> main() async {
         !_hasNamedIndex(
           reviewIndexes,
           reviewsStatusRatingIdDescIndexName,
-        )) {
+        ) ||
+        !_hasNamedIndex(disputeIndexes, disputesBookingUniqueIndexName) ||
+        !_hasNamedIndex(disputeIndexes, disputesStatusIdDescIndexName) ||
+        !_hasNamedIndex(disputeIndexes, disputesCustomerIdDescIndexName) ||
+        !_hasNamedIndex(disputeIndexes, disputesCleanerIdDescIndexName) ||
+        !_hasNamedIndex(
+          disputeIndexes,
+          disputesCategoryStatusIdDescIndexName,
+        ) ||
+        !_hasNamedIndex(auditIndexes, auditLogsActorIdDescIndexName) ||
+        !_hasNamedIndex(auditIndexes, auditLogsActionIdDescIndexName) ||
+        !_hasNamedIndex(auditIndexes, auditLogsTargetIdDescIndexName) ||
+        !_hasNamedIndex(auditIndexes, auditLogsCreatedAtIndexName)) {
       stderr.writeln('Database indexes could not be ensured.');
       exitCode = 1;
       return;
@@ -343,7 +364,18 @@ Future<void> main() async {
       ..writeln('unique = true')
       ..writeln('$reviewsCleanerStatusIdDescIndexName exists')
       ..writeln('$reviewsCustomerIdDescIndexName exists')
-      ..writeln('$reviewsStatusRatingIdDescIndexName exists');
+      ..writeln('$reviewsStatusRatingIdDescIndexName exists')
+      ..writeln('$usersRoleStatusIdDescIndexName exists')
+      ..writeln('$disputesBookingUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('$disputesStatusIdDescIndexName exists')
+      ..writeln('$disputesCustomerIdDescIndexName exists')
+      ..writeln('$disputesCleanerIdDescIndexName exists')
+      ..writeln('$disputesCategoryStatusIdDescIndexName exists')
+      ..writeln('$auditLogsActorIdDescIndexName exists')
+      ..writeln('$auditLogsActionIdDescIndexName exists')
+      ..writeln('$auditLogsTargetIdDescIndexName exists')
+      ..writeln('$auditLogsCreatedAtIndexName exists');
   } catch (_) {
     stderr.writeln('Database indexes could not be ensured.');
     exitCode = 1;

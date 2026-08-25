@@ -5,17 +5,22 @@ import 'package:home_cleaning_marketplace/features/bookings/data/booking_models.
 import 'package:home_cleaning_marketplace/features/bookings/presentation/cleaner_booking_controller.dart';
 import 'package:home_cleaning_marketplace/features/bookings/presentation/cleaner_booking_detail_screen.dart';
 import 'package:home_cleaning_marketplace/features/bookings/presentation/cleaner_booking_list_screen.dart';
+import 'package:home_cleaning_marketplace/features/disputes/presentation/booking_dispute_controller.dart';
 
 import '../../../helpers/feature_test_fakes.dart';
+
+void _useTallSurface(WidgetTester tester) {
+  tester.view.physicalSize = const Size(800, 2400);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+}
 
 void main() {
   testWidgets('list shows request state, coarse location, and load more', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(800, 2400);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
+    _useTallSurface(tester);
     final bookings = SeededCleanerBookingController(
       CleanerBookingState(
         loading: false,
@@ -27,6 +32,11 @@ void main() {
       ProviderScope(
         overrides: [
           cleanerBookingControllerProvider.overrideWith(() => bookings),
+          bookingDisputeControllerProvider.overrideWith(
+            () => SeededBookingDisputeController(
+              const BookingDisputeState(loading: false),
+            ),
+          ),
         ],
         child: const MaterialApp(home: CleanerBookingListScreen()),
       ),
@@ -55,6 +65,11 @@ void main() {
       ProviderScope(
         overrides: [
           cleanerBookingControllerProvider.overrideWith(() => bookings),
+          bookingDisputeControllerProvider.overrideWith(
+            () => SeededBookingDisputeController(
+              const BookingDisputeState(loading: false),
+            ),
+          ),
         ],
         child: const MaterialApp(
           home: CleanerBookingDetailScreen(
@@ -67,6 +82,7 @@ void main() {
     expect(find.text('Location: Dhaka, Dhaka, BD'), findsOneWidget);
     expect(find.text('1 Test Street'), findsNothing);
     expect(find.text('Message Customer'), findsOneWidget);
+    expect(find.text('Report a Problem'), findsNothing);
     expect(find.text('Accept'), findsOneWidget);
     expect(find.text('Decline'), findsOneWidget);
     expect(find.text('Start Job'), findsNothing);
@@ -83,6 +99,11 @@ void main() {
       ProviderScope(
         overrides: [
           cleanerBookingControllerProvider.overrideWith(() => bookings),
+          bookingDisputeControllerProvider.overrideWith(
+            () => SeededBookingDisputeController(
+              const BookingDisputeState(loading: false),
+            ),
+          ),
         ],
         child: const MaterialApp(
           home: CleanerBookingDetailScreen(
@@ -104,6 +125,7 @@ void main() {
   testWidgets('confirmed booking shows full address and cancel', (
     tester,
   ) async {
+    _useTallSurface(tester);
     final bookings = SeededCleanerBookingController(
       CleanerBookingState(
         loading: false,
@@ -117,6 +139,11 @@ void main() {
       ProviderScope(
         overrides: [
           cleanerBookingControllerProvider.overrideWith(() => bookings),
+          bookingDisputeControllerProvider.overrideWith(
+            () => SeededBookingDisputeController(
+              const BookingDisputeState(loading: false),
+            ),
+          ),
         ],
         child: const MaterialApp(
           home: CleanerBookingDetailScreen(
@@ -127,6 +154,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('1 Test Street'), findsOneWidget);
+    expect(find.text('Report a Problem'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
     expect(find.text('Accept'), findsNothing);
     await tester.tap(find.text('Cancel'));
@@ -141,6 +169,7 @@ void main() {
   });
 
   testWidgets('start job is available during the slot window', (tester) async {
+    _useTallSurface(tester);
     final now = DateTime.now().toUtc();
     final startable = SeededCleanerBookingController(
       CleanerBookingState(
@@ -157,6 +186,11 @@ void main() {
       ProviderScope(
         overrides: [
           cleanerBookingControllerProvider.overrideWith(() => startable),
+          bookingDisputeControllerProvider.overrideWith(
+            () => SeededBookingDisputeController(
+              const BookingDisputeState(loading: false),
+            ),
+          ),
         ],
         child: const MaterialApp(
           home: CleanerBookingDetailScreen(
@@ -173,6 +207,7 @@ void main() {
   });
 
   testWidgets('in-progress booking can be completed', (tester) async {
+    _useTallSurface(tester);
     final completable = SeededCleanerBookingController(
       CleanerBookingState(
         loading: false,
@@ -186,6 +221,11 @@ void main() {
       ProviderScope(
         overrides: [
           cleanerBookingControllerProvider.overrideWith(() => completable),
+          bookingDisputeControllerProvider.overrideWith(
+            () => SeededBookingDisputeController(
+              const BookingDisputeState(loading: false),
+            ),
+          ),
         ],
         child: const MaterialApp(
           home: CleanerBookingDetailScreen(
@@ -213,6 +253,11 @@ void main() {
                 loading: false,
                 detail: testCleanerBooking(status: BookingStatus.completed),
               ),
+            ),
+          ),
+          bookingDisputeControllerProvider.overrideWith(
+            () => SeededBookingDisputeController(
+              const BookingDisputeState(loading: false),
             ),
           ),
         ],

@@ -4,7 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:home_cleaning_marketplace/app/router/app_routes.dart';
 import 'package:home_cleaning_marketplace/features/addresses/presentation/address_form_screen.dart';
 import 'package:home_cleaning_marketplace/features/addresses/presentation/address_list_screen.dart';
+import 'package:home_cleaning_marketplace/features/admin/presentation/admin_audit_detail_screen.dart';
+import 'package:home_cleaning_marketplace/features/admin/presentation/admin_audit_list_screen.dart';
+import 'package:home_cleaning_marketplace/features/admin/presentation/admin_booking_detail_screen.dart';
+import 'package:home_cleaning_marketplace/features/admin/presentation/admin_booking_list_screen.dart';
 import 'package:home_cleaning_marketplace/features/admin/presentation/admin_home_screen.dart';
+import 'package:home_cleaning_marketplace/features/admin/presentation/admin_user_detail_screen.dart';
+import 'package:home_cleaning_marketplace/features/admin/presentation/admin_user_list_screen.dart';
 import 'package:home_cleaning_marketplace/features/admin/presentation/cleaner_approval_detail_screen.dart';
 import 'package:home_cleaning_marketplace/features/admin/presentation/cleaner_approval_list_screen.dart';
 import 'package:home_cleaning_marketplace/features/payments/presentation/admin_payment_detail_screen.dart';
@@ -36,6 +42,9 @@ import 'package:home_cleaning_marketplace/features/reviews/presentation/admin_re
 import 'package:home_cleaning_marketplace/features/reviews/presentation/admin_review_list_screen.dart';
 import 'package:home_cleaning_marketplace/features/reviews/presentation/cleaner_reviews_screen.dart';
 import 'package:home_cleaning_marketplace/features/reviews/presentation/customer_review_screen.dart';
+import 'package:home_cleaning_marketplace/features/disputes/presentation/admin_dispute_detail_screen.dart';
+import 'package:home_cleaning_marketplace/features/disputes/presentation/admin_dispute_list_screen.dart';
+import 'package:home_cleaning_marketplace/features/disputes/presentation/booking_dispute_screen.dart';
 
 class _RouterRefresh extends ChangeNotifier {
   void ping() => notifyListeners();
@@ -198,6 +207,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: AppRoutes.customerBookingDisputePath,
+        builder: (context, state) {
+          return BookingDisputeScreen(
+            bookingId: state.pathParameters['bookingId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
         path: AppRoutes.notificationsPath,
         builder: (context, state) => const NotificationCenterScreen(),
       ),
@@ -251,6 +268,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: AppRoutes.cleanerBookingDisputePath,
+        builder: (context, state) {
+          return BookingDisputeScreen(
+            bookingId: state.pathParameters['bookingId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
         path: AppRoutes.cleanerReviewsPath,
         builder: (context, state) => const CleanerReviewsScreen(),
       ),
@@ -292,6 +317,54 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           return AdminReviewDetailScreen(
             reviewId: state.pathParameters['reviewId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.adminDisputesPath,
+        builder: (context, state) => const AdminDisputeListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminDisputeDetailPath,
+        builder: (context, state) {
+          return AdminDisputeDetailScreen(
+            disputeId: state.pathParameters['disputeId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.adminUsersPath,
+        builder: (context, state) => const AdminUserListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminUserDetailPath,
+        builder: (context, state) {
+          return AdminUserDetailScreen(
+            userId: state.pathParameters['userId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.adminBookingsPath,
+        builder: (context, state) => const AdminBookingListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminBookingDetailPath,
+        builder: (context, state) {
+          return AdminBookingDetailScreen(
+            bookingId: state.pathParameters['bookingId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.adminAuditLogsPath,
+        builder: (context, state) => const AdminAuditListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminAuditLogDetailPath,
+        builder: (context, state) {
+          return AdminAuditDetailScreen(
+            auditLogId: state.pathParameters['auditLogId'] ?? '',
           );
         },
       ),

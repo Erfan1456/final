@@ -129,3 +129,30 @@ Response reviewNotFoundResponse() {
     statusCode: HttpStatus.notFound,
   );
 }
+
+/// 404 used when a dispute path id is malformed or unknown.
+Response disputeNotFoundResponse() {
+  return jsonError(
+    code: 'dispute_not_found',
+    message: 'Dispute was not found.',
+    statusCode: HttpStatus.notFound,
+  );
+}
+
+/// 404 used when an admin user path id is malformed or unknown.
+Response userNotFoundResponse() {
+  return jsonError(
+    code: 'user_not_found',
+    message: 'User was not found.',
+    statusCode: HttpStatus.notFound,
+  );
+}
+
+/// 404 used when an audit log path id is malformed or unknown.
+Response auditLogNotFoundResponse() {
+  return jsonError(
+    code: 'audit_log_not_found',
+    message: 'Audit log was not found.',
+    statusCode: HttpStatus.notFound,
+  );
+}

@@ -115,6 +115,32 @@ String messageForApiCode(String code) {
       return 'Reason must be between 5 and 500 characters.';
     case 'invalid_review_state':
       return 'This review cannot be changed in its current state.';
+    case 'dispute_not_found':
+      return 'Dispute was not found.';
+    case 'dispute_already_exists':
+      return 'A dispute already exists for this booking.';
+    case 'dispute_not_allowed':
+      return 'A dispute cannot be opened for this booking.';
+    case 'invalid_dispute_state':
+      return 'This dispute cannot be changed in its current state.';
+    case 'invalid_dispute_subject':
+      return 'Subject must be between 5 and 120 characters.';
+    case 'invalid_dispute_description':
+      return 'Description must be between 20 and 3000 characters.';
+    case 'invalid_dispute_resolution':
+      return 'Resolution must be between 10 and 3000 characters.';
+    case 'user_not_found':
+      return 'User was not found.';
+    case 'protected_admin_account':
+      return 'Administrator accounts cannot be changed from this screen.';
+    case 'invalid_account_state':
+      return 'This account cannot be changed in its current state.';
+    case 'invalid_moderation_reason':
+      return 'Reason must be between 5 and 500 characters.';
+    case 'admin_booking_not_cancellable':
+      return 'This booking cannot be cancelled by an administrator.';
+    case 'audit_log_not_found':
+      return 'Audit log was not found.';
     case 'invalid_input':
       return 'Please check your details and try again.';
     case 'invalid_access_token':

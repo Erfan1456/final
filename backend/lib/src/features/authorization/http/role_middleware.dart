@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:dart_frog/dart_frog.dart';
 import 'package:home_cleaning_marketplace_api/src/config/server_config.dart';
 import 'package:home_cleaning_marketplace_api/src/database/mongo_database.dart';
+import 'package:home_cleaning_marketplace_api/src/features/audit/application/audit_log_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/authorization/application/role_scoped_composition.dart';
 import 'package:home_cleaning_marketplace_api/src/features/authorization/authenticated_user_context.dart';
 import 'package:home_cleaning_marketplace_api/src/features/authorization/http/role_http_errors.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/application/cleaner_availability_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/application/admin_booking_operations_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/application/cleaner_booking_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/application/customer_booking_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/chat/application/booking_conversation_service.dart';
@@ -15,12 +17,15 @@ import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/appl
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/application/cleaner_service_management_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/application/customer_account_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/discovery/application/cleaner_discovery_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/disputes/application/admin_dispute_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/disputes/application/booking_dispute_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/notifications/application/notification_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/admin_payment_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/customer_payment_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/reviews/application/admin_review_moderation_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/reviews/application/cleaner_review_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/reviews/application/customer_review_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/users/application/admin_user_management_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_role.dart';
 
 /// Shared role middleware: Bearer auth → persisted user → current role.
@@ -106,10 +111,29 @@ Handler roleScopedMiddleware(
           final reviews =
               _tryRead<AdminReviewModerationService>(context) ??
               await RoleScopedComposition.adminReviews(mongo: mongo!);
+          final disputes =
+              _tryRead<AdminDisputeService>(context) ??
+              await RoleScopedComposition.adminDisputes(mongo: mongo!);
+          final users =
+              _tryRead<AdminUserManagementService>(context) ??
+              await RoleScopedComposition.adminUsers(mongo: mongo!);
+          final bookings =
+              _tryRead<AdminBookingOperationsService>(context) ??
+              await RoleScopedComposition.adminBookings(
+                mongo: mongo!,
+                config: config!,
+              );
+          final audit =
+              _tryRead<AuditLogService>(context) ??
+              await RoleScopedComposition.audit(mongo: mongo!);
           next = next
               .provide<AdminCleanerReviewService>(() => service)
               .provide<AdminPaymentService>(() => payments)
-              .provide<AdminReviewModerationService>(() => reviews);
+              .provide<AdminReviewModerationService>(() => reviews)
+              .provide<AdminDisputeService>(() => disputes)
+              .provide<AdminUserManagementService>(() => users)
+              .provide<AdminBookingOperationsService>(() => bookings)
+              .provide<AuditLogService>(() => audit);
       }
       return await handler(next);
     } on Exception catch (error) {
@@ -138,7 +162,12 @@ Handler multiRoleMiddleware(
         final conversations =
             _tryRead<BookingConversationService>(context) ??
             await RoleScopedComposition.conversations(mongo: mongo!);
-        next = next.provide<BookingConversationService>(() => conversations);
+        final disputes =
+            _tryRead<BookingDisputeService>(context) ??
+            await RoleScopedComposition.bookingDisputes(mongo: mongo!);
+        next = next
+            .provide<BookingConversationService>(() => conversations)
+            .provide<BookingDisputeService>(() => disputes);
       }
       final notifications =
           _tryRead<NotificationService>(context) ??

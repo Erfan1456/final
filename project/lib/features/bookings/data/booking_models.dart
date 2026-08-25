@@ -77,6 +77,20 @@ enum BookingStatus {
         return false;
     }
   }
+
+  bool get canOpenDispute {
+    switch (this) {
+      case BookingStatus.confirmed:
+      case BookingStatus.inProgress:
+      case BookingStatus.completed:
+      case BookingStatus.cancelled:
+        return true;
+      case BookingStatus.pending:
+      case BookingStatus.declined:
+      case BookingStatus.unknown:
+        return false;
+    }
+  }
 }
 
 class BookingServiceSnapshot {

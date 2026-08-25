@@ -8,6 +8,9 @@ const String usersEmailNormalizedUniqueIndexName =
 /// Field indexed for unique user email lookup.
 const String usersEmailNormalizedField = 'email_normalized';
 
+/// Stable name for the admin user listing compound index.
+const String usersRoleStatusIdDescIndexName = 'users_role_status_id_desc';
+
 /// Function used to ensure a MongoDB index without coupling tests to Atlas.
 typedef EnsureIndexFn =
     Future<void> Function({
@@ -20,12 +23,22 @@ typedef EnsureIndexFn =
 /// Ensures the approved `users.email_normalized` unique index.
 ///
 /// Does not run per HTTP request. Call from a controlled startup or tool.
-Future<void> ensureUserIndexes({required EnsureIndexFn ensureIndex}) {
-  return ensureIndex(
+Future<void> ensureUserIndexes({required EnsureIndexFn ensureIndex}) async {
+  await ensureIndex(
     collectionName: CollectionNames.users,
     keys: const <String, dynamic>{usersEmailNormalizedField: 1},
     unique: true,
     name: usersEmailNormalizedUniqueIndexName,
+  );
+  await ensureIndex(
+    collectionName: CollectionNames.users,
+    keys: const <String, dynamic>{
+      'role': 1,
+      'account_status': 1,
+      '_id': -1,
+    },
+    unique: false,
+    name: usersRoleStatusIdDescIndexName,
   );
 }
 

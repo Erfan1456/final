@@ -13,6 +13,7 @@ import 'package:home_cleaning_marketplace/features/catalog/data/marketplace_serv
 import 'package:home_cleaning_marketplace/features/discovery/presentation/discovery_controller.dart';
 import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_controller.dart';
 import 'package:home_cleaning_marketplace/features/reviews/presentation/customer_review_controller.dart';
+import 'package:home_cleaning_marketplace/features/disputes/presentation/booking_dispute_controller.dart';
 
 import '../../../helpers/feature_test_fakes.dart';
 
@@ -193,6 +194,11 @@ void main() {
               const CustomerReviewState(loading: false),
             ),
           ),
+          bookingDisputeControllerProvider.overrideWith(
+            () => SeededBookingDisputeController(
+              const BookingDisputeState(loading: false),
+            ),
+          ),
         ],
         child: const MaterialApp(
           home: CustomerBookingDetailScreen(
@@ -208,6 +214,7 @@ void main() {
     expect(find.textContaining('Status history'), findsOneWidget);
     expect(find.text('Message Cleaner'), findsOneWidget);
     expect(find.text('Leave Review'), findsNothing);
+    expect(find.text('Report a Problem'), findsNothing);
     expect(find.text('Cancel Booking'), findsOneWidget);
     await tester.tap(find.text('Cancel Booking'));
     await tester.pump();

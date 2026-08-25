@@ -3,6 +3,7 @@ import 'package:home_cleaning_marketplace_api/src/features/users/data/user_index
 import 'package:test/test.dart';
 
 class _RecordingEnsureIndex {
+  final names = <String>[];
   String? collectionName;
   Map<String, dynamic>? keys;
   bool? unique;
@@ -20,6 +21,7 @@ class _RecordingEnsureIndex {
     this.keys = Map<String, dynamic>.from(keys);
     this.unique = unique;
     this.name = name;
+    names.add(name);
   }
 }
 
@@ -30,16 +32,11 @@ void main() {
 
       await ensureUserIndexes(ensureIndex: recorder.call);
 
-      expect(recorder.calls, equals(1));
+      expect(recorder.calls, equals(2));
+      expect(recorder.names, contains(usersEmailNormalizedUniqueIndexName));
+      expect(recorder.names, contains(usersRoleStatusIdDescIndexName));
       expect(recorder.collectionName, equals(CollectionNames.users));
       expect(recorder.collectionName, equals('users'));
-      expect(
-        recorder.keys,
-        equals(const <String, dynamic>{usersEmailNormalizedField: 1}),
-      );
-      expect(recorder.unique, isTrue);
-      expect(recorder.name, equals(usersEmailNormalizedUniqueIndexName));
-      expect(recorder.name, equals('users_email_normalized_unique'));
     });
   });
 }

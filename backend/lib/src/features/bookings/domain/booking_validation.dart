@@ -212,6 +212,42 @@ abstract final class BookingValidation {
     }
   }
 
+  /// Parses an optional ObjectId query value.
+  static ObjectId? optionalObjectId(Object? raw, {required String field}) {
+    if (raw == null || (raw is String && raw.trim().isEmpty)) {
+      return null;
+    }
+    if (raw is ObjectId) {
+      return raw;
+    }
+    if (raw is! String) {
+      throw ProfileValidationException(message: '$field is invalid.');
+    }
+    try {
+      return ObjectId.fromHexString(raw.trim());
+    } catch (_) {
+      throw ProfileValidationException(message: '$field is invalid.');
+    }
+  }
+
+  /// Parses an optional ISO-8601 timestamp and normalizes to UTC.
+  static DateTime? optionalUtcDateTime(Object? raw, {required String field}) {
+    if (raw == null || (raw is String && raw.trim().isEmpty)) {
+      return null;
+    }
+    if (raw is DateTime) {
+      return raw.toUtc();
+    }
+    if (raw is! String) {
+      throw ProfileValidationException(message: '$field is invalid.');
+    }
+    final parsed = DateTime.tryParse(raw.trim());
+    if (parsed == null) {
+      throw ProfileValidationException(message: '$field is invalid.');
+    }
+    return parsed.toUtc();
+  }
+
   static bool _hasControlCharacters(String value) {
     for (final rune in value.runes) {
       if (rune <= 0x1F || (rune >= 0x7F && rune <= 0x9F)) {

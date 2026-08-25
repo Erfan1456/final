@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:home_cleaning_marketplace_api/src/features/audit/application/audit_log_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/audit/domain/audit_action.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/data/booking_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/payment_webhook_service.dart';
@@ -13,6 +15,7 @@ import 'package:home_cleaning_marketplace_api/src/features/payments/domain/payme
 import 'package:home_cleaning_marketplace_api/src/features/payments/domain/refund_request_status.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/provider/payment_provider.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_account.dart';
+import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_role.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide ServerConfig;
 
 /// HTTP-independent admin payment inspection and refunds.
@@ -25,6 +28,7 @@ class AdminPaymentService {
     required BookingRepository bookings,
     required PaymentWebhookService webhooks,
     required PaymentProvider? provider,
+    AuditSink? audit,
     DateTime Function()? clock,
   }) : _payments = payments,
        _events = events,
@@ -32,6 +36,7 @@ class AdminPaymentService {
        _bookings = bookings,
        _webhooks = webhooks,
        _provider = provider,
+       _audit = audit ?? const NoOpAuditSink(),
        _clock = clock ?? DateTime.now;
 
   final PaymentRepository _payments;
@@ -40,6 +45,7 @@ class AdminPaymentService {
   final BookingRepository _bookings;
   final PaymentWebhookService _webhooks;
   final PaymentProvider? _provider;
+  final AuditSink _audit;
   final DateTime Function() _clock;
 
   /// Admin payment list with keyset pagination.
@@ -199,6 +205,19 @@ class AdminPaymentService {
     }
 
     await _refundRequests.markSucceeded(id: stored.id, now: _clock().toUtc());
+    await _audit.appendBestEffort(
+      actorUserId: user.id,
+      actorRole: UserRole.admin,
+      action: AuditAction.paymentRefundRequested,
+      targetType: AuditTargetType.payment,
+      targetId: payment.id,
+      reason: reason,
+      metadata: <String, Object?>{
+        'refund_amount_minor': amountMinor,
+        'currency_code': payment.currencyCode,
+        'booking_id': payment.bookingId.oid,
+      },
+    );
     final updated = await _payments.findById(payment.id);
     if (updated == null) {
       throw const PaymentNotFoundException();

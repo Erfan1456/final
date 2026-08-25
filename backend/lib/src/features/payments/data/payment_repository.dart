@@ -85,6 +85,12 @@ abstract class PaymentRepository {
     ObjectId? customerUserId,
     ObjectId? after,
   });
+
+  /// Payments for many bookings. Used to avoid N+1 admin summaries.
+  Future<List<Payment>> findByBookingIds(Iterable<ObjectId> ids);
+
+  /// Count of payment documents for [customerUserId].
+  Future<int> countForCustomer(ObjectId customerUserId);
 }
 
 /// MongoDB implementation of [PaymentRepository].
@@ -352,6 +358,28 @@ class MongoPaymentRepository implements PaymentRepository {
       items: items,
       nextCursor: hasMore ? items.last.id.oid : null,
     );
+  }
+
+  @override
+  Future<List<Payment>> findByBookingIds(Iterable<ObjectId> ids) async {
+    final unique = ids.toSet().toList();
+    if (unique.isEmpty) {
+      return const <Payment>[];
+    }
+    final documents = await _documents.findMany(
+      selector: <String, dynamic>{
+        'booking_id': <String, dynamic>{r'$in': unique},
+      },
+      sort: const <String, int>{'_id': -1},
+    );
+    return documents.map(Payment.fromDocument).toList();
+  }
+
+  @override
+  Future<int> countForCustomer(ObjectId customerUserId) {
+    return _documents.count(<String, dynamic>{
+      'customer_user_id': customerUserId,
+    });
   }
 
   Future<Payment?> _transition({

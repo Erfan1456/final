@@ -2,7 +2,7 @@
 
 TASK 017 adds booking-scoped chat, a persistent in-app notification feed, verified completed-booking reviews, discovery rating aggregation, and admin review moderation.
 
-There are no WebSockets, push notifications, email/SMS, attachments, message edit/delete, typing/presence, review replies, disputes, or payouts.
+There are no WebSockets, push notifications, email/SMS, attachments, message edit/delete, typing/presence, review replies, or payouts. Booking disputes and admin audit are documented in [disputes-admin-operations-and-audit.md](disputes-admin-operations-and-audit.md).
 
 ## Booking chat
 
@@ -52,4 +52,4 @@ One review per booking. Hidden reviews stay hidden after customer edit and are e
 
 ## Flutter
 
-Focused Riverpod controllers: `BookingChatController` (5-second mounted polling, no overlapping polls, timer disposed), `NotificationController`, `CustomerReviewController`, `CleanerReviewsController`, `AdminReviewController`. No new packages. Chat send uses `Random.secure()` Idempotency-Key retained through retry of the same logical send.
+Focused Riverpod controllers: `BookingChatController` (5-second mounted polling, no overlapping polls, timer disposed), `NotificationController`, `CustomerReviewController`, `CleanerReviewsController`, `AdminReviewController`. TASK 018 maps `resource_type=dispute` notifications to role-scoped dispute screens using the booking id. No new packages. Chat send uses `Random.secure()` Idempotency-Key retained through retry of the same logical send.

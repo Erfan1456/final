@@ -1,6 +1,8 @@
+import 'package:home_cleaning_marketplace_api/src/features/users/domain/account_status.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/create_user_account_data.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_account.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_account_exceptions.dart';
+import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_role.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide ServerConfig;
 
 /// Persistence contract for upcoming authentication.
@@ -33,4 +35,43 @@ abstract class UserRepository {
     required String passwordHash,
     required DateTime updatedAt,
   });
+
+  /// Admin user list, `_id` descending, optional exact-email filter.
+  Future<UserAccountPage> adminPage({
+    required int limit,
+    UserRole? role,
+    AccountStatus? status,
+    String? emailNormalized,
+    ObjectId? after,
+  });
+
+  /// Conditional `active` → `suspended` for a non-admin account.
+  Future<UserAccount?> setActiveToSuspended({
+    required ObjectId userId,
+    required DateTime now,
+  });
+
+  /// Conditional `suspended` → `active` for a non-admin account.
+  Future<UserAccount?> setSuspendedToActive({
+    required ObjectId userId,
+    required DateTime now,
+  });
+
+  /// Conditional `active`/`suspended` → `deactivated` for a non-admin account.
+  Future<UserAccount?> setActiveOrSuspendedToDeactivated({
+    required ObjectId userId,
+    required DateTime now,
+  });
+}
+
+/// One keyset page of user accounts.
+class UserAccountPage {
+  /// Creates a page of [items] with an optional [nextCursor].
+  const UserAccountPage({required this.items, required this.nextCursor});
+
+  /// Accounts on this page.
+  final List<UserAccount> items;
+
+  /// Hex `_id` of the last item when another page may exist.
+  final String? nextCursor;
 }

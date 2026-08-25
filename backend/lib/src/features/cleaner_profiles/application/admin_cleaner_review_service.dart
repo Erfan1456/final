@@ -1,3 +1,5 @@
+import 'package:home_cleaning_marketplace_api/src/features/audit/application/audit_log_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/audit/domain/audit_action.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/application/auth_json.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/domain/cleaner_onboarding_status.dart';
@@ -7,6 +9,7 @@ import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/doma
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/domain/profile_validation_exception.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/user_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_account.dart';
+import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_role.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide ServerConfig;
 
 /// One admin list row combining a cleaner profile and a safe user email.
@@ -80,11 +83,14 @@ class AdminCleanerReviewService {
   AdminCleanerReviewService({
     required CleanerProfileRepository profiles,
     required UserRepository users,
+    AuditSink? audit,
   }) : _profiles = profiles,
-       _users = users;
+       _users = users,
+       _audit = audit ?? const NoOpAuditSink();
 
   final CleanerProfileRepository _profiles;
   final UserRepository _users;
+  final AuditSink _audit;
 
   /// Lists applications for [status], defaulting to pending.
   Future<AdminCleanerApplicationPage> listApplications({
@@ -139,6 +145,17 @@ class AdminCleanerReviewService {
       reviewedBy: adminUserId,
     );
     if (approved != null) {
+      await _audit.appendBestEffort(
+        actorUserId: adminUserId,
+        actorRole: UserRole.admin,
+        action: AuditAction.cleanerApproved,
+        targetType: AuditTargetType.cleanerProfile,
+        targetId: approved.id,
+        metadata: <String, Object?>{
+          'previous_status': CleanerOnboardingStatus.pending.wireValue,
+          'new_status': CleanerOnboardingStatus.approved.wireValue,
+        },
+      );
       return approved;
     }
     final existing = await _profiles.findByUserId(targetUserId);
@@ -163,6 +180,18 @@ class AdminCleanerReviewService {
       reason: parsedReason,
     );
     if (rejected != null) {
+      await _audit.appendBestEffort(
+        actorUserId: adminUserId,
+        actorRole: UserRole.admin,
+        action: AuditAction.cleanerRejected,
+        targetType: AuditTargetType.cleanerProfile,
+        targetId: rejected.id,
+        reason: parsedReason,
+        metadata: <String, Object?>{
+          'previous_status': CleanerOnboardingStatus.pending.wireValue,
+          'new_status': CleanerOnboardingStatus.rejected.wireValue,
+        },
+      );
       return rejected;
     }
     final existing = await _profiles.findByUserId(targetUserId);

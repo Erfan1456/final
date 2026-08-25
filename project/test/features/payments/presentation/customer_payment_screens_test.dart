@@ -9,6 +9,7 @@ import 'package:home_cleaning_marketplace/features/bookings/presentation/custome
 import 'package:home_cleaning_marketplace/features/payments/data/payment_models.dart';
 import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_controller.dart';
 import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_screen.dart';
+import 'package:home_cleaning_marketplace/features/disputes/presentation/booking_dispute_controller.dart';
 import 'package:home_cleaning_marketplace/features/reviews/presentation/customer_review_controller.dart';
 
 import '../../../helpers/feature_test_fakes.dart';
@@ -36,6 +37,11 @@ void main() {
           customerReviewControllerProvider.overrideWith(
             () => SeededCustomerReviewController(
               const CustomerReviewState(loading: false),
+            ),
+          ),
+          bookingDisputeControllerProvider.overrideWith(
+            () => SeededBookingDisputeController(
+              const BookingDisputeState(loading: false),
             ),
           ),
         ],
@@ -105,6 +111,11 @@ void main() {
               const CustomerReviewState(loading: false),
             ),
           ),
+          bookingDisputeControllerProvider.overrideWith(
+            () => SeededBookingDisputeController(
+              const BookingDisputeState(loading: false),
+            ),
+          ),
         ],
         child: const MaterialApp(
           home: CustomerBookingDetailScreen(
@@ -172,6 +183,11 @@ void main() {
             customerReviewControllerProvider.overrideWith(
               () => SeededCustomerReviewController(
                 const CustomerReviewState(loading: false),
+              ),
+            ),
+            bookingDisputeControllerProvider.overrideWith(
+              () => SeededBookingDisputeController(
+                const BookingDisputeState(loading: false),
               ),
             ),
           ],

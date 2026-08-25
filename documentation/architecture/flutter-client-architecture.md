@@ -61,7 +61,7 @@ features/
 
 Those nested folders are created only when a real feature needs them. Empty architecture folders are not created for unimplemented features.
 
-Authentication now lives under `features/auth/`. Customer, address, cleaner, admin, catalog, cleaner_services, availability, and discovery feature folders exist. See [flutter-authentication.md](flutter-authentication.md), [profile-address-and-cleaner-onboarding.md](profile-address-and-cleaner-onboarding.md), and [service-availability-and-discovery.md](service-availability-and-discovery.md).
+Authentication now lives under `features/auth/`. Customer, address, cleaner, admin, catalog, cleaner_services, availability, discovery, bookings, payments, chat, notifications, reviews, and disputes feature folders exist. See [flutter-authentication.md](flutter-authentication.md), [profile-address-and-cleaner-onboarding.md](profile-address-and-cleaner-onboarding.md), [service-availability-and-discovery.md](service-availability-and-discovery.md), [booking-reservation-and-lifecycle.md](booking-reservation-and-lifecycle.md), [payment-processing-and-webhooks.md](payment-processing-and-webhooks.md), [chat-notifications-and-reviews.md](chat-notifications-and-reviews.md), and [disputes-admin-operations-and-audit.md](disputes-admin-operations-and-audit.md).
 
 ## State Management
 

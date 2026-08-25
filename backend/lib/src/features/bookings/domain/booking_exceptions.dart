@@ -96,6 +96,15 @@ class InvalidCustomerNotesException implements Exception {
   String toString() => 'InvalidCustomerNotesException';
 }
 
+/// Thrown when a booking cannot be cancelled by an administrator.
+class AdminBookingNotCancellableException implements Exception {
+  /// Creates a sanitized ineligible-admin-cancel failure.
+  const AdminBookingNotCancellableException();
+
+  @override
+  String toString() => 'AdminBookingNotCancellableException';
+}
+
 /// Thrown when a cleaner tries to edit or delete a reserved availability slot.
 class AvailabilityReservedException implements Exception {
   /// Creates a sanitized reserved-slot failure.

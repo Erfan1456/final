@@ -2,7 +2,7 @@
 
 This document describes the Dart Frog backend for the Home Cleaning Service Marketplace.
 
-TASK 013 added role-scoped customer profile, address, cleaner onboarding, and admin review routes. TASK 014 added the public service catalog, cleaner offerings, availability, and customer discovery. TASK 015 added customer/cleaner booking reservation and lifecycle. TASK 016 added a sandbox-backed payment ledger, signed webhooks, refund foundation, and admin transaction inspection. TASK 017 added booking-scoped chat, in-app notifications, verified reviews, discovery rating aggregates, and admin review moderation. There is no production payment processor, WebSocket, or push notification product.
+TASK 013 added role-scoped customer profile, address, cleaner onboarding, and admin review routes. TASK 014 added the public service catalog, cleaner offerings, availability, and customer discovery. TASK 015 added customer/cleaner booking reservation and lifecycle. TASK 016 added a sandbox-backed payment ledger, signed webhooks, refund foundation, and admin transaction inspection. TASK 017 added booking-scoped chat, in-app notifications, verified reviews, discovery rating aggregates, and admin review moderation. TASK 018 added booking-scoped disputes, admin user management, admin booking oversight with payment-aware cancellation, and an append-only audit log. There is no production payment processor, WebSocket, push notification, payout, password recovery, MFA, or AI product.
 
 ## Current Architecture
 

@@ -109,6 +109,32 @@ abstract class BookingRepository {
     required ObjectId cleanerUserId,
     required DateTime now,
   });
+
+  /// Admin list page, `_id` descending.
+  Future<BookingPage> adminPage({
+    required int limit,
+    BookingStatus? status,
+    ObjectId? customerUserId,
+    ObjectId? cleanerUserId,
+    ObjectId? serviceId,
+    DateTime? from,
+    DateTime? to,
+    ObjectId? after,
+  });
+
+  /// Conditional pending/confirmed cancel by an administrator.
+  Future<Booking?> cancelByAdmin({
+    required ObjectId id,
+    required ObjectId adminUserId,
+    required DateTime now,
+    required String reason,
+  });
+
+  /// Count of bookings for [customerUserId].
+  Future<int> countForCustomer(ObjectId customerUserId);
+
+  /// Count of bookings for [cleanerUserId].
+  Future<int> countForCleaner(ObjectId cleanerUserId);
 }
 
 /// MongoDB implementation of [BookingRepository].
@@ -463,6 +489,124 @@ class MongoBookingRepository implements BookingRepository {
         createdAt: utc,
       ),
     );
+  }
+
+  @override
+  Future<BookingPage> adminPage({
+    required int limit,
+    BookingStatus? status,
+    ObjectId? customerUserId,
+    ObjectId? cleanerUserId,
+    ObjectId? serviceId,
+    DateTime? from,
+    DateTime? to,
+    ObjectId? after,
+  }) async {
+    final selector = <String, dynamic>{};
+    if (status != null) {
+      selector['status'] = status.wireValue;
+    }
+    if (customerUserId != null) {
+      selector['customer_user_id'] = customerUserId;
+    }
+    if (cleanerUserId != null) {
+      selector['cleaner_user_id'] = cleanerUserId;
+    }
+    if (serviceId != null) {
+      selector['service_id'] = serviceId;
+    }
+    if (from != null || to != null) {
+      selector['start_at'] = <String, dynamic>{
+        if (from != null) r'$gte': from.toUtc(),
+        if (to != null) r'$lte': to.toUtc(),
+      };
+    }
+    if (after != null) {
+      selector['_id'] = <String, dynamic>{r'$lt': after};
+    }
+    final documents = await _documents.findMany(
+      selector: selector,
+      sort: const <String, int>{'_id': -1},
+      limit: limit + 1,
+    );
+    final hasMore = documents.length > limit;
+    final page = hasMore ? documents.sublist(0, limit) : documents;
+    final items = page.map(Booking.fromDocument).toList();
+    return BookingPage(
+      items: items,
+      nextCursor: hasMore ? items.last.id.oid : null,
+    );
+  }
+
+  @override
+  Future<Booking?> cancelByAdmin({
+    required ObjectId id,
+    required ObjectId adminUserId,
+    required DateTime now,
+    required String reason,
+  }) async {
+    final utc = now.toUtc();
+    final pending = await _transition(
+      selector: <String, dynamic>{
+        '_id': id,
+        'status': BookingStatus.pending.wireValue,
+        'reservation_active': true,
+        'start_at': <String, dynamic>{r'$gt': utc},
+      },
+      set: <String, dynamic>{
+        'status': BookingStatus.cancelled.wireValue,
+        'reservation_active': false,
+        'cancelled_at': utc,
+        'updated_at': utc,
+      },
+      history: BookingStatusHistoryEntry(
+        fromStatus: BookingStatus.pending,
+        toStatus: BookingStatus.cancelled,
+        actorUserId: adminUserId,
+        actorRole: UserRole.admin,
+        reason: reason,
+        createdAt: utc,
+      ),
+    );
+    if (pending != null) {
+      return pending;
+    }
+    return _transition(
+      selector: <String, dynamic>{
+        '_id': id,
+        'status': BookingStatus.confirmed.wireValue,
+        'reservation_active': true,
+        'start_at': <String, dynamic>{r'$gt': utc},
+      },
+      set: <String, dynamic>{
+        'status': BookingStatus.cancelled.wireValue,
+        'reservation_active': false,
+        'cancelled_at': utc,
+        'updated_at': utc,
+      },
+      history: BookingStatusHistoryEntry(
+        fromStatus: BookingStatus.confirmed,
+        toStatus: BookingStatus.cancelled,
+        actorUserId: adminUserId,
+        actorRole: UserRole.admin,
+        reason: reason,
+        createdAt: utc,
+      ),
+    );
+  }
+
+  @override
+  Future<int> countForCustomer(ObjectId customerUserId) {
+    return _documents.count(<String, dynamic>{
+      'customer_user_id': customerUserId,
+    });
+  }
+
+  @override
+  Future<int> countForCleaner(ObjectId cleanerUserId) {
+    return _documents.count(<String, dynamic>{
+      'cleaner_user_id': cleanerUserId,
+    });
   }
 
   Future<BookingPage> _listPage({

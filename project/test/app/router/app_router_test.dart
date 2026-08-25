@@ -238,6 +238,11 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Review'), findsWidgets);
+    router.go(
+      AppRoutes.customerBookingDisputeLocation('507f1f77bcf86cd799439091'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Dispute'), findsWidgets);
   });
 
   testWidgets('cleaner can open booking chat and my reviews', (tester) async {
@@ -250,6 +255,11 @@ void main() {
     router.go(AppRoutes.cleanerReviewsPath);
     await tester.pumpAndSettle();
     expect(find.text('My Reviews'), findsWidgets);
+    router.go(
+      AppRoutes.cleanerBookingDisputeLocation('507f1f77bcf86cd799439091'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Dispute'), findsWidgets);
   });
 
   testWidgets('admin can open review moderation', (tester) async {
@@ -262,6 +272,18 @@ void main() {
     router.go(AppRoutes.adminReviewDetailLocation('507f1f77bcf86cd7994390e1'));
     await tester.pumpAndSettle();
     expect(find.text('Review moderation'), findsOneWidget);
+    router.go(AppRoutes.adminDisputesPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Disputes'), findsWidgets);
+    router.go(AppRoutes.adminUsersPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Users'), findsWidgets);
+    router.go(AppRoutes.adminBookingsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Bookings'), findsWidgets);
+    router.go(AppRoutes.adminAuditLogsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Audit Log'), findsWidgets);
   });
 
   testWidgets('customer is redirected from cleaner chat and admin reviews', (
@@ -274,6 +296,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Manage Profile'), findsOneWidget);
     router.go(AppRoutes.adminReviewsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Manage Profile'), findsOneWidget);
+    router.go(AppRoutes.adminDisputesPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Manage Profile'), findsOneWidget);
+    router.go(
+      AppRoutes.cleanerBookingDisputeLocation('507f1f77bcf86cd799439091'),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Manage Profile'), findsOneWidget);
   });
@@ -292,6 +322,14 @@ void main() {
     router.go(AppRoutes.adminReviewsPath);
     await tester.pumpAndSettle();
     expect(find.text('Cleaner home'), findsOneWidget);
+    router.go(AppRoutes.adminUsersPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Cleaner home'), findsOneWidget);
+    router.go(
+      AppRoutes.customerBookingDisputeLocation('507f1f77bcf86cd799439091'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Cleaner home'), findsOneWidget);
   });
 
   testWidgets('admin is redirected from customer chat and cleaner reviews', (
@@ -306,6 +344,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Admin Dashboard'), findsOneWidget);
     router.go(AppRoutes.cleanerReviewsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Admin Dashboard'), findsOneWidget);
+    router.go(
+      AppRoutes.customerBookingDisputeLocation('507f1f77bcf86cd799439091'),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Admin Dashboard'), findsOneWidget);
   });

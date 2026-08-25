@@ -10,6 +10,7 @@ import 'package:home_cleaning_marketplace/features/catalog/data/marketplace_serv
 import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_controller.dart';
 import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_section.dart';
 import 'package:home_cleaning_marketplace/features/reviews/presentation/customer_review_controller.dart';
+import 'package:home_cleaning_marketplace/features/disputes/presentation/booking_dispute_controller.dart';
 
 class CustomerBookingDetailScreen extends ConsumerStatefulWidget {
   const CustomerBookingDetailScreen({super.key, required this.bookingId});
@@ -38,6 +39,9 @@ class _CustomerBookingDetailScreenState
           .load(widget.bookingId);
       ref
           .read(customerReviewControllerProvider.notifier)
+          .load(widget.bookingId);
+      ref
+          .read(bookingDisputeControllerProvider.notifier)
           .load(widget.bookingId);
     });
   }
@@ -105,6 +109,20 @@ class _CustomerBookingDetailScreenState
                                   null
                               ? 'Leave Review'
                               : 'Edit Review',
+                        ),
+                      ),
+                    ],
+                    if (booking.status.canOpenDispute) ...[
+                      const SizedBox(height: 8),
+                      OutlinedButton(
+                        onPressed: () => context.push(
+                          AppRoutes.customerBookingDisputeLocation(booking.id),
+                        ),
+                        child: Text(
+                          ref.watch(bookingDisputeControllerProvider).dispute ==
+                                  null
+                              ? 'Report a Problem'
+                              : 'View Dispute',
                         ),
                       ),
                     ],

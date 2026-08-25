@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dart_frog/dart_frog.dart';
 import 'package:home_cleaning_marketplace_api/src/features/addresses/domain/address_exceptions.dart';
+import 'package:home_cleaning_marketplace_api/src/features/audit/domain/audit_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/application/auth_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/http/auth_http_errors.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/tokens/access_token_exceptions.dart';
@@ -13,10 +14,12 @@ import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/doma
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/domain/cleaner_service_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/domain/customer_profile_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/domain/profile_validation_exception.dart';
+import 'package:home_cleaning_marketplace_api/src/features/disputes/domain/dispute_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/notifications/domain/notification_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/domain/payment_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/reviews/domain/review_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/domain/service_exceptions.dart';
+import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_account_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/http/json_response.dart';
 
 /// Maps role-scoped application failures to the JSON error envelope.
@@ -338,6 +341,105 @@ Response mapRoleScopedException(Exception error) {
       code: 'invalid_review_state',
       message: 'This review action is not allowed in the current state.',
       statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is DisputeNotFoundException) {
+    return jsonError(
+      code: 'dispute_not_found',
+      message: 'Dispute was not found.',
+      statusCode: HttpStatus.notFound,
+    );
+  }
+  if (error is DisputeAlreadyExistsException) {
+    return jsonError(
+      code: 'dispute_already_exists',
+      message: 'A dispute already exists for this booking.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is DisputeNotAllowedException) {
+    return jsonError(
+      code: 'dispute_not_allowed',
+      message: 'This booking cannot be disputed.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is InvalidDisputeStateException) {
+    return jsonError(
+      code: 'invalid_dispute_state',
+      message: 'This dispute action is not allowed in the current state.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is InvalidDisputeSubjectException) {
+    return jsonError(code: 'invalid_dispute_subject', message: error.message);
+  }
+  if (error is InvalidDisputeDescriptionException) {
+    return jsonError(
+      code: 'invalid_dispute_description',
+      message: error.message,
+    );
+  }
+  if (error is InvalidDisputeResolutionException) {
+    return jsonError(
+      code: 'invalid_dispute_resolution',
+      message: error.message,
+    );
+  }
+  if (error is InvalidDisputeCategoryException) {
+    return jsonError(
+      code: 'invalid_input',
+      message: 'Dispute category is invalid.',
+    );
+  }
+  if (error is UserNotFoundException) {
+    return jsonError(
+      code: 'user_not_found',
+      message: 'User was not found.',
+      statusCode: HttpStatus.notFound,
+    );
+  }
+  if (error is ProtectedAdminAccountException) {
+    return jsonError(
+      code: 'protected_admin_account',
+      message: 'Administrator accounts cannot be changed by this operation.',
+      statusCode: HttpStatus.forbidden,
+    );
+  }
+  if (error is InvalidAccountStateException) {
+    return jsonError(
+      code: 'invalid_account_state',
+      message: 'This account action is not allowed in the current state.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is InvalidModerationReasonException) {
+    return jsonError(code: 'invalid_moderation_reason', message: error.message);
+  }
+  if (error is InvalidAdminUserQueryException) {
+    return jsonError(
+      code: 'invalid_input',
+      message: 'User list filters are invalid.',
+    );
+  }
+  if (error is AdminBookingNotCancellableException) {
+    return jsonError(
+      code: 'admin_booking_not_cancellable',
+      message: 'This booking cannot be cancelled by an administrator.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is AuditLogNotFoundException) {
+    return jsonError(
+      code: 'audit_log_not_found',
+      message: 'Audit log was not found.',
+      statusCode: HttpStatus.notFound,
+    );
+  }
+  if (error is InvalidAuditQueryException) {
+    return jsonError(
+      code: 'invalid_input',
+      message: 'Audit log filters are invalid.',
     );
   }
   if (error is InvalidAccessTokenException ||

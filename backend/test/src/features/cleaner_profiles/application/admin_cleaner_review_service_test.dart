@@ -29,8 +29,10 @@ class _MemoryUsers implements UserDocumentStore {
 
   @override
   Future<List<Map<String, dynamic>>> findMany(
-    Map<String, dynamic> selector,
-  ) async {
+    Map<String, dynamic> selector, {
+    Map<String, int>? sort,
+    int? limit,
+  }) async {
     final ids = (selector['_id'] as Map)[r'$in'] as List;
     return [
       for (final document in documents)

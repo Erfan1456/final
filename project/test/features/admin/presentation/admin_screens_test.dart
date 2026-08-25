@@ -41,6 +41,10 @@ void main() {
     expect(find.text('Cleaner Approvals'), findsOneWidget);
     expect(find.text('Payments'), findsOneWidget);
     expect(find.text('Review Moderation'), findsOneWidget);
+    expect(find.text('Disputes'), findsOneWidget);
+    expect(find.text('Users'), findsOneWidget);
+    expect(find.text('Bookings'), findsOneWidget);
+    expect(find.text('Audit Log'), findsOneWidget);
     expect(find.text('Notifications'), findsOneWidget);
   });
 

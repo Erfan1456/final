@@ -195,6 +195,17 @@ String? notificationTargetLocation(
         return AppRoutes.cleanerReviewsPath;
       }
       return null;
+    case 'dispute':
+      if (resourceId == null || resourceId.isEmpty) {
+        return null;
+      }
+      if (role == 'customer') {
+        return AppRoutes.customerBookingDisputeLocation(resourceId);
+      }
+      if (role == 'cleaner') {
+        return AppRoutes.cleanerBookingDisputeLocation(resourceId);
+      }
+      return null;
     default:
       return null;
   }

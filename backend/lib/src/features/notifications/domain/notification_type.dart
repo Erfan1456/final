@@ -11,7 +11,11 @@ enum NotificationType {
   paymentFailed,
   paymentRefunded,
   messageReceived,
-  reviewReceived;
+  reviewReceived,
+  disputeOpened,
+  disputeUnderReview,
+  disputeResolved,
+  disputeClosed;
 
   /// Stable database/wire representation.
   String get wireValue {
@@ -38,6 +42,14 @@ enum NotificationType {
         return 'message_received';
       case NotificationType.reviewReceived:
         return 'review_received';
+      case NotificationType.disputeOpened:
+        return 'dispute_opened';
+      case NotificationType.disputeUnderReview:
+        return 'dispute_under_review';
+      case NotificationType.disputeResolved:
+        return 'dispute_resolved';
+      case NotificationType.disputeClosed:
+        return 'dispute_closed';
     }
   }
 
@@ -66,6 +78,14 @@ enum NotificationType {
         return NotificationType.messageReceived;
       case 'review_received':
         return NotificationType.reviewReceived;
+      case 'dispute_opened':
+        return NotificationType.disputeOpened;
+      case 'dispute_under_review':
+        return NotificationType.disputeUnderReview;
+      case 'dispute_resolved':
+        return NotificationType.disputeResolved;
+      case 'dispute_closed':
+        return NotificationType.disputeClosed;
       default:
         throw const FormatException('Unknown NotificationType.');
     }

@@ -33,6 +33,7 @@ Current documents:
 * [booking-reservation-and-lifecycle.md](architecture/booking-reservation-and-lifecycle.md)
 * [payment-processing-and-webhooks.md](architecture/payment-processing-and-webhooks.md)
 * [chat-notifications-and-reviews.md](architecture/chat-notifications-and-reviews.md)
+* [disputes-admin-operations-and-audit.md](architecture/disputes-admin-operations-and-audit.md)
 
 ### `setup/`
 
@@ -66,6 +67,8 @@ Current documents:
 * [messages-collection.md](database/messages-collection.md)
 * [notifications-collection.md](database/notifications-collection.md)
 * [reviews-collection.md](database/reviews-collection.md)
+* [disputes-collection.md](database/disputes-collection.md)
+* [audit-logs-collection.md](database/audit-logs-collection.md)
 
 ### `api/`
 
@@ -81,6 +84,8 @@ Current documents:
 * [chat-api.md](api/chat-api.md)
 * [notification-api.md](api/notification-api.md)
 * [review-api.md](api/review-api.md)
+* [dispute-api.md](api/dispute-api.md)
+* [admin-operations-api.md](api/admin-operations-api.md)
 
 ### `features/`
 
@@ -106,6 +111,7 @@ Current documents:
 * [ADR-013-booking-reservation-idempotency-and-lifecycle.md](decisions/ADR-013-booking-reservation-idempotency-and-lifecycle.md)
 * [ADR-014-payment-provider-webhooks-and-refunds.md](decisions/ADR-014-payment-provider-webhooks-and-refunds.md)
 * [ADR-015-chat-notifications-and-verified-reviews.md](decisions/ADR-015-chat-notifications-and-verified-reviews.md)
+* [ADR-016-disputes-admin-operations-and-audit.md](decisions/ADR-016-disputes-admin-operations-and-audit.md)
 
 ### `workflows/`
 

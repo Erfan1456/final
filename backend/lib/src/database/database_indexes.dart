@@ -1,4 +1,5 @@
 import 'package:home_cleaning_marketplace_api/src/features/addresses/data/address_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/audit/data/audit_log_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/session_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/data/availability_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/data/booking_indexes.dart';
@@ -8,6 +9,7 @@ import 'package:home_cleaning_marketplace_api/src/features/chat/data/message_ind
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/disputes/data/dispute_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/notifications/data/notification_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_refund_request_indexes.dart';
@@ -37,4 +39,6 @@ Future<void> ensureApprovedDatabaseIndexes(Db db) async {
   await ensureMessageIndexesOnDb(db);
   await ensureNotificationIndexesOnDb(db);
   await ensureReviewIndexesOnDb(db);
+  await ensureDisputeIndexesOnDb(db);
+  await ensureAuditLogIndexesOnDb(db);
 }

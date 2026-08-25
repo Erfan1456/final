@@ -75,3 +75,5 @@ Do not mark the booking cancelled first and hope refund succeeds later.
 Sandbox UI appears only when the API sets `simulation_available == true`. It is labeled **Development Sandbox**. There is no card-number or CVV form. The app does not claim real card, Stripe, or production processing.
 
 TASK 017 notifies the customer after a successful paid, failed, or refunded webhook transition. Invalid signatures, integrity mismatches, ignored unknown payments, and stale no-op events do not notify.
+
+TASK 018 admin cancellation of a confirmed booking reuses this payment-aware orchestration. Refund failure leaves the booking confirmed. A successful refund request also appends a best-effort `payment_refund_requested` audit row without changing financial correctness.

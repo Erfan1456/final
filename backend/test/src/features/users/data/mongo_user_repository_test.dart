@@ -26,8 +26,10 @@ class _MemoryUserDocuments implements UserDocumentStore {
 
   @override
   Future<List<Map<String, dynamic>>> findMany(
-    Map<String, dynamic> selector,
-  ) async {
+    Map<String, dynamic> selector, {
+    Map<String, int>? sort,
+    int? limit,
+  }) async {
     return [
       for (final document in documents)
         if (_matches(document, selector)) Map<String, dynamic>.from(document),
@@ -79,6 +81,17 @@ class _MemoryUserDocuments implements UserDocumentStore {
   bool _matches(Map<String, dynamic> document, Map<String, dynamic> selector) {
     for (final entry in selector.entries) {
       final expected = entry.value;
+      if (expected is Map && expected.containsKey(r'$lt')) {
+        final actual = document[entry.key];
+        final bound = expected[r'$lt'];
+        if (actual is ObjectId && bound is ObjectId) {
+          if (actual.oid.compareTo(bound.oid) >= 0) {
+            return false;
+          }
+          continue;
+        }
+        return false;
+      }
       if (expected is Map && expected.containsKey(r'$in')) {
         final options = expected[r'$in'];
         if (options is! List || !options.contains(document[entry.key])) {

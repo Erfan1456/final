@@ -153,4 +153,115 @@ class MemoryUserRepository implements UserRepository {
   }) {
     throw UnimplementedError();
   }
+
+  @override
+  Future<UserAccountPage> adminPage({
+    required int limit,
+    UserRole? role,
+    AccountStatus? status,
+    String? emailNormalized,
+    ObjectId? after,
+  }) async {
+    var matches = users.toList();
+    if (role != null) {
+      matches = [
+        for (final user in matches)
+          if (user.role == role) user,
+      ];
+    }
+    if (status != null) {
+      matches = [
+        for (final user in matches)
+          if (user.accountStatus == status) user,
+      ];
+    }
+    if (emailNormalized != null) {
+      matches = [
+        for (final user in matches)
+          if (user.emailNormalized == emailNormalized) user,
+      ];
+    }
+    matches.sort((a, b) => b.id.oid.compareTo(a.id.oid));
+    if (after != null) {
+      matches = [
+        for (final user in matches)
+          if (user.id.oid.compareTo(after.oid) < 0) user,
+      ];
+    }
+    final hasMore = matches.length > limit;
+    final page = hasMore ? matches.sublist(0, limit) : matches;
+    return UserAccountPage(
+      items: page,
+      nextCursor: hasMore ? page.last.id.oid : null,
+    );
+  }
+
+  @override
+  Future<UserAccount?> setActiveToSuspended({
+    required ObjectId userId,
+    required DateTime now,
+  }) {
+    return _setStatus(
+      userId: userId,
+      now: now,
+      allowedFrom: {AccountStatus.active},
+      to: AccountStatus.suspended,
+    );
+  }
+
+  @override
+  Future<UserAccount?> setSuspendedToActive({
+    required ObjectId userId,
+    required DateTime now,
+  }) {
+    return _setStatus(
+      userId: userId,
+      now: now,
+      allowedFrom: {AccountStatus.suspended},
+      to: AccountStatus.active,
+    );
+  }
+
+  @override
+  Future<UserAccount?> setActiveOrSuspendedToDeactivated({
+    required ObjectId userId,
+    required DateTime now,
+  }) {
+    return _setStatus(
+      userId: userId,
+      now: now,
+      allowedFrom: {AccountStatus.active, AccountStatus.suspended},
+      to: AccountStatus.deactivated,
+    );
+  }
+
+  Future<UserAccount?> _setStatus({
+    required ObjectId userId,
+    required DateTime now,
+    required Set<AccountStatus> allowedFrom,
+    required AccountStatus to,
+  }) async {
+    final index = users.indexWhere((user) => user.id == userId);
+    if (index < 0) {
+      return null;
+    }
+    final current = users[index];
+    if (current.role == UserRole.admin ||
+        !allowedFrom.contains(current.accountStatus)) {
+      return null;
+    }
+    final updated = UserAccount(
+      id: current.id,
+      role: current.role,
+      email: current.email,
+      emailNormalized: current.emailNormalized,
+      passwordHash: current.passwordHash,
+      accountStatus: to,
+      emailVerified: current.emailVerified,
+      createdAt: current.createdAt,
+      updatedAt: now.toUtc(),
+    );
+    users[index] = updated;
+    return updated;
+  }
 }

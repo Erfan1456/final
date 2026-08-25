@@ -33,3 +33,4 @@ No architecture has been chosen in TASK 001. Concrete architecture documents sho
 * [booking-reservation-and-lifecycle.md](booking-reservation-and-lifecycle.md) — complete-slot reservation, idempotency, conditional lifecycle, and privacy DTOs.
 * [payment-processing-and-webhooks.md](payment-processing-and-webhooks.md) — sandbox payment ledger, HMAC webhooks, refunds, and payment-aware cancellation.
 * [chat-notifications-and-reviews.md](chat-notifications-and-reviews.md) — booking-scoped REST chat, in-app notifications, verified reviews, and admin moderation.
+* [disputes-admin-operations-and-audit.md](disputes-admin-operations-and-audit.md) — booking disputes, admin user/booking operations, and append-only audit.

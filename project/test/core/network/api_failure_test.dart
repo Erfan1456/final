@@ -58,6 +58,19 @@ void main() {
       equals('Review was not found.'),
     );
     expect(messageForApiCode('invalid_review_rating'), contains('1 to 5'));
+    expect(messageForApiCode('dispute_not_found'), 'Dispute was not found.');
+    expect(
+      messageForApiCode('protected_admin_account'),
+      contains('Administrator'),
+    );
+    expect(
+      messageForApiCode('audit_log_not_found'),
+      'Audit log was not found.',
+    );
+    expect(
+      messageForApiCode('admin_booking_not_cancellable'),
+      contains('cannot be cancelled'),
+    );
     expect(
       messageForApiCode('some_unknown_code'),
       equals('Something went wrong. Please try again.'),

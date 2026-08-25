@@ -29,6 +29,15 @@ import 'package:home_cleaning_marketplace/features/reviews/data/review_models.da
 import 'package:home_cleaning_marketplace/features/reviews/presentation/admin_review_controller.dart';
 import 'package:home_cleaning_marketplace/features/reviews/presentation/cleaner_reviews_controller.dart';
 import 'package:home_cleaning_marketplace/features/reviews/presentation/customer_review_controller.dart';
+import 'package:home_cleaning_marketplace/features/admin/data/admin_booking_models.dart';
+import 'package:home_cleaning_marketplace/features/admin/data/admin_user_models.dart';
+import 'package:home_cleaning_marketplace/features/admin/data/audit_models.dart';
+import 'package:home_cleaning_marketplace/features/admin/presentation/admin_audit_log_controller.dart';
+import 'package:home_cleaning_marketplace/features/admin/presentation/admin_booking_operations_controller.dart';
+import 'package:home_cleaning_marketplace/features/admin/presentation/admin_user_management_controller.dart';
+import 'package:home_cleaning_marketplace/features/disputes/data/dispute_models.dart';
+import 'package:home_cleaning_marketplace/features/disputes/presentation/admin_dispute_controller.dart';
+import 'package:home_cleaning_marketplace/features/disputes/presentation/booking_dispute_controller.dart';
 
 class SeededCustomerProfileController extends CustomerProfileController {
   SeededCustomerProfileController(this._seed);
@@ -803,6 +812,261 @@ class SeededAdminReviewController extends AdminReviewController {
   }
 }
 
+class SeededBookingDisputeController extends BookingDisputeController {
+  SeededBookingDisputeController(this._seed);
+
+  final BookingDisputeState _seed;
+  int loadCalls = 0;
+  int createCalls = 0;
+  int closeCalls = 0;
+  String? lastSubject;
+  String? lastDescription;
+  String? lastCategory;
+
+  @override
+  BookingDisputeState build() => _seed;
+
+  @override
+  Future<void> load(String bookingId) async {
+    loadCalls += 1;
+  }
+
+  @override
+  Future<bool> create({
+    required String bookingId,
+    required String category,
+    required String subject,
+    required String description,
+  }) async {
+    createCalls += 1;
+    lastCategory = category;
+    lastSubject = subject;
+    lastDescription = description;
+    return true;
+  }
+
+  @override
+  Future<bool> close(String bookingId) async {
+    closeCalls += 1;
+    return true;
+  }
+}
+
+class SeededAdminDisputeController extends AdminDisputeController {
+  SeededAdminDisputeController(this._seed);
+
+  final AdminDisputeState _seed;
+  int loadCalls = 0;
+  int loadMoreCalls = 0;
+  int loadDetailCalls = 0;
+  int startReviewCalls = 0;
+  int resolveCalls = 0;
+  int closeCalls = 0;
+  String? lastResolution;
+  AdminDisputeFilters? lastFilters;
+
+  @override
+  AdminDisputeState build() => _seed;
+
+  @override
+  Future<void> load({AdminDisputeFilters? filters}) async {
+    loadCalls += 1;
+    lastFilters = filters ?? state.filters;
+    if (filters != null) {
+      state = state.copyWith(filters: filters, loading: false);
+    }
+  }
+
+  @override
+  Future<void> applyFilters(AdminDisputeFilters filters) {
+    return load(filters: filters);
+  }
+
+  @override
+  Future<void> loadMore() async {
+    loadMoreCalls += 1;
+  }
+
+  @override
+  Future<void> loadDetail(String disputeId) async {
+    loadDetailCalls += 1;
+  }
+
+  @override
+  Future<bool> startReview(String disputeId) async {
+    startReviewCalls += 1;
+    return true;
+  }
+
+  @override
+  Future<bool> resolve({
+    required String disputeId,
+    required String resolution,
+  }) async {
+    resolveCalls += 1;
+    lastResolution = resolution;
+    return true;
+  }
+
+  @override
+  Future<bool> close(String disputeId) async {
+    closeCalls += 1;
+    return true;
+  }
+}
+
+class SeededAdminUserManagementController
+    extends AdminUserManagementController {
+  SeededAdminUserManagementController(this._seed);
+
+  final AdminUserManagementState _seed;
+  int loadCalls = 0;
+  int loadMoreCalls = 0;
+  int loadDetailCalls = 0;
+  int suspendCalls = 0;
+  int reactivateCalls = 0;
+  int deactivateCalls = 0;
+  String? lastReason;
+  AdminUserFilters? lastFilters;
+
+  @override
+  AdminUserManagementState build() => _seed;
+
+  @override
+  Future<void> load({AdminUserFilters? filters}) async {
+    loadCalls += 1;
+    lastFilters = filters ?? state.filters;
+    if (filters != null) {
+      state = state.copyWith(filters: filters, loading: false);
+    }
+  }
+
+  @override
+  Future<void> applyFilters(AdminUserFilters filters) {
+    return load(filters: filters);
+  }
+
+  @override
+  Future<void> loadMore() async {
+    loadMoreCalls += 1;
+  }
+
+  @override
+  Future<void> loadDetail(String userId) async {
+    loadDetailCalls += 1;
+  }
+
+  @override
+  Future<bool> suspend({required String userId, required String reason}) async {
+    suspendCalls += 1;
+    lastReason = reason;
+    return true;
+  }
+
+  @override
+  Future<bool> reactivate(String userId) async {
+    reactivateCalls += 1;
+    return true;
+  }
+
+  @override
+  Future<bool> deactivate({
+    required String userId,
+    required String reason,
+  }) async {
+    deactivateCalls += 1;
+    lastReason = reason;
+    return true;
+  }
+}
+
+class SeededAdminBookingOperationsController
+    extends AdminBookingOperationsController {
+  SeededAdminBookingOperationsController(this._seed);
+
+  final AdminBookingOperationsState _seed;
+  int loadCalls = 0;
+  int loadMoreCalls = 0;
+  int loadDetailCalls = 0;
+  int cancelCalls = 0;
+  String? lastReason;
+  AdminBookingFilters? lastFilters;
+
+  @override
+  AdminBookingOperationsState build() => _seed;
+
+  @override
+  Future<void> load({AdminBookingFilters? filters}) async {
+    loadCalls += 1;
+    lastFilters = filters ?? state.filters;
+    if (filters != null) {
+      state = state.copyWith(filters: filters, loading: false);
+    }
+  }
+
+  @override
+  Future<void> applyFilters(AdminBookingFilters filters) {
+    return load(filters: filters);
+  }
+
+  @override
+  Future<void> loadMore() async {
+    loadMoreCalls += 1;
+  }
+
+  @override
+  Future<void> loadDetail(String bookingId) async {
+    loadDetailCalls += 1;
+  }
+
+  @override
+  Future<bool> cancel({
+    required String bookingId,
+    required String reason,
+  }) async {
+    cancelCalls += 1;
+    lastReason = reason;
+    return true;
+  }
+}
+
+class SeededAdminAuditLogController extends AdminAuditLogController {
+  SeededAdminAuditLogController(this._seed);
+
+  final AdminAuditLogState _seed;
+  int loadCalls = 0;
+  int loadMoreCalls = 0;
+  int loadDetailCalls = 0;
+  AdminAuditFilters? lastFilters;
+
+  @override
+  AdminAuditLogState build() => _seed;
+
+  @override
+  Future<void> load({AdminAuditFilters? filters}) async {
+    loadCalls += 1;
+    lastFilters = filters ?? state.filters;
+    if (filters != null) {
+      state = state.copyWith(filters: filters, loading: false);
+    }
+  }
+
+  @override
+  Future<void> applyFilters(AdminAuditFilters filters) {
+    return load(filters: filters);
+  }
+
+  @override
+  Future<void> loadMore() async {
+    loadMoreCalls += 1;
+  }
+
+  @override
+  Future<void> loadDetail(String auditLogId) async {
+    loadDetailCalls += 1;
+  }
+}
+
 CustomerProfile testCustomerProfile() {
   final created = DateTime.utc(2026, 8, 25, 12);
   return CustomerProfile(
@@ -939,6 +1203,30 @@ List<dynamic> featureControllerOverrides() {
     ),
     adminReviewControllerProvider.overrideWith(
       () => SeededAdminReviewController(const AdminReviewState(loading: false)),
+    ),
+    bookingDisputeControllerProvider.overrideWith(
+      () => SeededBookingDisputeController(
+        const BookingDisputeState(loading: false),
+      ),
+    ),
+    adminDisputeControllerProvider.overrideWith(
+      () =>
+          SeededAdminDisputeController(const AdminDisputeState(loading: false)),
+    ),
+    adminUserManagementControllerProvider.overrideWith(
+      () => SeededAdminUserManagementController(
+        const AdminUserManagementState(loading: false),
+      ),
+    ),
+    adminBookingOperationsControllerProvider.overrideWith(
+      () => SeededAdminBookingOperationsController(
+        const AdminBookingOperationsState(loading: false),
+      ),
+    ),
+    adminAuditLogControllerProvider.overrideWith(
+      () => SeededAdminAuditLogController(
+        const AdminAuditLogState(loading: false),
+      ),
     ),
   ];
 }
@@ -1618,4 +1906,227 @@ AdminReviewDetail testAdminReviewDetail({
       hiddenAt: hiddenReason == null ? null : '2026-08-25T13:00:00.000Z',
     ),
   );
+}
+
+Map<String, dynamic> bookingDisputeJson({
+  String status = 'open',
+  String? resolution,
+  String cleanerPublicName = 'Ada Cleaner',
+}) {
+  return <String, dynamic>{
+    'id': '507f1f77bcf86cd7994390d1',
+    'booking_id': '507f1f77bcf86cd799439091',
+    'category': 'service_quality',
+    'status': status,
+    'subject': 'Late arrival issue',
+    'description': 'The cleaner arrived more than two hours late to the job.',
+    'resolution': resolution,
+    'history': <Map<String, dynamic>>[
+      <String, dynamic>{
+        'from_status': null,
+        'to_status': 'open',
+        'actor_user_id': '507f1f77bcf86cd799439011',
+        'actor_role': 'customer',
+        'note': null,
+        'created_at': '2026-08-25T12:00:00.000Z',
+      },
+    ],
+    'created_at': '2026-08-25T12:00:00.000Z',
+    'updated_at': '2026-08-25T12:00:00.000Z',
+    'resolved_at': resolution == null ? null : '2026-08-25T13:00:00.000Z',
+    'cleaner_public_name': cleanerPublicName,
+  };
+}
+
+BookingDispute testBookingDispute({
+  String status = 'open',
+  String? resolution,
+}) {
+  return BookingDispute.fromJson(
+    bookingDisputeJson(status: status, resolution: resolution),
+  );
+}
+
+Map<String, dynamic> adminDisputeJson({String status = 'open'}) {
+  return <String, dynamic>{
+    ...bookingDisputeJson(status: status),
+    'customer_user_id': '507f1f77bcf86cd799439011',
+    'cleaner_user_id': '507f1f77bcf86cd799439081',
+    'opened_by_user_id': '507f1f77bcf86cd799439011',
+    'opened_by_role': 'customer',
+    'customer_display_name': 'Pat Customer',
+    'cleaner_public_name': 'Ada Cleaner',
+  };
+}
+
+AdminDisputeSummary testAdminDisputeSummary({String status = 'open'}) {
+  return AdminDisputeSummary.fromJson(adminDisputeJson(status: status));
+}
+
+AdminDisputeDetail testAdminDisputeDetail({String status = 'open'}) {
+  return AdminDisputeDetail.fromJson(<String, dynamic>{
+    'dispute': adminDisputeJson(status: status),
+    'booking': <String, dynamic>{
+      'id': '507f1f77bcf86cd799439091',
+      'status': 'confirmed',
+      'service_name': 'Home Cleaning',
+      'start_at': '2026-09-01T03:00:00.000Z',
+      'end_at': '2026-09-01T05:00:00.000Z',
+      'quoted_total_minor': 8000,
+      'currency_code': 'USD',
+    },
+  });
+}
+
+Map<String, dynamic> adminUserJson({
+  String id = '507f1f77bcf86cd799439011',
+  String role = 'customer',
+  String email = 'pat.customer@example.com',
+  String accountStatus = 'active',
+  String? fullName = 'Pat Customer',
+}) {
+  return <String, dynamic>{
+    'id': id,
+    'role': role,
+    'email': email,
+    'account_status': accountStatus,
+    'email_verified': false,
+    'created_at': '2026-08-25T12:00:00.000Z',
+    'updated_at': '2026-08-25T12:00:00.000Z',
+    'full_name': fullName,
+  };
+}
+
+AdminUserSummary testAdminUserSummary({
+  String role = 'customer',
+  String accountStatus = 'active',
+}) {
+  return AdminUserSummary.fromJson(
+    adminUserJson(role: role, accountStatus: accountStatus),
+  );
+}
+
+AdminUserDetail testAdminUserDetail({
+  String role = 'customer',
+  String accountStatus = 'active',
+  bool protectedAdmin = false,
+}) {
+  return AdminUserDetail.fromJson(<String, dynamic>{
+    'user': adminUserJson(
+      role: protectedAdmin ? 'admin' : role,
+      accountStatus: accountStatus,
+      email: protectedAdmin ? 'admin@example.com' : 'pat.customer@example.com',
+      fullName: protectedAdmin ? null : 'Pat Customer',
+    ),
+    'profile': protectedAdmin ? null : customerProfileJson(),
+    'protected_admin_account': protectedAdmin,
+    'booking_count': 1,
+    'payment_count': 0,
+    'active_dispute_count': 0,
+  });
+}
+
+Map<String, dynamic> adminBookingSummaryJson({
+  String status = 'confirmed',
+  String? paymentStatus,
+  String? disputeStatus,
+}) {
+  return <String, dynamic>{
+    'id': '507f1f77bcf86cd799439091',
+    'status': status,
+    'customer_user_id': '507f1f77bcf86cd799439011',
+    'cleaner_user_id': '507f1f77bcf86cd799439081',
+    'customer_display_name': 'Pat Customer',
+    'cleaner_public_name': 'Ada Cleaner',
+    'service_name': 'Home Cleaning',
+    'start_at': '2026-09-01T03:00:00.000Z',
+    'end_at': '2026-09-01T05:00:00.000Z',
+    'quoted_total_minor': 8000,
+    'currency_code': 'USD',
+    'payment': paymentStatus == null
+        ? null
+        : <String, dynamic>{
+            'id': '507f1f77bcf86cd7994390a1',
+            'status': paymentStatus,
+            'amount_minor': 8000,
+            'currency_code': 'USD',
+            'refunded_amount_minor': 0,
+          },
+    'dispute': disputeStatus == null
+        ? null
+        : <String, dynamic>{
+            'id': '507f1f77bcf86cd7994390d1',
+            'status': disputeStatus,
+            'category': 'service_quality',
+          },
+  };
+}
+
+AdminBookingSummary testAdminBookingSummary({
+  String status = 'confirmed',
+  String? paymentStatus,
+  String? disputeStatus,
+}) {
+  return AdminBookingSummary.fromJson(
+    adminBookingSummaryJson(
+      status: status,
+      paymentStatus: paymentStatus,
+      disputeStatus: disputeStatus,
+    ),
+  );
+}
+
+AdminBookingDetail testAdminBookingDetail({
+  String status = 'confirmed',
+  String? paymentStatus,
+}) {
+  final bookingJson =
+      Map<String, dynamic>.from(customerBookingJson(status: status))
+        ..addAll(<String, dynamic>{
+          'customer_user_id': '507f1f77bcf86cd799439011',
+          'cleaner_user_id': '507f1f77bcf86cd799439081',
+          'customer_display_name': 'Pat Customer',
+          'cleaner_public_name': 'Ada Cleaner',
+          'service_id': '507f1f77bcf86cd799439041',
+        });
+  bookingJson.remove('cleaner_full_name');
+  return AdminBookingDetail.fromJson(<String, dynamic>{
+    'booking': bookingJson,
+    'payments': paymentStatus == null
+        ? <Map<String, dynamic>>[]
+        : <Map<String, dynamic>>[
+            <String, dynamic>{
+              'id': '507f1f77bcf86cd7994390a1',
+              'status': paymentStatus,
+              'amount_minor': 8000,
+              'currency_code': 'USD',
+              'refunded_amount_minor': 0,
+            },
+          ],
+    'dispute': null,
+  });
+}
+
+Map<String, dynamic> adminAuditJson({
+  String action = 'user_suspended',
+  String targetType = 'user',
+}) {
+  return <String, dynamic>{
+    'id': '507f1f77bcf86cd7994390f1',
+    'actor_user_id': '507f1f77bcf86cd799439099',
+    'actor_role': 'admin',
+    'action': action,
+    'target_type': targetType,
+    'target_id': '507f1f77bcf86cd799439011',
+    'reason': 'Repeated no-show complaints',
+    'metadata': <String, Object?>{
+      'previous_status': 'active',
+      'new_status': 'suspended',
+    },
+    'created_at': '2026-08-25T12:00:00.000Z',
+  };
+}
+
+AdminAuditLogSummary testAdminAuditLog({String action = 'user_suspended'}) {
+  return AdminAuditLogSummary.fromJson(adminAuditJson(action: action));
 }

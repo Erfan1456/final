@@ -36,6 +36,26 @@ class AdminHomeScreen extends ConsumerWidget {
               child: const Text('Review Moderation'),
             ),
             const SizedBox(height: 12),
+            FilledButton(
+              onPressed: () => context.push(AppRoutes.adminDisputesPath),
+              child: const Text('Disputes'),
+            ),
+            const SizedBox(height: 12),
+            FilledButton(
+              onPressed: () => context.push(AppRoutes.adminUsersPath),
+              child: const Text('Users'),
+            ),
+            const SizedBox(height: 12),
+            FilledButton(
+              onPressed: () => context.push(AppRoutes.adminBookingsPath),
+              child: const Text('Bookings'),
+            ),
+            const SizedBox(height: 12),
+            FilledButton(
+              onPressed: () => context.push(AppRoutes.adminAuditLogsPath),
+              child: const Text('Audit Log'),
+            ),
+            const SizedBox(height: 12),
             const NotificationHomeLink(),
             const SizedBox(height: 24),
             const LogoutActions(),

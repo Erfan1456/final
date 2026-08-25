@@ -21,7 +21,7 @@ MongoDB Atlas is the persistence provider. `mongo_dart` is the backend driver. U
 * admin cleaner list, detail, approve, and reject
 * public service catalog, cleaner offerings, availability, and customer discovery
 
-TASK 015–017 may ensure approved booking, payment, conversation, notification, and review indexes through the controlled index tool. It does not create live bookings, conversations, messages, notifications, reviews, users, or availability fixtures.
+TASK 015–018 may ensure approved booking, payment, conversation, notification, review, dispute, audit, and user-listing indexes through the controlled index tool. It does not create live bookings, conversations, messages, notifications, reviews, disputes, audit rows, users, or availability fixtures.
 
 Do not place a real MongoDB URI, passwords, or other secrets in this package. Flutter never receives the MongoDB connection URI.
 
@@ -61,8 +61,10 @@ Do not place a real MongoDB URI, passwords, or other secrets in this package. Fl
 * `GET`/`PUT /api/v1/customer/bookings/{bookingId}/review`
 * `GET /api/v1/cleaner/reviews`
 * admin review list/detail/hide/unhide
+* participant booking dispute create/get/close
+* admin disputes, users, bookings, and audit-log list/detail
 
-See [../documentation/api/authentication-api.md](../documentation/api/authentication-api.md), [../documentation/api/profile-address-onboarding-admin-api.md](../documentation/api/profile-address-onboarding-admin-api.md), [../documentation/api/services-availability-discovery-api.md](../documentation/api/services-availability-discovery-api.md), [../documentation/api/booking-api.md](../documentation/api/booking-api.md), [../documentation/api/payment-api.md](../documentation/api/payment-api.md), [../documentation/api/chat-api.md](../documentation/api/chat-api.md), [../documentation/api/notification-api.md](../documentation/api/notification-api.md), [../documentation/api/review-api.md](../documentation/api/review-api.md), and [../documentation/architecture/protected-api-authentication.md](../documentation/architecture/protected-api-authentication.md). These auth endpoints require production rate limiting before unrestricted internet exposure. WebSockets, push notifications, and a production payment processor are still absent.
+See [../documentation/api/authentication-api.md](../documentation/api/authentication-api.md), [../documentation/api/profile-address-onboarding-admin-api.md](../documentation/api/profile-address-onboarding-admin-api.md), [../documentation/api/services-availability-discovery-api.md](../documentation/api/services-availability-discovery-api.md), [../documentation/api/booking-api.md](../documentation/api/booking-api.md), [../documentation/api/payment-api.md](../documentation/api/payment-api.md), [../documentation/api/chat-api.md](../documentation/api/chat-api.md), [../documentation/api/notification-api.md](../documentation/api/notification-api.md), [../documentation/api/review-api.md](../documentation/api/review-api.md), [../documentation/api/dispute-api.md](../documentation/api/dispute-api.md), [../documentation/api/admin-operations-api.md](../documentation/api/admin-operations-api.md), and [../documentation/architecture/protected-api-authentication.md](../documentation/architecture/protected-api-authentication.md). These auth endpoints require production rate limiting before unrestricted internet exposure. WebSockets, push notifications, payouts, password recovery, MFA, AI moderation, and a production payment processor are still absent.
 
 ## Configuration
 

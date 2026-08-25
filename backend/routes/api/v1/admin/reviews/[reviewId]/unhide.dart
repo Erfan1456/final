@@ -13,7 +13,9 @@ Future<Response> onRequest(RequestContext context, String reviewId) {
         return reviewNotFoundResponse();
       }
       final reviews = context.read<AdminReviewModerationService>();
-      return jsonSuccess(await reviews.unhide(reviewId: id));
+      return jsonSuccess(
+        await reviews.unhide(user: scoped.currentUser, reviewId: id),
+      );
     },
   );
 }

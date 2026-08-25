@@ -143,6 +143,35 @@ class BookingCancellationOrchestrator {
     throw const InvalidBookingStateException();
   }
 
+  /// Administrator cancel after payment-aware confirmed-booking preparation.
+  Future<Booking> cancelByAdmin({
+    required UserAccount admin,
+    required ObjectId bookingId,
+    required String reason,
+  }) async {
+    final booking = await _bookings.findById(bookingId);
+    if (booking == null) {
+      throw const BookingNotFoundException();
+    }
+    if (booking.status != BookingStatus.pending &&
+        booking.status != BookingStatus.confirmed) {
+      throw const AdminBookingNotCancellableException();
+    }
+    if (booking.status == BookingStatus.confirmed) {
+      await prepareConfirmedCancellation(booking);
+    }
+    final updated = await _bookings.cancelByAdmin(
+      id: bookingId,
+      adminUserId: admin.id,
+      now: _clock().toUtc(),
+      reason: reason,
+    );
+    if (updated != null) {
+      return updated;
+    }
+    throw const InvalidBookingStateException();
+  }
+
   Future<void> _refundRemaining(Payment payment) async {
     final remaining = payment.remainingRefundableMinor;
     if (remaining < 1) {

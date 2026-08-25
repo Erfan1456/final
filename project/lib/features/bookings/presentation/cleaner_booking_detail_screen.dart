@@ -7,6 +7,7 @@ import 'package:home_cleaning_marketplace/features/bookings/data/booking_models.
 import 'package:home_cleaning_marketplace/features/bookings/presentation/booking_widgets.dart';
 import 'package:home_cleaning_marketplace/features/bookings/presentation/cleaner_booking_controller.dart';
 import 'package:home_cleaning_marketplace/features/catalog/data/marketplace_service.dart';
+import 'package:home_cleaning_marketplace/features/disputes/presentation/booking_dispute_controller.dart';
 
 class CleanerBookingDetailScreen extends ConsumerStatefulWidget {
   const CleanerBookingDetailScreen({super.key, required this.bookingId});
@@ -30,6 +31,9 @@ class _CleanerBookingDetailScreenState
       ref
           .read(cleanerBookingControllerProvider.notifier)
           .loadDetail(widget.bookingId);
+      ref
+          .read(bookingDisputeControllerProvider.notifier)
+          .load(widget.bookingId);
     });
   }
 
@@ -108,6 +112,20 @@ class _CleanerBookingDetailScreenState
                       ),
                       child: const Text('Message Customer'),
                     ),
+                    if (booking.status.canOpenDispute) ...[
+                      const SizedBox(height: 8),
+                      OutlinedButton(
+                        onPressed: () => context.push(
+                          AppRoutes.cleanerBookingDisputeLocation(booking.id),
+                        ),
+                        child: Text(
+                          ref.watch(bookingDisputeControllerProvider).dispute ==
+                                  null
+                              ? 'Report a Problem'
+                              : 'View Dispute',
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     BookingStatusHistoryList(history: booking.statusHistory),
                     if (state.errorMessage != null) Text(state.errorMessage!),

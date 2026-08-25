@@ -41,3 +41,4 @@ No such decisions are made in TASK 001. Decision records should be added when th
 * [ADR-013-booking-reservation-idempotency-and-lifecycle.md](ADR-013-booking-reservation-idempotency-and-lifecycle.md) — accepted complete-slot booking, immutable snapshots, partial unique reservation, and idempotent creation.
 * [ADR-014-payment-provider-webhooks-and-refunds.md](ADR-014-payment-provider-webhooks-and-refunds.md) — accepted provider-neutral sandbox payment ledger, signed webhooks, and refund foundation.
 * [ADR-015-chat-notifications-and-verified-reviews.md](ADR-015-chat-notifications-and-verified-reviews.md) — accepted booking-scoped chat, in-app notifications, computed discovery ratings, and admin review moderation.
+* [ADR-016-disputes-admin-operations-and-audit.md](ADR-016-disputes-admin-operations-and-audit.md) — accepted one dispute per booking, admin user/booking operations, payment-aware admin cancellation, and append-only best-effort audit.
