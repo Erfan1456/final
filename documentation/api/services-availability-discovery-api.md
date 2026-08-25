@@ -1,6 +1,6 @@
 # Services, Availability, and Discovery API
 
-TASK 014 adds a public service catalog, approved-cleaner service offerings, future availability slots, and customer-only discovery. Booking, payment, chat, reviews, maps, geocoding, and admin catalog editors are not implemented.
+TASK 014 adds a public service catalog, approved-cleaner service offerings, future availability slots, and customer-only discovery. TASK 015 books those slots; payment, chat, reviews, maps, geocoding, and admin catalog editors are not implemented. Discovery list/detail exclude slots with an active booking reservation via a batched lookup. See [booking-api.md](booking-api.md).
 
 All timestamps in requests must be ISO-8601 strings with an explicit timezone/offset. The backend normalizes to UTC. Timezone-less values are rejected.
 
@@ -79,7 +79,7 @@ Duration 60 minutes–8 hours in 30-minute increments. Overlap: 409 `availabilit
 
 ### `GET` / `PUT` / `DELETE /api/v1/cleaner/availability/{slotId}`
 
-Owned future slots only. Foreign, unknown, and already-started slots: 404 `availability_not_found`. PUT may change `service_id`, `start_at`, and `end_at` under the same rules. DELETE physically removes the open future slot.
+Owned future slots only. Foreign, unknown, and already-started slots: 404 `availability_not_found`. PUT may change `service_id`, `start_at`, and `end_at` under the same rules. DELETE physically removes the open future slot. If an active booking references the slot: 409 `availability_reserved`. GET remains allowed.
 
 ## Customer discovery
 
@@ -143,7 +143,7 @@ Customer discovery never includes:
 
 ## Query strategy
 
-Discovery pages `cleaner_services` then batch-fetches users, profiles, and availability. It does not loop one cleaner → one profile → one user → one slot. Page size is at most 50.
+Discovery pages `cleaner_services` then batch-fetches users, profiles, availability, and **active booking reservations** (`findActiveByAvailabilitySlotIds`). It does not loop one cleaner → one profile → one user → one slot → one booking. Page size is at most 50. Reserved slots (pending/confirmed/in_progress) are excluded from `next_available_at`, availability-range filters, and cleaner-detail future slots.
 
 ## Errors
 
@@ -156,6 +156,7 @@ Discovery pages `cleaner_services` then batch-fetches users, profiles, and avail
 | missing/foreign/started slot | 404 | `availability_not_found` |
 | ineligible discovery target | 404 | `cleaner_not_found` |
 | overlap | 409 | `availability_overlap` |
+| reserved slot update/delete | 409 | `availability_reserved` |
 | 180 future slots | 409 | `availability_limit_reached` |
 | wrong persisted role | 403 | `forbidden` |
 

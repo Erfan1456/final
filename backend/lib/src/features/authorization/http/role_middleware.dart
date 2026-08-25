@@ -6,6 +6,8 @@ import 'package:home_cleaning_marketplace_api/src/features/authorization/applica
 import 'package:home_cleaning_marketplace_api/src/features/authorization/authenticated_user_context.dart';
 import 'package:home_cleaning_marketplace_api/src/features/authorization/http/role_http_errors.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/application/cleaner_availability_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/application/cleaner_booking_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/application/customer_booking_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/application/admin_cleaner_review_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/application/cleaner_onboarding_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/application/cleaner_service_management_service.dart';
@@ -36,9 +38,13 @@ Handler roleScopedMiddleware(
           final discovery =
               _tryRead<CleanerDiscoveryService>(context) ??
               await RoleScopedComposition.discovery(mongo: mongo!);
+          final bookings =
+              _tryRead<CustomerBookingService>(context) ??
+              await RoleScopedComposition.customerBookings(mongo: mongo!);
           next = next
               .provide<CustomerAccountService>(() => service)
-              .provide<CleanerDiscoveryService>(() => discovery);
+              .provide<CleanerDiscoveryService>(() => discovery)
+              .provide<CustomerBookingService>(() => bookings);
         case UserRole.cleaner:
           final onboarding =
               _tryRead<CleanerOnboardingService>(context) ??
@@ -49,10 +55,14 @@ Handler roleScopedMiddleware(
           final availability =
               _tryRead<CleanerAvailabilityService>(context) ??
               await RoleScopedComposition.cleanerAvailability(mongo: mongo!);
+          final bookings =
+              _tryRead<CleanerBookingService>(context) ??
+              await RoleScopedComposition.cleanerBookings(mongo: mongo!);
           next = next
               .provide<CleanerOnboardingService>(() => onboarding)
               .provide<CleanerServiceManagementService>(() => offerings)
-              .provide<CleanerAvailabilityService>(() => availability);
+              .provide<CleanerAvailabilityService>(() => availability)
+              .provide<CleanerBookingService>(() => bookings);
         case UserRole.admin:
           final service =
               _tryRead<AdminCleanerReviewService>(context) ??

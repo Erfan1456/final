@@ -8,6 +8,7 @@ import 'package:home_cleaning_marketplace_api/src/database/mongo_database.dart';
 import 'package:home_cleaning_marketplace_api/src/features/addresses/data/address_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/session_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/data/availability_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/data/booking_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_indexes.dart';
@@ -61,6 +62,9 @@ Future<void> main() async {
     final slotIndexes = await db
         .collection(CollectionNames.availabilitySlots)
         .getIndexes();
+    final bookingIndexes = await db
+        .collection(CollectionNames.bookings)
+        .getIndexes();
 
     if (!_hasNamedIndex(usersIndexes, usersEmailNormalizedUniqueIndexName) ||
         !_hasNamedIndex(
@@ -109,6 +113,17 @@ Future<void> main() async {
         !_hasNamedIndex(
           slotIndexes,
           availabilitySlotsCleanerServiceStartIndexName,
+        ) ||
+        !_hasPartialUniqueActiveSlotIndex(bookingIndexes) ||
+        !_hasNamedIndex(
+          bookingIndexes,
+          bookingsCustomerIdempotencyUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(bookingIndexes, bookingsCustomerIdDescIndexName) ||
+        !_hasNamedIndex(bookingIndexes, bookingsCleanerIdDescIndexName) ||
+        !_hasNamedIndex(
+          bookingIndexes,
+          bookingsCleanerActiveStartIndexName,
         )) {
       stderr.writeln('Database indexes could not be ensured.');
       exitCode = 1;
@@ -169,7 +184,16 @@ Future<void> main() async {
         '$availabilitySlotsStartAtField ascending',
       )
       ..writeln('$availabilitySlotsServiceStartIndexName exists')
-      ..writeln('$availabilitySlotsCleanerServiceStartIndexName exists');
+      ..writeln('$availabilitySlotsCleanerServiceStartIndexName exists')
+      ..writeln('$bookingsActiveAvailabilitySlotUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('key = $bookingsAvailabilitySlotIdField ascending')
+      ..writeln('partialFilterExpression.reservation_active = true')
+      ..writeln('$bookingsCustomerIdempotencyUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('$bookingsCustomerIdDescIndexName exists')
+      ..writeln('$bookingsCleanerIdDescIndexName exists')
+      ..writeln('$bookingsCleanerActiveStartIndexName exists');
   } catch (_) {
     stderr.writeln('Database indexes could not be ensured.');
     exitCode = 1;
@@ -180,4 +204,25 @@ Future<void> main() async {
 
 bool _hasNamedIndex(List<Map<String, dynamic>> indexes, String name) {
   return indexes.any((index) => index['name'] == name);
+}
+
+bool _hasPartialUniqueActiveSlotIndex(List<Map<String, dynamic>> indexes) {
+  for (final index in indexes) {
+    if (index['name'] != bookingsActiveAvailabilitySlotUniqueIndexName) {
+      continue;
+    }
+    if (index['unique'] != true) {
+      return false;
+    }
+    final key = index['key'];
+    if (key is! Map || key[bookingsAvailabilitySlotIdField] != 1) {
+      return false;
+    }
+    final filter = index['partialFilterExpression'];
+    if (filter is! Map || filter[bookingsReservationActiveField] != true) {
+      return false;
+    }
+    return true;
+  }
+  return false;
 }

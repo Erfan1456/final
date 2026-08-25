@@ -1,6 +1,7 @@
 import 'package:home_cleaning_marketplace_api/src/features/addresses/data/address_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/session_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/data/availability_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/data/booking_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_indexes.dart';
@@ -19,4 +20,5 @@ Future<void> ensureApprovedDatabaseIndexes(Db db) async {
   await ensureServiceIndexesOnDb(db);
   await ensureCleanerServiceIndexesOnDb(db);
   await ensureAvailabilityIndexesOnDb(db);
+  await ensureBookingIndexesOnDb(db);
 }

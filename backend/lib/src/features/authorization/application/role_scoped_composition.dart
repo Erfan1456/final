@@ -10,6 +10,9 @@ import 'package:home_cleaning_marketplace_api/src/features/authorization/current
 import 'package:home_cleaning_marketplace_api/src/features/authorization/role_request_authorizer.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/application/cleaner_availability_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/data/availability_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/application/cleaner_booking_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/application/customer_booking_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/data/booking_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/application/admin_cleaner_review_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/application/cleaner_onboarding_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_repository.dart';
@@ -36,6 +39,8 @@ class RoleScopedComposition {
   static CleanerServiceManagementService? _serviceManagement;
   static CleanerAvailabilityService? _availability;
   static CleanerDiscoveryService? _discovery;
+  static CustomerBookingService? _customerBookings;
+  static CleanerBookingService? _cleanerBookings;
 
   /// Builds a [RoleRequestAuthorizer] from request providers.
   ///
@@ -146,6 +151,7 @@ class RoleScopedComposition {
       services: await services(mongo: mongo),
       offerings: MongoCleanerServiceRepository.fromDb(db),
       slots: MongoAvailabilityRepository.fromDb(db),
+      bookings: MongoBookingRepository.fromDb(db),
     );
   }
 
@@ -164,6 +170,42 @@ class RoleScopedComposition {
       profiles: MongoCleanerProfileRepository.fromDb(db),
       users: _users ??= MongoUserRepository.fromDb(db),
       slots: MongoAvailabilityRepository.fromDb(db),
+      bookings: MongoBookingRepository.fromDb(db),
+    );
+  }
+
+  /// Shared customer booking service.
+  static Future<CustomerBookingService> customerBookings({
+    required MongoDatabase mongo,
+  }) async {
+    final cached = _customerBookings;
+    if (cached != null) {
+      return cached;
+    }
+    final db = await _requireDb(mongo);
+    return _customerBookings = CustomerBookingService(
+      addresses: MongoAddressRepository.fromDb(db),
+      slots: MongoAvailabilityRepository.fromDb(db),
+      users: _users ??= MongoUserRepository.fromDb(db),
+      cleanerProfiles: MongoCleanerProfileRepository.fromDb(db),
+      services: await services(mongo: mongo),
+      offerings: MongoCleanerServiceRepository.fromDb(db),
+      bookings: MongoBookingRepository.fromDb(db),
+    );
+  }
+
+  /// Shared cleaner booking/job service.
+  static Future<CleanerBookingService> cleanerBookings({
+    required MongoDatabase mongo,
+  }) async {
+    final cached = _cleanerBookings;
+    if (cached != null) {
+      return cached;
+    }
+    final db = await _requireDb(mongo);
+    return _cleanerBookings = CleanerBookingService(
+      bookings: MongoBookingRepository.fromDb(db),
+      customerProfiles: MongoCustomerProfileRepository.fromDb(db),
     );
   }
 

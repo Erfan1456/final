@@ -7,6 +7,7 @@ import 'package:home_cleaning_marketplace_api/src/features/auth/http/auth_http_e
 import 'package:home_cleaning_marketplace_api/src/features/auth/tokens/access_token_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/authorization/forbidden_exception.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/domain/availability_exceptions.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/domain/cleaner_profile_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/domain/cleaner_service_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/domain/customer_profile_exceptions.dart';
@@ -121,6 +122,59 @@ Response mapRoleScopedException(Exception error) {
   if (error is InvalidAvailabilityWindowException) {
     return jsonError(
       code: 'invalid_availability_window',
+      message: error.message,
+    );
+  }
+  if (error is AvailabilityReservedException) {
+    return jsonError(
+      code: 'availability_reserved',
+      message: 'This availability slot is reserved by an active booking.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is BookingNotFoundException) {
+    return jsonError(
+      code: 'booking_not_found',
+      message: 'Booking was not found.',
+      statusCode: HttpStatus.notFound,
+    );
+  }
+  if (error is AvailabilityUnavailableException) {
+    return jsonError(
+      code: 'availability_unavailable',
+      message: 'That availability slot is no longer available.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is InvalidBookingStateException) {
+    return jsonError(
+      code: 'invalid_booking_state',
+      message: 'This booking action is not allowed in the current state.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is IdempotencyKeyRequiredException) {
+    return jsonError(
+      code: 'idempotency_key_required',
+      message: 'Idempotency-Key is required.',
+    );
+  }
+  if (error is InvalidIdempotencyKeyException) {
+    return jsonError(
+      code: 'invalid_idempotency_key',
+      message: 'Idempotency-Key is invalid.',
+    );
+  }
+  if (error is IdempotencyKeyReusedException) {
+    return jsonError(
+      code: 'idempotency_key_reused',
+      message: 'Idempotency-Key was already used for a different request.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is InvalidCustomerNotesException) {
+    return jsonError(
+      code: 'invalid_customer_notes',
       message: error.message,
     );
   }

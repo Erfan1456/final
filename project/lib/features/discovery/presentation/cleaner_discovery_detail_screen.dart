@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:home_cleaning_marketplace/app/router/app_routes.dart';
 import 'package:home_cleaning_marketplace/features/availability/presentation/cleaner_availability_screen.dart';
 import 'package:home_cleaning_marketplace/features/catalog/data/marketplace_service.dart';
 import 'package:home_cleaning_marketplace/features/discovery/data/cleaner_discovery_models.dart';
@@ -68,17 +70,29 @@ class _CleanerDiscoveryDetailScreenState
                     ),
                     const SizedBox(height: 16),
                     const Text('Future availability'),
-                    for (final slot in detail.availability)
+                    const Text('Future availability'),
+                    for (final slot in detail.availability) ...[
                       ListTile(
                         title: Text(formatLocalDateTime(slot.startAt)),
                         subtitle: Text(
                           '${formatLocalDateTime(slot.endAt)} · ${slot.duration.inMinutes} min',
                         ),
                       ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Booking will use available slots in a later workflow.',
-                    ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: FilledButton(
+                          onPressed: () {
+                            context.push(
+                              AppRoutes.customerBookSlotLocation(
+                                widget.cleanerUserId,
+                                slot.id,
+                              ),
+                            );
+                          },
+                          child: const Text('Book This Slot'),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     OutlinedButton(
                       onPressed: () {

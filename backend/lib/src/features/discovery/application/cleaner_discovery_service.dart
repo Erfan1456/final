@@ -1,7 +1,9 @@
 import 'package:home_cleaning_marketplace_api/src/features/authorization/approved_cleaner_policy.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/data/availability_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/domain/availability_exceptions.dart';
+import 'package:home_cleaning_marketplace_api/src/features/availability/domain/availability_slot.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/domain/availability_validation.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/data/booking_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/domain/cleaner_profile.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_repository.dart';
@@ -27,12 +29,14 @@ class CleanerDiscoveryService {
     required CleanerProfileRepository profiles,
     required UserRepository users,
     required AvailabilityRepository slots,
+    required BookingRepository bookings,
     DateTime Function()? clock,
   }) : _services = services,
        _offerings = offerings,
        _profiles = profiles,
        _users = users,
        _slots = slots,
+       _bookings = bookings,
        _clock = clock ?? DateTime.now;
 
   /// Default page size.
@@ -50,6 +54,7 @@ class CleanerDiscoveryService {
   final CleanerProfileRepository _profiles;
   final UserRepository _users;
   final AvailabilityRepository _slots;
+  final BookingRepository _bookings;
   final DateTime Function() _clock;
 
   /// Lists discoverable cleaners using the supplied query values.
@@ -152,12 +157,14 @@ class CleanerDiscoveryService {
       throw const CleanerNotFoundException();
     }
     final now = _clock().toUtc();
-    final slots = await _slots.listFutureForCleanerAndService(
-      cleanerUserId: cleanerUserId,
-      serviceId: service.id,
-      from: now,
-      to: now.add(AvailabilityValidation.defaultDetailHorizon),
-      limit: AvailabilityValidation.maxDetailSlots,
+    final slots = await _unreserved(
+      await _slots.listFutureForCleanerAndService(
+        cleanerUserId: cleanerUserId,
+        serviceId: service.id,
+        from: now,
+        to: now.add(AvailabilityValidation.defaultDetailHorizon),
+        limit: AvailabilityValidation.maxDetailSlots,
+      ),
     );
     return CleanerDiscoveryDetail(
       cleanerUserId: cleanerUserId.oid,
@@ -213,15 +220,16 @@ class CleanerDiscoveryService {
     final remainingIds = [
       for (final offering in remaining) offering.cleanerUserId,
     ];
-    Set<String>? overlappingIds;
     if (window != null) {
-      final overlapping = await _slots.listOverlappingForCleaners(
-        cleanerUserIds: remainingIds,
-        serviceId: service.id,
-        from: window.from,
-        to: window.to,
+      final overlapping = await _unreserved(
+        await _slots.listOverlappingForCleaners(
+          cleanerUserIds: remainingIds,
+          serviceId: service.id,
+          from: window.from,
+          to: window.to,
+        ),
       );
-      overlappingIds = {
+      final overlappingIds = {
         for (final slot in overlapping)
           if (slot.startAt.isAfter(now)) slot.cleanerUserId.oid,
       };
@@ -232,12 +240,14 @@ class CleanerDiscoveryService {
     }
 
     final nextByCleaner = <String, DateTime>{};
-    final nextSlots = await _slots.listFutureForCleanersAndService(
-      cleanerUserIds: [
-        for (final offering in remaining) offering.cleanerUserId,
-      ],
-      serviceId: service.id,
-      now: now,
+    final nextSlots = await _unreserved(
+      await _slots.listFutureForCleanersAndService(
+        cleanerUserIds: [
+          for (final offering in remaining) offering.cleanerUserId,
+        ],
+        serviceId: service.id,
+        now: now,
+      ),
     );
     for (final slot in nextSlots) {
       nextByCleaner.putIfAbsent(slot.cleanerUserId.oid, () => slot.startAt);
@@ -256,6 +266,28 @@ class CleanerDiscoveryService {
               profilesByUserId[offering.cleanerUserId.oid]!.serviceArea,
           nextAvailableAt: nextByCleaner[offering.cleanerUserId.oid],
         ),
+    ];
+  }
+
+  /// Batch-excludes slots with an active booking reservation. One query.
+  Future<List<AvailabilitySlot>> _unreserved(
+    List<AvailabilitySlot> slots,
+  ) async {
+    if (slots.isEmpty) {
+      return slots;
+    }
+    final reserved = await _bookings.findActiveByAvailabilitySlotIds([
+      for (final slot in slots) slot.id,
+    ]);
+    if (reserved.isEmpty) {
+      return slots;
+    }
+    final reservedIds = {
+      for (final booking in reserved) booking.availabilitySlotId.oid,
+    };
+    return [
+      for (final slot in slots)
+        if (!reservedIds.contains(slot.id.oid)) slot,
     ];
   }
 

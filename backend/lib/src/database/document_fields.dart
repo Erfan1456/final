@@ -114,4 +114,33 @@ abstract final class DocumentFields {
     }
     throw onError('$field must be DateTime or null.');
   }
+
+  /// Requires [field] to be a nested document map.
+  static Map<String, dynamic> requireMap(
+    Map<String, dynamic> document,
+    String field,
+    Exception Function(String message) onError,
+  ) {
+    final value = document[field];
+    if (value is Map<String, dynamic>) {
+      return value;
+    }
+    if (value is Map) {
+      return Map<String, dynamic>.from(value);
+    }
+    throw onError('$field must be Map.');
+  }
+
+  /// Requires [field] to be a [List].
+  static List<dynamic> requireList(
+    Map<String, dynamic> document,
+    String field,
+    Exception Function(String message) onError,
+  ) {
+    final value = document[field];
+    if (value is List) {
+      return value;
+    }
+    throw onError('$field must be List.');
+  }
 }

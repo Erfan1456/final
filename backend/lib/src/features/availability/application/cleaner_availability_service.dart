@@ -3,6 +3,8 @@ import 'package:home_cleaning_marketplace_api/src/features/availability/data/ava
 import 'package:home_cleaning_marketplace_api/src/features/availability/domain/availability_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/domain/availability_slot.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/domain/availability_validation.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/data/booking_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/data/service_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/domain/service_exceptions.dart';
@@ -18,17 +20,20 @@ class CleanerAvailabilityService {
     required ServiceRepository services,
     required CleanerServiceRepository offerings,
     required AvailabilityRepository slots,
+    required BookingRepository bookings,
     DateTime Function()? clock,
   }) : _policy = policy,
        _services = services,
        _offerings = offerings,
        _slots = slots,
+       _bookings = bookings,
        _clock = clock ?? DateTime.now;
 
   final ApprovedCleanerPolicy _policy;
   final ServiceRepository _services;
   final CleanerServiceRepository _offerings;
   final AvailabilityRepository _slots;
+  final BookingRepository _bookings;
   final DateTime Function() _clock;
 
   /// Lists owned slots in the requested window.
@@ -126,6 +131,7 @@ class CleanerAvailabilityService {
     if (existing == null) {
       throw const AvailabilityNotFoundException();
     }
+    await _rejectIfReserved(slotId);
     final serviceId = _requireObjectId(serviceIdRaw);
     await _requireActiveOffering(user.id, serviceId);
     final window = AvailabilityValidation.requireSlotWindow(
@@ -159,13 +165,30 @@ class CleanerAvailabilityService {
     required ObjectId slotId,
   }) async {
     await _policy.requireApproved(user);
+    final now = _clock().toUtc();
+    final existing = await _slots.findOwnedFutureById(
+      id: slotId,
+      cleanerUserId: user.id,
+      now: now,
+    );
+    if (existing == null) {
+      throw const AvailabilityNotFoundException();
+    }
+    await _rejectIfReserved(slotId);
     final deleted = await _slots.deleteOwnedFuture(
       id: slotId,
       cleanerUserId: user.id,
-      now: _clock().toUtc(),
+      now: now,
     );
     if (!deleted) {
       throw const AvailabilityNotFoundException();
+    }
+  }
+
+  Future<void> _rejectIfReserved(ObjectId slotId) async {
+    final reserved = await _bookings.findActiveByAvailabilitySlot(slotId);
+    if (reserved != null) {
+      throw const AvailabilityReservedException();
     }
   }
 

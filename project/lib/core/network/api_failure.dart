@@ -54,6 +54,22 @@ String messageForApiCode(String code) {
       return 'The availability window is invalid.';
     case 'cleaner_not_found':
       return 'Cleaner was not found.';
+    case 'booking_not_found':
+      return 'Booking was not found.';
+    case 'availability_unavailable':
+      return 'That time slot is no longer available.';
+    case 'availability_reserved':
+      return 'This availability slot is reserved by a booking.';
+    case 'invalid_booking_state':
+      return 'This booking cannot be changed in its current state.';
+    case 'idempotency_key_required':
+      return 'Please try booking again.';
+    case 'invalid_idempotency_key':
+      return 'Please try booking again.';
+    case 'idempotency_key_reused':
+      return 'Please start a new booking attempt.';
+    case 'invalid_customer_notes':
+      return 'Notes must be plain text up to 500 characters.';
     case 'invalid_input':
       return 'Please check your details and try again.';
     case 'invalid_access_token':

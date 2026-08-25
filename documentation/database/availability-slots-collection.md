@@ -2,7 +2,7 @@
 
 This document describes the `availability_slots` collection.
 
-TASK 014 stores open future bookable windows. There is no customer id, booking id, payment information, or status field yet. TASK 015 booking will extend reservation semantics. Recurring rules are not stored.
+TASK 014 stores open future bookable windows. TASK 015 does not add a status field to this collection. Active bookings reserve a slot through `bookings.reservation_active`; the slot document remains. Recurring rules are not stored.
 
 ## Purpose
 

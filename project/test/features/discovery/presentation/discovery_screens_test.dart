@@ -169,13 +169,56 @@ void main() {
     expect(find.text('Reliable cleaner for apartments.'), findsOneWidget);
     expect(find.text('Home Cleaning'), findsOneWidget);
     expect(find.text('Billing: hourly'), findsOneWidget);
+    expect(find.text('Book This Slot'), findsOneWidget);
     expect(
       find.text('Booking will use available slots in a later workflow.'),
-      findsOneWidget,
+      findsNothing,
     );
     expect(find.textContaining('phone'), findsNothing);
     expect(find.textContaining('@'), findsNothing);
     expect(find.text('Book'), findsNothing);
+  });
+
+  testWidgets('Book This Slot opens the confirmation route', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          discoveryControllerProvider.overrideWith(
+            () => SeededDiscoveryController(
+              DiscoveryState(loading: false, detail: testDiscoveryDetail()),
+            ),
+          ),
+          comparisonControllerProvider.overrideWith(
+            () => SeededComparisonController(const ComparisonState()),
+          ),
+        ],
+        child: MaterialApp.router(
+          routerConfig: GoRouter(
+            initialLocation: AppRoutes.customerCleanerDetailPath.replaceFirst(
+              ':cleanerUserId',
+              '507f1f77bcf86cd799439081',
+            ),
+            routes: [
+              GoRoute(
+                path: AppRoutes.customerCleanerDetailPath,
+                builder: (context, state) => CleanerDiscoveryDetailScreen(
+                  cleanerUserId: state.pathParameters['cleanerUserId'] ?? '',
+                ),
+              ),
+              GoRoute(
+                path: AppRoutes.customerBookSlotPath,
+                builder: (context, state) =>
+                    const Scaffold(body: Text('Booking confirmation route')),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Book This Slot'));
+    await tester.pumpAndSettle();
+    expect(find.text('Booking confirmation route'), findsOneWidget);
   });
 
   testWidgets('comparison screen notes mixed currencies', (tester) async {

@@ -25,6 +25,19 @@ void main() {
     );
     expect(messageForApiCode('cleaner_not_approved'), contains('approved'));
     expect(
+      messageForApiCode('booking_not_found'),
+      equals('Booking was not found.'),
+    );
+    expect(
+      messageForApiCode('availability_unavailable'),
+      equals('That time slot is no longer available.'),
+    );
+    expect(
+      messageForApiCode('invalid_booking_state'),
+      contains('current state'),
+    );
+    expect(messageForApiCode('availability_reserved'), contains('reserved'));
+    expect(
       messageForApiCode('some_unknown_code'),
       equals('Something went wrong. Please try again.'),
     );

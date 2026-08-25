@@ -60,6 +60,11 @@ class CustomerHomeScreen extends ConsumerWidget {
                 onPressed: () => context.push(AppRoutes.customerDiscoverPath),
                 child: const Text('Find Cleaners'),
               ),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: () => context.push(AppRoutes.customerBookingsPath),
+                child: const Text('My Bookings'),
+              ),
               const Spacer(),
               const LogoutActions(),
             ],

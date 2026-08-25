@@ -84,3 +84,12 @@ Response cleanerNotFoundResponse() {
     statusCode: HttpStatus.notFound,
   );
 }
+
+/// 404 used when a booking path id is malformed or not owned.
+Response bookingNotFoundResponse() {
+  return jsonError(
+    code: 'booking_not_found',
+    message: 'Booking was not found.',
+    statusCode: HttpStatus.notFound,
+  );
+}

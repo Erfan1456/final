@@ -279,5 +279,39 @@ void main() {
       );
       expect(admin.statusCode, equals(HttpStatus.forbidden));
     });
+
+    test('cleaner and admin cannot use customer booking routes', () async {
+      final cleaner = await send(
+        wrap: customer_mw.middleware,
+        path: '/api/v1/customer/bookings',
+        jwtRole: UserRole.cleaner,
+        persisted: account(role: UserRole.cleaner),
+      );
+      expect(cleaner.statusCode, equals(HttpStatus.forbidden));
+      final admin = await send(
+        wrap: customer_mw.middleware,
+        path: '/api/v1/customer/bookings',
+        jwtRole: UserRole.admin,
+        persisted: account(role: UserRole.admin),
+      );
+      expect(admin.statusCode, equals(HttpStatus.forbidden));
+    });
+
+    test('customer and admin cannot use cleaner booking routes', () async {
+      final customer = await send(
+        wrap: cleaner_mw.middleware,
+        path: '/api/v1/cleaner/bookings',
+        jwtRole: UserRole.customer,
+        persisted: account(),
+      );
+      expect(customer.statusCode, equals(HttpStatus.forbidden));
+      final admin = await send(
+        wrap: cleaner_mw.middleware,
+        path: '/api/v1/cleaner/bookings',
+        jwtRole: UserRole.admin,
+        persisted: account(role: UserRole.admin),
+      );
+      expect(admin.statusCode, equals(HttpStatus.forbidden));
+    });
   });
 }

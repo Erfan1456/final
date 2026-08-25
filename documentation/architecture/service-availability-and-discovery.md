@@ -1,6 +1,6 @@
 # Service Offerings, Availability, and Discovery Architecture
 
-TASK 014 makes approved cleaners configurable and discoverable. Booking, payment, chat, reviews, maps, geocoding, ranking, and admin catalog UI are not implemented.
+TASK 014 makes approved cleaners configurable and discoverable. TASK 015 books complete availability slots; payment, chat, reviews, maps, geocoding, ranking, and admin catalog UI are not implemented.
 
 ## Product flow
 
@@ -58,7 +58,7 @@ Scheduling requires unambiguous timestamps. Clients send ISO-8601 with an explic
 
 ## Interval-overlap limitation
 
-Application overlap queries plus a unique cleaner/start index prevent most conflicts. MongoDB has no simple exclusion constraint for arbitrary ranges. Concurrent partially overlapping inserts can theoretically race. TASK 015 booking must introduce stronger reservation controls. Adjacent boundaries are allowed.
+Application overlap queries plus a unique cleaner/start index prevent most conflicts. MongoDB has no simple exclusion constraint for arbitrary ranges. Concurrent partially overlapping inserts can theoretically race. TASK 015 adds a booking-level active-interval overlap pre-check and a **database** partial unique index for same-slot reservation. Adjacent boundaries are allowed.
 
 ## Privacy DTO
 
@@ -70,5 +70,8 @@ Focused Riverpod controllers: catalog (plain Dio), cleaner services, availabilit
 
 * `/cleaner/services`, `/cleaner/availability`, `/cleaner/availability/new`, `/cleaner/availability/:slotId/edit`
 * `/customer/discover`, `/customer/cleaners/:cleanerUserId`, `/customer/compare`
+* `/customer/book/:cleanerUserId/:slotId`, `/customer/bookings`, `/customer/bookings/:bookingId`
+
+Discovery excludes slots with an active booking reservation using a batched `findActiveByAvailabilitySlotIds` lookup (not N+1). See [booking-reservation-and-lifecycle.md](booking-reservation-and-lifecycle.md).
 
 Role guards are UX only. Backend policy remains authoritative. Unapproved cleaners see "Approval required" rather than mutating offerings.

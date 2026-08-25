@@ -37,6 +37,7 @@ void main() {
     await pumpCleanerHome(tester, const CleanerOnboardingState(loading: false));
     expect(find.text('Start onboarding'), findsOneWidget);
     expect(find.textContaining('Start onboarding to apply'), findsOneWidget);
+    expect(find.text('Booking Requests / Jobs'), findsOneWidget);
   });
 
   testWidgets('draft shows continue onboarding', (tester) async {
@@ -89,6 +90,7 @@ void main() {
     );
     expect(find.text('Manage Services'), findsOneWidget);
     expect(find.text('Manage Availability'), findsOneWidget);
+    expect(find.text('Booking Requests / Jobs'), findsOneWidget);
     expect(find.text('Start onboarding'), findsNothing);
   });
 

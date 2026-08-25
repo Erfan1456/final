@@ -61,6 +61,11 @@ class CleanerHomeScreen extends ConsumerWidget {
                   child: Text(actionLabel),
                 ),
               ],
+              const SizedBox(height: 16),
+              FilledButton.tonal(
+                onPressed: () => context.push(AppRoutes.cleanerBookingsPath),
+                child: const Text('Booking Requests / Jobs'),
+              ),
               if (status == OnboardingStatus.approved) ...[
                 const SizedBox(height: 16),
                 FilledButton(

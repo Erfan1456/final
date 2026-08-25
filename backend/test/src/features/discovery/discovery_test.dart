@@ -5,6 +5,11 @@ import 'package:dart_frog/dart_frog.dart';
 import 'package:home_cleaning_marketplace_api/src/features/authorization/authenticated_user_context.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/data/availability_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/domain/availability_slot.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/data/booking_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_address_snapshot.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_service_snapshot.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_status.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/domain/cleaner_onboarding_status.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_repository.dart';
@@ -32,6 +37,7 @@ void main() {
   late MemoryCollectionDocumentStore offerings;
   late MemoryCollectionDocumentStore profiles;
   late MemoryCollectionDocumentStore slots;
+  late MemoryCollectionDocumentStore bookings;
   late MemoryUserRepository users;
   late CleanerDiscoveryService discovery;
   late AuthenticatedUserContext scoped;
@@ -42,6 +48,7 @@ void main() {
     offerings = MemoryCollectionDocumentStore();
     profiles = MemoryCollectionDocumentStore();
     slots = MemoryCollectionDocumentStore();
+    bookings = MemoryCollectionDocumentStore();
     users = MemoryUserRepository();
     final home = testHomeCleaningService();
     serviceId = home.id;
@@ -52,6 +59,7 @@ void main() {
       profiles: MongoCleanerProfileRepository(documents: profiles),
       users: users,
       slots: MongoAvailabilityRepository(documents: slots),
+      bookings: MongoBookingRepository(documents: bookings),
       clock: marketplaceTestNow,
     );
     scoped = AuthenticatedUserContext(
@@ -338,5 +346,63 @@ void main() {
       expect(users.findByIdsCalls, equals(1));
       expect(profiles.findManyCalls, equals(1));
     });
+
+    test(
+      'reserved slots are excluded from next available and detail',
+      () async {
+        final cleaner = seedCleaner(
+          hexSuffix: 'reserved',
+          nextStart: DateTime.utc(2026, 9, 1, 3),
+        );
+        final slotId = slots.documents.single['_id'] as ObjectId;
+        bookings.documents.add(
+          Booking(
+            id: ObjectId(),
+            customerUserId: ObjectId(),
+            cleanerUserId: cleaner,
+            availabilitySlotId: slotId,
+            serviceId: serviceId,
+            status: BookingStatus.pending,
+            reservationActive: true,
+            durationMinutes: 120,
+            hourlyRateMinor: 250000,
+            quotedTotalMinor: 500000,
+            currencyCode: 'BDT',
+            serviceSnapshot: BookingServiceSnapshot.fromService(
+              testHomeCleaningService(),
+            ),
+            addressSnapshot: BookingAddressSnapshot.fromAddress(
+              testAddress(userId: ObjectId()),
+            ),
+            idempotencyKey: 'idempotency-key-16',
+            requestFingerprint: 'a' * 64,
+            startAt: DateTime.utc(2026, 9, 1, 3),
+            endAt: DateTime.utc(2026, 9, 1, 5),
+            statusHistory: const [],
+            createdAt: marketplaceTestNow(),
+            updatedAt: marketplaceTestNow(),
+          ).toDocument(),
+        );
+        bookings.findManyCalls = 0;
+        final listed = await discovery.listCleaners();
+        expect(listed.items.single.nextAvailableAt, isNull);
+        expect(bookings.findManyCalls, equals(1));
+        final window = await discovery.listCleaners(
+          availableFrom: '2026-09-01T09:00:00+06:00',
+          availableTo: '2026-09-01T12:00:00+06:00',
+        );
+        expect(window.items, isEmpty);
+        final detail = await discovery.getCleanerDetail(cleanerUserId: cleaner);
+        expect(detail.availability, isEmpty);
+
+        bookings.documents.single['status'] = BookingStatus.cancelled.wireValue;
+        bookings.documents.single['reservation_active'] = false;
+        final afterRelease = await discovery.getCleanerDetail(
+          cleanerUserId: cleaner,
+        );
+        expect(afterRelease.availability, hasLength(1));
+        expect(afterRelease.availability.single.id, equals(slotId));
+      },
+    );
   });
 }

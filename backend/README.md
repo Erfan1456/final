@@ -21,7 +21,7 @@ MongoDB Atlas is the persistence provider. `mongo_dart` is the backend driver. U
 * admin cleaner list, detail, approve, and reject
 * public service catalog, cleaner offerings, availability, and customer discovery
 
-TASK 014 may ensure approved indexes and the canonical `home-cleaning` catalog document through controlled tools. It does not create live cleaner offerings or availability. Bookings, payments, chat, and reviews are still absent.
+TASK 015 may ensure approved booking indexes (including the partial unique active-slot constraint) through the controlled index tool. It does not create live bookings, users, or availability fixtures. Payments, chat, and reviews are still absent.
 
 Do not place a real MongoDB URI, passwords, or other secrets in this package. Flutter never receives the MongoDB connection URI.
 
@@ -50,8 +50,14 @@ Do not place a real MongoDB URI, passwords, or other secrets in this package. Fl
 * `GET`/`PUT`/`DELETE /api/v1/cleaner/services[/{serviceId}]`
 * `GET`/`POST`/`PUT`/`DELETE /api/v1/cleaner/availability[/{slotId}]`
 * `GET /api/v1/discovery/cleaners[/{cleanerUserId}]`
+* `GET`/`POST /api/v1/customer/bookings`
+* `GET /api/v1/customer/bookings/{bookingId}`
+* `POST /api/v1/customer/bookings/{bookingId}/cancel`
+* `GET /api/v1/cleaner/bookings`
+* `GET /api/v1/cleaner/bookings/{bookingId}`
+* `POST /api/v1/cleaner/bookings/{bookingId}/accept|decline|cancel|start|complete`
 
-See [../documentation/api/authentication-api.md](../documentation/api/authentication-api.md), [../documentation/api/profile-address-onboarding-admin-api.md](../documentation/api/profile-address-onboarding-admin-api.md), [../documentation/api/services-availability-discovery-api.md](../documentation/api/services-availability-discovery-api.md), and [../documentation/architecture/protected-api-authentication.md](../documentation/architecture/protected-api-authentication.md). These auth endpoints require production rate limiting before unrestricted internet exposure. Bookings, payments, chat, and reviews are still absent.
+See [../documentation/api/authentication-api.md](../documentation/api/authentication-api.md), [../documentation/api/profile-address-onboarding-admin-api.md](../documentation/api/profile-address-onboarding-admin-api.md), [../documentation/api/services-availability-discovery-api.md](../documentation/api/services-availability-discovery-api.md), [../documentation/api/booking-api.md](../documentation/api/booking-api.md), and [../documentation/architecture/protected-api-authentication.md](../documentation/architecture/protected-api-authentication.md). These auth endpoints require production rate limiting before unrestricted internet exposure. Payments, chat, and reviews are still absent.
 
 ## Configuration
 
@@ -133,9 +139,9 @@ Business logic should not accumulate in route handlers. Future features should a
 * Protected account routes (`GET /account/me`, `DELETE /account/sessions`)
 * Role-scoped customer profile and address routes
 * Cleaner onboarding and admin review routes
-* Platform service catalog, cleaner offerings, availability, and customer discovery
-* Approved `customer_profiles`, `cleaner_profiles`, `addresses`, `services`, `cleaner_services`, and `availability_slots` indexes
-* No bookings, payments, chat, or reviews
+* Platform service catalog, cleaner offerings, availability, customer discovery, and booking reservation/lifecycle
+* Approved `customer_profiles`, `cleaner_profiles`, `addresses`, `services`, `cleaner_services`, `availability_slots`, and `bookings` indexes
+* No payments, chat, or reviews
 * No production rate limiting yet
 * No production rate limiting yet
 * CORS is a small development-oriented foundation, not a complete production security policy

@@ -4,6 +4,9 @@ import 'package:home_cleaning_marketplace/features/admin/data/admin_cleaner_mode
 import 'package:home_cleaning_marketplace/features/admin/presentation/admin_cleaner_review_controller.dart';
 import 'package:home_cleaning_marketplace/features/availability/data/availability_slot.dart';
 import 'package:home_cleaning_marketplace/features/availability/presentation/availability_controller.dart';
+import 'package:home_cleaning_marketplace/features/bookings/data/booking_models.dart';
+import 'package:home_cleaning_marketplace/features/bookings/presentation/cleaner_booking_controller.dart';
+import 'package:home_cleaning_marketplace/features/bookings/presentation/customer_booking_controller.dart';
 import 'package:home_cleaning_marketplace/features/catalog/data/marketplace_service.dart';
 import 'package:home_cleaning_marketplace/features/catalog/presentation/catalog_controller.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/data/cleaner_profile.dart';
@@ -297,6 +300,151 @@ class SeededComparisonController extends ComparisonController {
   ComparisonState build() => _seed;
 }
 
+class SeededCustomerBookingController extends CustomerBookingController {
+  SeededCustomerBookingController(this._seed);
+
+  final CustomerBookingState _seed;
+  int loadCalls = 0;
+  int loadMoreCalls = 0;
+  int loadDetailCalls = 0;
+  int submitCalls = 0;
+  int cancelCalls = 0;
+  int beginAttemptCalls = 0;
+  BookingStatus? lastStatus;
+  String? lastSubmitSlotId;
+  String? lastSubmitAddressId;
+  String? lastNotes;
+
+  @override
+  CustomerBookingState build() => _seed;
+
+  @override
+  void beginSubmitAttempt({String Function()? keyFactory}) {
+    beginAttemptCalls += 1;
+    super.beginSubmitAttempt(
+      keyFactory: keyFactory ?? () => 'test-idempotency-key-aa',
+    );
+  }
+
+  @override
+  Future<void> load({BookingStatus? status, bool clearFilter = false}) async {
+    loadCalls += 1;
+    lastStatus = clearFilter ? null : status;
+    state = state.copyWith(
+      loading: false,
+      statusFilter: lastStatus,
+      clearFilter: lastStatus == null,
+    );
+  }
+
+  @override
+  Future<void> loadMore() async {
+    loadMoreCalls += 1;
+  }
+
+  @override
+  Future<void> loadDetail(String bookingId) async {
+    loadDetailCalls += 1;
+  }
+
+  @override
+  Future<CustomerBooking?> submit({
+    required String availabilitySlotId,
+    required String addressId,
+    String? customerNotes,
+  }) async {
+    if (state.submitting) {
+      return state.submittedBooking;
+    }
+    submitCalls += 1;
+    lastSubmitSlotId = availabilitySlotId;
+    lastSubmitAddressId = addressId;
+    lastNotes = customerNotes;
+    state = state.copyWith(submitting: true);
+    final booking = testCustomerBooking();
+    state = state.copyWith(submitting: false, submittedBooking: booking);
+    return booking;
+  }
+
+  @override
+  Future<bool> cancel(String bookingId, {String? reason}) async {
+    cancelCalls += 1;
+    return true;
+  }
+}
+
+class SeededCleanerBookingController extends CleanerBookingController {
+  SeededCleanerBookingController(this._seed);
+
+  final CleanerBookingState _seed;
+  int loadCalls = 0;
+  int loadMoreCalls = 0;
+  int loadDetailCalls = 0;
+  int acceptCalls = 0;
+  int declineCalls = 0;
+  int cancelCalls = 0;
+  int startCalls = 0;
+  int completeCalls = 0;
+  String? lastReason;
+  BookingStatus? lastStatus;
+
+  @override
+  CleanerBookingState build() => _seed;
+
+  @override
+  Future<void> load({BookingStatus? status, bool clearFilter = false}) async {
+    loadCalls += 1;
+    lastStatus = clearFilter ? null : status;
+    state = state.copyWith(
+      loading: false,
+      statusFilter: lastStatus,
+      clearFilter: lastStatus == null,
+    );
+  }
+
+  @override
+  Future<void> loadMore() async {
+    loadMoreCalls += 1;
+  }
+
+  @override
+  Future<void> loadDetail(String bookingId) async {
+    loadDetailCalls += 1;
+  }
+
+  @override
+  Future<bool> accept(String bookingId) async {
+    acceptCalls += 1;
+    return true;
+  }
+
+  @override
+  Future<bool> decline(String bookingId, {required String reason}) async {
+    declineCalls += 1;
+    lastReason = reason;
+    return true;
+  }
+
+  @override
+  Future<bool> cancel(String bookingId, {required String reason}) async {
+    cancelCalls += 1;
+    lastReason = reason;
+    return true;
+  }
+
+  @override
+  Future<bool> start(String bookingId) async {
+    startCalls += 1;
+    return true;
+  }
+
+  @override
+  Future<bool> complete(String bookingId) async {
+    completeCalls += 1;
+    return true;
+  }
+}
+
 CustomerProfile testCustomerProfile() {
   final created = DateTime.utc(2026, 8, 25, 12);
   return CustomerProfile(
@@ -395,6 +543,16 @@ List<dynamic> featureControllerOverrides() {
     comparisonControllerProvider.overrideWith(
       () => SeededComparisonController(const ComparisonState()),
     ),
+    customerBookingControllerProvider.overrideWith(
+      () => SeededCustomerBookingController(
+        const CustomerBookingState(loading: false),
+      ),
+    ),
+    cleanerBookingControllerProvider.overrideWith(
+      () => SeededCleanerBookingController(
+        const CleanerBookingState(loading: false),
+      ),
+    ),
   ];
 }
 
@@ -474,6 +632,40 @@ CleanerDiscoveryDetail testDiscoveryDetail({
     hourlyRateMinor: 250000,
     currencyCode: 'BDT',
     availability: [testAvailabilitySlot()],
+  );
+}
+
+CustomerBooking testCustomerBooking({
+  String id = '507f1f77bcf86cd799439091',
+  BookingStatus status = BookingStatus.pending,
+  String startAt = '2026-09-01T03:00:00.000Z',
+  String endAt = '2026-09-01T05:00:00.000Z',
+}) {
+  return CustomerBooking.fromJson(
+    customerBookingJson(
+      id: id,
+      status: status.wireValue,
+      startAt: startAt,
+      endAt: endAt,
+    ),
+  );
+}
+
+CleanerBooking testCleanerBooking({
+  String id = '507f1f77bcf86cd799439091',
+  BookingStatus status = BookingStatus.pending,
+  bool fullAddress = false,
+  String startAt = '2026-09-01T03:00:00.000Z',
+  String endAt = '2026-09-01T05:00:00.000Z',
+}) {
+  return CleanerBooking.fromJson(
+    cleanerBookingJson(
+      id: id,
+      status: status.wireValue,
+      fullAddress: fullAddress,
+      startAt: startAt,
+      endAt: endAt,
+    ),
   );
 }
 
@@ -601,5 +793,111 @@ Map<String, dynamic> discoverySummaryJson({
     'hourly_rate_minor': 250000,
     'currency_code': 'BDT',
     'next_available_at': '2026-09-01T03:00:00.000Z',
+  };
+}
+
+Map<String, dynamic> bookingHistoryJson({
+  String? fromStatus,
+  String toStatus = 'pending',
+  String actorRole = 'customer',
+}) {
+  return <String, dynamic>{
+    'from_status': fromStatus,
+    'to_status': toStatus,
+    'actor_user_id': '507f1f77bcf86cd799439011',
+    'actor_role': actorRole,
+    'reason': null,
+    'created_at': '2026-08-25T12:00:00.000Z',
+  };
+}
+
+Map<String, dynamic> bookingAddressJson({required bool full}) {
+  if (!full) {
+    return <String, dynamic>{
+      'city': 'Dhaka',
+      'region': 'Dhaka',
+      'country_code': 'BD',
+    };
+  }
+  return <String, dynamic>{
+    'label': 'Home',
+    'line1': '1 Test Street',
+    'line2': null,
+    'city': 'Dhaka',
+    'region': 'Dhaka',
+    'postal_code': '1205',
+    'country_code': 'BD',
+  };
+}
+
+Map<String, dynamic> customerBookingJson({
+  String id = '507f1f77bcf86cd799439091',
+  String status = 'pending',
+  bool idempotentReplay = false,
+  String startAt = '2026-09-01T03:00:00.000Z',
+  String endAt = '2026-09-01T05:00:00.000Z',
+}) {
+  return <String, dynamic>{
+    'id': id,
+    'status': status,
+    'cleaner_user_id': '507f1f77bcf86cd799439081',
+    'cleaner_full_name': 'Ada Cleaner',
+    'service_snapshot': <String, dynamic>{
+      'slug': 'home-cleaning',
+      'name': 'Home Cleaning',
+      'billing_model': 'hourly',
+    },
+    'address_snapshot': bookingAddressJson(full: true),
+    'duration_minutes': 120,
+    'hourly_rate_minor': 250000,
+    'quoted_total_minor': 500000,
+    'currency_code': 'BDT',
+    'customer_notes': 'Please use the side entrance.',
+    'start_at': startAt,
+    'end_at': endAt,
+    'accepted_at': null,
+    'declined_at': null,
+    'started_at': null,
+    'completed_at': null,
+    'cancelled_at': null,
+    'status_history': [bookingHistoryJson()],
+    'created_at': '2026-08-25T12:00:00.000Z',
+    'updated_at': '2026-08-25T12:00:00.000Z',
+    'idempotent_replay': idempotentReplay,
+  };
+}
+
+Map<String, dynamic> cleanerBookingJson({
+  String id = '507f1f77bcf86cd799439091',
+  String status = 'pending',
+  bool fullAddress = false,
+  String startAt = '2026-09-01T03:00:00.000Z',
+  String endAt = '2026-09-01T05:00:00.000Z',
+}) {
+  return <String, dynamic>{
+    'id': id,
+    'status': status,
+    'customer_display_name': 'Test Customer',
+    'service_snapshot': <String, dynamic>{
+      'slug': 'home-cleaning',
+      'name': 'Home Cleaning',
+      'billing_model': 'hourly',
+    },
+    'address_snapshot': bookingAddressJson(full: fullAddress),
+    'duration_minutes': 120,
+    'hourly_rate_minor': 250000,
+    'quoted_total_minor': 500000,
+    'currency_code': 'BDT',
+    'customer_notes': 'Please use the side entrance.',
+    'start_at': startAt,
+    'end_at': endAt,
+    'accepted_at': null,
+    'declined_at': null,
+    'started_at': null,
+    'completed_at': null,
+    'cancelled_at': null,
+    'status_history': [bookingHistoryJson()],
+    'created_at': '2026-08-25T12:00:00.000Z',
+    'updated_at': '2026-08-25T12:00:00.000Z',
   };
 }

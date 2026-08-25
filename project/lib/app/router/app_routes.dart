@@ -33,6 +33,14 @@ abstract final class AppRoutes {
   static const String customerCleanerDetailPath =
       '/customer/cleaners/:cleanerUserId';
   static const String customerComparePath = '/customer/compare';
+  static const String customerBookSlotPath =
+      '/customer/book/:cleanerUserId/:slotId';
+  static const String customerBookingsPath = '/customer/bookings';
+  static const String customerBookingDetailPath =
+      '/customer/bookings/:bookingId';
+
+  static const String cleanerBookingsPath = '/cleaner/bookings';
+  static const String cleanerBookingDetailPath = '/cleaner/bookings/:bookingId';
 
   static const String adminHomePath = '/admin/home';
   static const String adminHomeName = 'adminHome';
@@ -66,5 +74,17 @@ abstract final class AppRoutes {
       return true;
     }
     return false;
+  }
+
+  static String customerBookSlotLocation(String cleanerUserId, String slotId) {
+    return '/customer/book/$cleanerUserId/$slotId';
+  }
+
+  static String customerBookingDetailLocation(String bookingId) {
+    return '/customer/bookings/$bookingId';
+  }
+
+  static String cleanerBookingDetailLocation(String bookingId) {
+    return '/cleaner/bookings/$bookingId';
   }
 }

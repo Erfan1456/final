@@ -20,6 +20,9 @@ abstract class AvailabilityRepository {
     ObjectId? serviceId,
   });
 
+  /// Finds a slot by [id], regardless of owner or start time.
+  Future<AvailabilitySlot?> findById(ObjectId id);
+
   /// Finds an owned future slot by [id] and [cleanerUserId].
   Future<AvailabilitySlot?> findOwnedFutureById({
     required ObjectId id,
@@ -130,6 +133,11 @@ class MongoAvailabilityRepository implements AvailabilityRepository {
       sort: const <String, int>{'start_at': 1},
     );
     return documents.map(AvailabilitySlot.fromDocument).toList();
+  }
+
+  @override
+  Future<AvailabilitySlot?> findById(ObjectId id) {
+    return _find(<String, dynamic>{'_id': id});
   }
 
   @override

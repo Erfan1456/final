@@ -25,4 +25,7 @@ abstract final class CollectionNames {
 
   /// Open future bookable availability windows for a cleaner and service.
   static const String availabilitySlots = 'availability_slots';
+
+  /// Customer bookings of complete availability slots.
+  static const String bookings = 'bookings';
 }

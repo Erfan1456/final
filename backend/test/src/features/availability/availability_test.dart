@@ -11,6 +11,11 @@ import 'package:home_cleaning_marketplace_api/src/features/availability/data/ava
 import 'package:home_cleaning_marketplace_api/src/features/availability/domain/availability_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/domain/availability_slot.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/domain/availability_validation.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/data/booking_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_address_snapshot.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_service_snapshot.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_status.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/domain/cleaner_service_offering.dart';
@@ -36,6 +41,7 @@ void main() {
   late MemoryCollectionDocumentStore offerings;
   late MemoryCollectionDocumentStore profiles;
   late MemoryCollectionDocumentStore slots;
+  late MemoryCollectionDocumentStore bookings;
   late CleanerAvailabilityService availability;
   late AuthenticatedUserContext scoped;
   late ObjectId serviceId;
@@ -46,6 +52,7 @@ void main() {
     offerings = MemoryCollectionDocumentStore();
     profiles = MemoryCollectionDocumentStore();
     slots = MemoryCollectionDocumentStore();
+    bookings = MemoryCollectionDocumentStore();
     final home = testHomeCleaningService();
     serviceId = home.id;
     services.documents.add(home.toDocument());
@@ -74,6 +81,7 @@ void main() {
       services: MongoServiceRepository(documents: services),
       offerings: MongoCleanerServiceRepository(documents: offerings),
       slots: MongoAvailabilityRepository(documents: slots),
+      bookings: MongoBookingRepository(documents: bookings),
       clock: marketplaceTestNow,
     );
     scoped = AuthenticatedUserContext(
@@ -501,5 +509,100 @@ void main() {
       expect(names, contains(availabilitySlotsServiceStartIndexName));
       expect(names, contains(availabilitySlotsCleanerServiceStartIndexName));
     });
+  });
+
+  group('reserved availability protection', () {
+    test(
+      'reserved slot cannot update or delete; unreserved still can',
+      () async {
+        final created = await createSlot(
+          start: '2026-09-01T09:00:00+06:00',
+          end: '2026-09-01T11:00:00+06:00',
+        );
+        final slotId =
+            (((jsonDecode(await created.body()) as Map)['data'] as Map)['slot']
+                    as Map)['id']
+                as String;
+        bookings.documents.add(
+          Booking(
+            id: ObjectId(),
+            customerUserId: ObjectId(),
+            cleanerUserId: userId,
+            availabilitySlotId: ObjectId.fromHexString(slotId),
+            serviceId: serviceId,
+            status: BookingStatus.pending,
+            reservationActive: true,
+            durationMinutes: 120,
+            hourlyRateMinor: 250000,
+            quotedTotalMinor: 500000,
+            currencyCode: 'BDT',
+            serviceSnapshot: BookingServiceSnapshot.fromService(
+              testHomeCleaningService(),
+            ),
+            addressSnapshot: BookingAddressSnapshot.fromAddress(
+              testAddress(userId: userId),
+            ),
+            idempotencyKey: 'idempotency-key-16',
+            requestFingerprint: 'a' * 64,
+            startAt: DateTime.utc(2026, 9, 1, 3),
+            endAt: DateTime.utc(2026, 9, 1, 5),
+            statusHistory: const [],
+            createdAt: marketplaceTestNow(),
+            updatedAt: marketplaceTestNow(),
+          ).toDocument(),
+        );
+        final updated = await slot_route.onRequest(
+          ctx(
+            jsonRequest(
+              method: 'PUT',
+              path: '/api/v1/cleaner/availability/$slotId',
+              body: <String, Object?>{
+                'service_id': serviceId.oid,
+                'start_at': '2026-09-01T13:00:00+06:00',
+                'end_at': '2026-09-01T15:00:00+06:00',
+              },
+            ),
+          ),
+          slotId,
+        );
+        expect(updated.statusCode, equals(HttpStatus.conflict));
+        expect(
+          ((jsonDecode(await updated.body()) as Map)['error'] as Map)['code'],
+          equals('availability_reserved'),
+        );
+        final deleted = await slot_route.onRequest(
+          ctx(
+            Request(
+              'DELETE',
+              Uri.parse('http://localhost/api/v1/cleaner/availability/$slotId'),
+            ),
+          ),
+          slotId,
+        );
+        expect(deleted.statusCode, equals(HttpStatus.conflict));
+        final got = await slot_route.onRequest(
+          ctx(
+            Request(
+              'GET',
+              Uri.parse('http://localhost/api/v1/cleaner/availability/$slotId'),
+            ),
+          ),
+          slotId,
+        );
+        expect(got.statusCode, equals(HttpStatus.ok));
+
+        bookings.documents.clear();
+        final unreservedDelete = await slot_route.onRequest(
+          ctx(
+            Request(
+              'DELETE',
+              Uri.parse('http://localhost/api/v1/cleaner/availability/$slotId'),
+            ),
+          ),
+          slotId,
+        );
+        expect(unreservedDelete.statusCode, equals(HttpStatus.ok));
+      },
+    );
   });
 }

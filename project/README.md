@@ -8,9 +8,9 @@ Repository-level documentation lives at [`../documentation/`](../documentation/)
 
 Flutter commands should be executed from this directory.
 
-Authentication is implemented as a vertical slice: secure token storage, signup/login/logout, session restoration, and go_router guards. TASK 013 adds role-aware customer, cleaner, and admin dashboards plus profile, address, onboarding, and approval screens. TASK 014 adds cleaner service/availability management and customer discovery, detail, and local comparison. Bookings, payments, chat, and reviews are not implemented yet.
+Authentication is implemented as a vertical slice: secure token storage, signup/login/logout, session restoration, and go_router guards. TASK 013 adds role-aware customer, cleaner, and admin dashboards plus profile, address, onboarding, and approval screens. TASK 014 adds cleaner service/availability management and customer discovery, detail, and local comparison. TASK 015 adds customer booking creation, My Bookings, and cleaner booking requests/jobs. Payments, chat, and reviews are not implemented yet.
 
-See [../documentation/architecture/flutter-authentication.md](../documentation/architecture/flutter-authentication.md), [../documentation/architecture/profile-address-and-cleaner-onboarding.md](../documentation/architecture/profile-address-and-cleaner-onboarding.md), and [../documentation/architecture/service-availability-and-discovery.md](../documentation/architecture/service-availability-and-discovery.md).
+See [../documentation/architecture/flutter-authentication.md](../documentation/architecture/flutter-authentication.md), [../documentation/architecture/profile-address-and-cleaner-onboarding.md](../documentation/architecture/profile-address-and-cleaner-onboarding.md), [../documentation/architecture/service-availability-and-discovery.md](../documentation/architecture/service-availability-and-discovery.md), and [../documentation/architecture/booking-reservation-and-lifecycle.md](../documentation/architecture/booking-reservation-and-lifecycle.md).
 
 ## Architecture
 

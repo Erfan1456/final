@@ -9,6 +9,9 @@ abstract class CustomerProfileRepository {
   /// Returns the profile owned by [userId], or `null`.
   Future<CustomerProfile?> findByUserId(ObjectId userId);
 
+  /// Returns profiles whose `user_id` is in [ids]. Missing ids are omitted.
+  Future<List<CustomerProfile>> findByUserIds(Iterable<ObjectId> ids);
+
   /// Creates or updates the owned profile's editable fields.
   ///
   /// Does not accept `user_id`, `default_address_id`, or timestamps from
@@ -54,6 +57,20 @@ class MongoCustomerProfileRepository implements CustomerProfileRepository {
   @override
   Future<CustomerProfile?> findByUserId(ObjectId userId) {
     return _find(<String, dynamic>{'user_id': userId});
+  }
+
+  @override
+  Future<List<CustomerProfile>> findByUserIds(Iterable<ObjectId> ids) async {
+    final unique = ids.toSet().toList();
+    if (unique.isEmpty) {
+      return const <CustomerProfile>[];
+    }
+    final documents = await _documents.findMany(
+      selector: <String, dynamic>{
+        'user_id': <String, dynamic>{r'$in': unique},
+      },
+    );
+    return documents.map(CustomerProfile.fromDocument).toList();
   }
 
   @override

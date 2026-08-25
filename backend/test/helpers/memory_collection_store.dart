@@ -213,6 +213,18 @@ void _applyUpdate(
       document.remove(key.toString());
     }
   }
+  final push = update[r'$push'];
+  if (push is Map) {
+    push.forEach((key, value) {
+      final field = key.toString();
+      final existing = document[field];
+      if (existing is List) {
+        existing.add(value);
+      } else {
+        document[field] = <dynamic>[value];
+      }
+    });
+  }
 }
 
 int _compare(Object? left, Object? right) {

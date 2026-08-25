@@ -19,7 +19,7 @@ Database: MongoDB Atlas — backend connectivity foundation implemented
 Primary Android development environment: Android Studio / Android Emulator
 ```
 
-The Dart Frog backend lives in `backend/`. MongoDB Atlas connectivity is implemented in the backend only. Flutter authentication, role-scoped profiles, addresses, cleaner onboarding, admin approval, service catalog, offerings, availability, and customer discovery now exist. Bookings, payments, chat, and reviews are not implemented.
+The Dart Frog backend lives in `backend/`. MongoDB Atlas connectivity is implemented in the backend only. Flutter authentication, role-scoped profiles, addresses, cleaner onboarding, admin approval, service catalog, offerings, availability, customer discovery, and booking reservation/lifecycle now exist. Payments, chat, and reviews are not implemented.
 
 ## Intended High-Level Architecture
 

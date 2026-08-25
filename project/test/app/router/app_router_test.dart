@@ -171,6 +171,78 @@ void main() {
     expect(find.text('Compare cleaners'), findsOneWidget);
   });
 
+  testWidgets('customer can open booking confirmation, list, and detail', (
+    tester,
+  ) async {
+    await pumpApp(tester, AuthState.authenticated(testUser()));
+    final context = tester.element(find.byType(CustomerHomeScreen));
+    final router = GoRouter.of(context);
+    router.go(
+      AppRoutes.customerBookSlotLocation(
+        '507f1f77bcf86cd799439081',
+        '507f1f77bcf86cd799439071',
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Confirm booking'), findsOneWidget);
+    router.go(AppRoutes.customerBookingsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('My Bookings'), findsWidgets);
+    router.go(
+      AppRoutes.customerBookingDetailLocation('507f1f77bcf86cd799439091'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Booking details'), findsOneWidget);
+  });
+
+  testWidgets('cleaner can open booking list and detail', (tester) async {
+    await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
+    final context = tester.element(find.text('Cleaner home'));
+    final router = GoRouter.of(context);
+    router.go(AppRoutes.cleanerBookingsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Booking Requests / Jobs'), findsWidgets);
+    router.go(
+      AppRoutes.cleanerBookingDetailLocation('507f1f77bcf86cd799439091'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Job details'), findsOneWidget);
+  });
+
+  testWidgets('customer is redirected from cleaner booking routes', (
+    tester,
+  ) async {
+    await pumpApp(tester, AuthState.authenticated(testUser()));
+    final customerContext = tester.element(find.byType(CustomerHomeScreen));
+    GoRouter.of(customerContext).go(AppRoutes.cleanerBookingsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Manage Profile'), findsOneWidget);
+  });
+
+  testWidgets('cleaner is redirected from customer booking routes', (
+    tester,
+  ) async {
+    await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
+    final cleanerContext = tester.element(find.text('Cleaner home'));
+    GoRouter.of(cleanerContext).go(AppRoutes.customerBookingsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Cleaner home'), findsOneWidget);
+  });
+
+  testWidgets('admin is redirected from customer and cleaner booking routes', (
+    tester,
+  ) async {
+    await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
+    final adminContext = tester.element(find.text('Admin Dashboard'));
+    final router = GoRouter.of(adminContext);
+    router.go(AppRoutes.customerBookingsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Admin Dashboard'), findsOneWidget);
+    router.go(AppRoutes.cleanerBookingsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Admin Dashboard'), findsOneWidget);
+  });
+
   testWidgets('cleaner can open services and availability', (tester) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
     final context = tester.element(find.text('Cleaner home'));

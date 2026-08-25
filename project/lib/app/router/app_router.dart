@@ -14,6 +14,11 @@ import 'package:home_cleaning_marketplace/features/auth/presentation/signup_scre
 import 'package:home_cleaning_marketplace/features/auth/presentation/splash_screen.dart';
 import 'package:home_cleaning_marketplace/features/availability/presentation/cleaner_availability_form_screen.dart';
 import 'package:home_cleaning_marketplace/features/availability/presentation/cleaner_availability_screen.dart';
+import 'package:home_cleaning_marketplace/features/bookings/presentation/booking_confirmation_screen.dart';
+import 'package:home_cleaning_marketplace/features/bookings/presentation/cleaner_booking_detail_screen.dart';
+import 'package:home_cleaning_marketplace/features/bookings/presentation/cleaner_booking_list_screen.dart';
+import 'package:home_cleaning_marketplace/features/bookings/presentation/customer_booking_detail_screen.dart';
+import 'package:home_cleaning_marketplace/features/bookings/presentation/customer_booking_list_screen.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/presentation/cleaner_home_screen.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/presentation/cleaner_onboarding_screen.dart';
 import 'package:home_cleaning_marketplace/features/cleaner_services/presentation/cleaner_service_management_screen.dart';
@@ -139,6 +144,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const CleanerComparisonScreen(),
       ),
       GoRoute(
+        path: AppRoutes.customerBookSlotPath,
+        builder: (context, state) {
+          return BookingConfirmationScreen(
+            cleanerUserId: state.pathParameters['cleanerUserId'] ?? '',
+            slotId: state.pathParameters['slotId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.customerBookingsPath,
+        builder: (context, state) => const CustomerBookingListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.customerBookingDetailPath,
+        builder: (context, state) {
+          return CustomerBookingDetailScreen(
+            bookingId: state.pathParameters['bookingId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
         path: AppRoutes.cleanerHomePath,
         name: AppRoutes.cleanerHomeName,
         builder: (context, state) => const CleanerHomeScreen(),
@@ -164,6 +190,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           return CleanerAvailabilityFormScreen(
             slotId: state.pathParameters['slotId'],
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.cleanerBookingsPath,
+        builder: (context, state) => const CleanerBookingListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.cleanerBookingDetailPath,
+        builder: (context, state) {
+          return CleanerBookingDetailScreen(
+            bookingId: state.pathParameters['bookingId'] ?? '',
           );
         },
       ),

@@ -1,3 +1,4 @@
+import 'package:home_cleaning_marketplace_api/src/features/addresses/domain/address.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/domain/cleaner_onboarding_status.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/domain/cleaner_profile.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/application/canonical_service_catalog.dart';
@@ -25,6 +26,34 @@ MarketplaceService testHomeCleaningService({
     description: CanonicalHomeCleaningService.description,
     billingModel: CanonicalHomeCleaningService.billingModel,
     active: active,
+    createdAt: created,
+    updatedAt: created,
+  );
+}
+
+/// Customer service address for booking tests.
+Address testAddress({
+  required ObjectId userId,
+  ObjectId? id,
+  String label = 'Home',
+  String line1 = '12 Test Street',
+  String? line2,
+  String city = 'Dhaka',
+  String region = 'Dhaka',
+  String postalCode = '1205',
+  String countryCode = 'BD',
+}) {
+  final created = DateTime.utc(2026, 8, 20, 12);
+  return Address(
+    id: id ?? ObjectId.fromHexString('507f1f77bcf86cd7994390a1'),
+    userId: userId,
+    label: label,
+    line1: line1,
+    line2: line2,
+    city: city,
+    region: region,
+    postalCode: postalCode,
+    countryCode: countryCode,
     createdAt: created,
     updatedAt: created,
   );
