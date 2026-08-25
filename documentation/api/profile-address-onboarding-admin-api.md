@@ -1,6 +1,6 @@
 # Profile, Address, Onboarding, and Admin Review API
 
-TASK 013 adds role-scoped marketplace account APIs. Bookings, payments, chat, reviews, cleaner services, availability, earnings, and discovery are not implemented.
+TASK 013 adds role-scoped marketplace account APIs. TASK 014 adds catalog, offerings, availability, and discovery. Bookings, payments, chat, and reviews are not implemented.
 
 All feature routes require:
 

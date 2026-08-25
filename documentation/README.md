@@ -29,6 +29,7 @@ Current documents:
 * [protected-api-authentication.md](architecture/protected-api-authentication.md)
 * [flutter-authentication.md](architecture/flutter-authentication.md)
 * [profile-address-and-cleaner-onboarding.md](architecture/profile-address-and-cleaner-onboarding.md)
+* [service-availability-and-discovery.md](architecture/service-availability-and-discovery.md)
 
 ### `setup/`
 
@@ -50,6 +51,9 @@ Current documents:
 * [customer-profiles-collection.md](database/customer-profiles-collection.md)
 * [cleaner-profiles-collection.md](database/cleaner-profiles-collection.md)
 * [addresses-collection.md](database/addresses-collection.md)
+* [services-collection.md](database/services-collection.md)
+* [cleaner-services-collection.md](database/cleaner-services-collection.md)
+* [availability-slots-collection.md](database/availability-slots-collection.md)
 
 ### `api/`
 
@@ -59,6 +63,7 @@ Current documents:
 
 * [authentication-api.md](api/authentication-api.md)
 * [profile-address-onboarding-admin-api.md](api/profile-address-onboarding-admin-api.md)
+* [services-availability-discovery-api.md](api/services-availability-discovery-api.md)
 
 ### `features/`
 
@@ -80,6 +85,7 @@ Current documents:
 * [ADR-009-authentication-application-flow.md](decisions/ADR-009-authentication-application-flow.md)
 * [ADR-010-flutter-authentication-and-secure-session-storage.md](decisions/ADR-010-flutter-authentication-and-secure-session-storage.md)
 * [ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md](decisions/ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md)
+* [ADR-012-service-offerings-availability-and-discovery.md](decisions/ADR-012-service-offerings-availability-and-discovery.md)
 
 ### `workflows/`
 

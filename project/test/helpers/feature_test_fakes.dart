@@ -2,10 +2,19 @@ import 'package:home_cleaning_marketplace/features/addresses/data/address.dart';
 import 'package:home_cleaning_marketplace/features/addresses/presentation/address_controller.dart';
 import 'package:home_cleaning_marketplace/features/admin/data/admin_cleaner_models.dart';
 import 'package:home_cleaning_marketplace/features/admin/presentation/admin_cleaner_review_controller.dart';
+import 'package:home_cleaning_marketplace/features/availability/data/availability_slot.dart';
+import 'package:home_cleaning_marketplace/features/availability/presentation/availability_controller.dart';
+import 'package:home_cleaning_marketplace/features/catalog/data/marketplace_service.dart';
+import 'package:home_cleaning_marketplace/features/catalog/presentation/catalog_controller.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/data/cleaner_profile.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/presentation/cleaner_onboarding_controller.dart';
+import 'package:home_cleaning_marketplace/features/cleaner_services/data/cleaner_service_offering.dart';
+import 'package:home_cleaning_marketplace/features/cleaner_services/presentation/cleaner_service_controller.dart';
 import 'package:home_cleaning_marketplace/features/customer/data/customer_profile.dart';
 import 'package:home_cleaning_marketplace/features/customer/presentation/customer_profile_controller.dart';
+import 'package:home_cleaning_marketplace/features/discovery/data/cleaner_discovery_models.dart';
+import 'package:home_cleaning_marketplace/features/discovery/presentation/comparison_controller.dart';
+import 'package:home_cleaning_marketplace/features/discovery/presentation/discovery_controller.dart';
 
 class SeededCustomerProfileController extends CustomerProfileController {
   SeededCustomerProfileController(this._seed);
@@ -151,6 +160,143 @@ class SeededAdminCleanerReviewController extends AdminCleanerReviewController {
   }
 }
 
+class SeededCatalogController extends CatalogController {
+  SeededCatalogController(this._seed);
+
+  final CatalogState _seed;
+
+  @override
+  CatalogState build() => _seed;
+
+  @override
+  Future<void> load() async {}
+}
+
+class SeededCleanerServiceController extends CleanerServiceController {
+  SeededCleanerServiceController(this._seed);
+
+  final CleanerServiceState _seed;
+  int saveCalls = 0;
+  int deactivateCalls = 0;
+
+  @override
+  CleanerServiceState build() => _seed;
+
+  @override
+  Future<void> load() async {}
+
+  @override
+  Future<bool> save({
+    required String serviceId,
+    required int hourlyRateMinor,
+    required String currencyCode,
+    required bool isActive,
+  }) async {
+    saveCalls += 1;
+    state = state.copyWith(saving: true);
+    return true;
+  }
+
+  @override
+  Future<bool> deactivate(String serviceId) async {
+    deactivateCalls += 1;
+    return true;
+  }
+}
+
+class SeededAvailabilityController extends AvailabilityController {
+  SeededAvailabilityController(this._seed);
+
+  final AvailabilityState _seed;
+  int createCalls = 0;
+  int updateCalls = 0;
+  int deleteCalls = 0;
+
+  @override
+  AvailabilityState build() => _seed;
+
+  @override
+  Future<void> load() async {}
+
+  @override
+  Future<bool> create({
+    required String serviceId,
+    required String startAt,
+    required String endAt,
+  }) async {
+    createCalls += 1;
+    return true;
+  }
+
+  @override
+  Future<bool> update({
+    required String slotId,
+    required String serviceId,
+    required String startAt,
+    required String endAt,
+  }) async {
+    updateCalls += 1;
+    return true;
+  }
+
+  @override
+  Future<bool> delete(String slotId) async {
+    deleteCalls += 1;
+    return true;
+  }
+}
+
+class SeededDiscoveryController extends DiscoveryController {
+  SeededDiscoveryController(this._seed);
+
+  final DiscoveryState _seed;
+  int loadCalls = 0;
+  int loadMoreCalls = 0;
+  int loadDetailCalls = 0;
+  DiscoveryFilters? lastFilters;
+
+  @override
+  DiscoveryState build() => _seed;
+
+  @override
+  Future<void> load({DiscoveryFilters? filters}) async {
+    loadCalls += 1;
+    lastFilters = filters ?? state.filters;
+    if (filters != null) {
+      state = DiscoveryState(
+        loading: false,
+        items: state.items,
+        nextCursor: state.nextCursor,
+        filters: filters,
+      );
+    }
+  }
+
+  @override
+  Future<void> applyFilters(DiscoveryFilters filters) {
+    return load(filters: filters);
+  }
+
+  @override
+  Future<void> loadMore() async {
+    loadMoreCalls += 1;
+  }
+
+  @override
+  Future<void> loadDetail(String cleanerUserId) async {
+    loadDetailCalls += 1;
+  }
+}
+
+class SeededComparisonController extends ComparisonController {
+  SeededComparisonController(this._seed);
+
+  final ComparisonState _seed;
+
+  @override
+  ComparisonState build() => _seed;
+}
+
 CustomerProfile testCustomerProfile() {
   final created = DateTime.utc(2026, 8, 25, 12);
   return CustomerProfile(
@@ -229,7 +375,106 @@ List<dynamic> featureControllerOverrides() {
         const AdminCleanerReviewState(loading: false),
       ),
     ),
+    catalogControllerProvider.overrideWith(
+      () => SeededCatalogController(
+        CatalogState(loading: false, items: [testMarketplaceService()]),
+      ),
+    ),
+    cleanerServiceControllerProvider.overrideWith(
+      () => SeededCleanerServiceController(
+        const CleanerServiceState(loading: false),
+      ),
+    ),
+    availabilityControllerProvider.overrideWith(
+      () =>
+          SeededAvailabilityController(const AvailabilityState(loading: false)),
+    ),
+    discoveryControllerProvider.overrideWith(
+      () => SeededDiscoveryController(const DiscoveryState(loading: false)),
+    ),
+    comparisonControllerProvider.overrideWith(
+      () => SeededComparisonController(const ComparisonState()),
+    ),
   ];
+}
+
+MarketplaceService testMarketplaceService({
+  String id = '507f1f77bcf86cd799439051',
+  String slug = 'home-cleaning',
+  String name = 'Home Cleaning',
+}) {
+  return MarketplaceService(
+    id: id,
+    slug: slug,
+    name: name,
+    description: 'Hourly professional home cleaning.',
+    billingModel: BillingModel.hourly,
+  );
+}
+
+CleanerServiceOffering testCleanerServiceOffering({
+  bool isActive = true,
+  int hourlyRateMinor = 250000,
+  String currencyCode = 'BDT',
+}) {
+  final created = DateTime.utc(2026, 8, 25, 12);
+  return CleanerServiceOffering(
+    id: '507f1f77bcf86cd799439061',
+    service: testMarketplaceService(),
+    hourlyRateMinor: hourlyRateMinor,
+    currencyCode: currencyCode,
+    isActive: isActive,
+    createdAt: created,
+    updatedAt: created,
+  );
+}
+
+AvailabilitySlot testAvailabilitySlot({
+  String id = '507f1f77bcf86cd799439071',
+}) {
+  return AvailabilitySlot(
+    id: id,
+    serviceId: testMarketplaceService().id,
+    startAt: DateTime.utc(2026, 9, 1, 3),
+    endAt: DateTime.utc(2026, 9, 1, 5),
+    createdAt: DateTime.utc(2026, 8, 25, 12),
+    updatedAt: DateTime.utc(2026, 8, 25, 12),
+  );
+}
+
+CleanerDiscoverySummary testDiscoverySummary({
+  String cleanerUserId = '507f1f77bcf86cd799439081',
+  String fullName = 'Ada Cleaner',
+  String currencyCode = 'BDT',
+  int hourlyRateMinor = 250000,
+}) {
+  return CleanerDiscoverySummary(
+    cleanerUserId: cleanerUserId,
+    fullName: fullName,
+    bioExcerpt: 'Reliable cleaner for apartments.',
+    yearsExperience: 4,
+    serviceArea: 'Dhaka North',
+    service: testMarketplaceService(),
+    hourlyRateMinor: hourlyRateMinor,
+    currencyCode: currencyCode,
+    nextAvailableAt: DateTime.utc(2026, 9, 1, 3),
+  );
+}
+
+CleanerDiscoveryDetail testDiscoveryDetail({
+  String cleanerUserId = '507f1f77bcf86cd799439081',
+}) {
+  return CleanerDiscoveryDetail(
+    cleanerUserId: cleanerUserId,
+    fullName: 'Ada Cleaner',
+    bio: 'Reliable cleaner for apartments.',
+    yearsExperience: 4,
+    serviceArea: 'Dhaka North',
+    service: testMarketplaceService(),
+    hourlyRateMinor: 250000,
+    currencyCode: 'BDT',
+    availability: [testAvailabilitySlot()],
+  );
 }
 
 Map<String, dynamic> customerProfileJson({
@@ -300,5 +545,61 @@ Map<String, dynamic> adminSummaryJson() {
     'email': 'pending.cleaner@example.com',
     'onboarding_status': 'pending',
     'submitted_at': '2026-08-25T12:00:00.000Z',
+  };
+}
+
+Map<String, dynamic> marketplaceServiceJson() {
+  return <String, dynamic>{
+    'id': '507f1f77bcf86cd799439051',
+    'slug': 'home-cleaning',
+    'name': 'Home Cleaning',
+    'description': 'Hourly professional home cleaning.',
+    'billing_model': 'hourly',
+  };
+}
+
+Map<String, dynamic> cleanerOfferingJson({bool isActive = true}) {
+  return <String, dynamic>{
+    'id': '507f1f77bcf86cd799439061',
+    'service': marketplaceServiceJson(),
+    'hourly_rate_minor': 250000,
+    'currency_code': 'BDT',
+    'is_active': isActive,
+    'created_at': '2026-08-25T12:00:00.000Z',
+    'updated_at': '2026-08-25T12:00:00.000Z',
+  };
+}
+
+Map<String, dynamic> availabilitySlotJson({
+  String id = '507f1f77bcf86cd799439071',
+}) {
+  return <String, dynamic>{
+    'id': id,
+    'service_id': '507f1f77bcf86cd799439051',
+    'start_at': '2026-09-01T03:00:00.000Z',
+    'end_at': '2026-09-01T05:00:00.000Z',
+    'created_at': '2026-08-25T12:00:00.000Z',
+    'updated_at': '2026-08-25T12:00:00.000Z',
+  };
+}
+
+Map<String, dynamic> discoverySummaryJson({
+  String cleanerUserId = '507f1f77bcf86cd799439081',
+  String fullName = 'Ada Cleaner',
+}) {
+  return <String, dynamic>{
+    'cleaner_user_id': cleanerUserId,
+    'full_name': fullName,
+    'bio_excerpt': 'Reliable cleaner for apartments.',
+    'years_experience': 4,
+    'service_area': 'Dhaka North',
+    'service': <String, dynamic>{
+      'id': '507f1f77bcf86cd799439051',
+      'slug': 'home-cleaning',
+      'name': 'Home Cleaning',
+    },
+    'hourly_rate_minor': 250000,
+    'currency_code': 'BDT',
+    'next_available_at': '2026-09-01T03:00:00.000Z',
   };
 }

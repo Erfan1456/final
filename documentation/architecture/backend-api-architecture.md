@@ -2,7 +2,7 @@
 
 This document describes the Dart Frog backend for the Home Cleaning Service Marketplace.
 
-TASK 011 added public authentication HTTP routes. TASK 012 added Bearer access-token authentication and protected account routes. TASK 013 added role-scoped customer profile, address, cleaner onboarding, and admin review routes. Bookings, payments, chat, reviews, cleaner services, availability, and discovery are not implemented.
+TASK 013 added role-scoped customer profile, address, cleaner onboarding, and admin review routes. TASK 014 added the public service catalog, cleaner offerings, availability, and customer discovery. Bookings, payments, chat, and reviews are not implemented.
 
 ## Current Architecture
 
@@ -20,7 +20,7 @@ MongoDB Atlas
 
 MongoDB credentials exist only on the backend/server environment. Flutter will never receive the MongoDB URI.
 
-See [../database/mongodb-atlas-integration.md](../database/mongodb-atlas-integration.md), [../database/users-collection.md](../database/users-collection.md), [../database/user-sessions-collection.md](../database/user-sessions-collection.md), [../database/customer-profiles-collection.md](../database/customer-profiles-collection.md), [../database/cleaner-profiles-collection.md](../database/cleaner-profiles-collection.md), [../database/addresses-collection.md](../database/addresses-collection.md), [password-security.md](password-security.md), [auth-token-and-session-security.md](auth-token-and-session-security.md), [authentication-application-flow.md](authentication-application-flow.md), [protected-api-authentication.md](protected-api-authentication.md), [flutter-authentication.md](flutter-authentication.md), [profile-address-and-cleaner-onboarding.md](profile-address-and-cleaner-onboarding.md), [../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md](../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md), [../decisions/ADR-006-user-account-persistence-model.md](../decisions/ADR-006-user-account-persistence-model.md), [../decisions/ADR-007-password-hashing-and-policy.md](../decisions/ADR-007-password-hashing-and-policy.md), [../decisions/ADR-008-access-and-refresh-token-strategy.md](../decisions/ADR-008-access-and-refresh-token-strategy.md), [../decisions/ADR-009-authentication-application-flow.md](../decisions/ADR-009-authentication-application-flow.md), [../decisions/ADR-010-flutter-authentication-and-secure-session-storage.md](../decisions/ADR-010-flutter-authentication-and-secure-session-storage.md), and [../decisions/ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md](../decisions/ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md).
+See [../database/mongodb-atlas-integration.md](../database/mongodb-atlas-integration.md), [../database/users-collection.md](../database/users-collection.md), [../database/user-sessions-collection.md](../database/user-sessions-collection.md), [../database/customer-profiles-collection.md](../database/customer-profiles-collection.md), [../database/cleaner-profiles-collection.md](../database/cleaner-profiles-collection.md), [../database/addresses-collection.md](../database/addresses-collection.md), [../database/services-collection.md](../database/services-collection.md), [../database/cleaner-services-collection.md](../database/cleaner-services-collection.md), [../database/availability-slots-collection.md](../database/availability-slots-collection.md), [password-security.md](password-security.md), [auth-token-and-session-security.md](auth-token-and-session-security.md), [authentication-application-flow.md](authentication-application-flow.md), [protected-api-authentication.md](protected-api-authentication.md), [flutter-authentication.md](flutter-authentication.md), [profile-address-and-cleaner-onboarding.md](profile-address-and-cleaner-onboarding.md), [service-availability-and-discovery.md](service-availability-and-discovery.md), [../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md](../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md), [../decisions/ADR-006-user-account-persistence-model.md](../decisions/ADR-006-user-account-persistence-model.md), [../decisions/ADR-007-password-hashing-and-policy.md](../decisions/ADR-007-password-hashing-and-policy.md), [../decisions/ADR-008-access-and-refresh-token-strategy.md](../decisions/ADR-008-access-and-refresh-token-strategy.md), [../decisions/ADR-009-authentication-application-flow.md](../decisions/ADR-009-authentication-application-flow.md), [../decisions/ADR-010-flutter-authentication-and-secure-session-storage.md](../decisions/ADR-010-flutter-authentication-and-secure-session-storage.md), [../decisions/ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md](../decisions/ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md), and [../decisions/ADR-012-service-offerings-availability-and-discovery.md](../decisions/ADR-012-service-offerings-availability-and-discovery.md).
 
 ## Dart Frog Responsibilities
 
@@ -79,9 +79,20 @@ GET /api/v1/admin/cleaners
 GET /api/v1/admin/cleaners/<userId>
 POST /api/v1/admin/cleaners/<userId>/approve
 POST /api/v1/admin/cleaners/<userId>/reject
+GET /api/v1/services
+GET /api/v1/cleaner/services
+PUT /api/v1/cleaner/services/<serviceId>
+DELETE /api/v1/cleaner/services/<serviceId>
+GET /api/v1/cleaner/availability
+POST /api/v1/cleaner/availability
+GET /api/v1/cleaner/availability/<slotId>
+PUT /api/v1/cleaner/availability/<slotId>
+DELETE /api/v1/cleaner/availability/<slotId>
+GET /api/v1/discovery/cleaners
+GET /api/v1/discovery/cleaners/<cleanerUserId>
 ```
 
-`GET /api/v1/health` is liveness and does not depend on MongoDB. `GET /api/v1/ready` is readiness and performs a MongoDB ping. Authentication routes are documented in [../api/authentication-api.md](../api/authentication-api.md). Role-scoped profile, address, onboarding, and admin review routes are documented in [../api/profile-address-onboarding-admin-api.md](../api/profile-address-onboarding-admin-api.md). See also [authentication-application-flow.md](authentication-application-flow.md), [protected-api-authentication.md](protected-api-authentication.md), [profile-address-and-cleaner-onboarding.md](profile-address-and-cleaner-onboarding.md), and [../decisions/ADR-009-authentication-application-flow.md](../decisions/ADR-009-authentication-application-flow.md).
+`GET /api/v1/health` is liveness and does not depend on MongoDB. `GET /api/v1/ready` is readiness and performs a MongoDB ping. Authentication routes are documented in [../api/authentication-api.md](../api/authentication-api.md). Role-scoped profile, address, onboarding, and admin review routes are documented in [../api/profile-address-onboarding-admin-api.md](../api/profile-address-onboarding-admin-api.md). Catalog, offering, availability, and discovery routes are documented in [../api/services-availability-discovery-api.md](../api/services-availability-discovery-api.md). See also [authentication-application-flow.md](authentication-application-flow.md), [protected-api-authentication.md](protected-api-authentication.md), [profile-address-and-cleaner-onboarding.md](profile-address-and-cleaner-onboarding.md), [service-availability-and-discovery.md](service-availability-and-discovery.md), and [../decisions/ADR-009-authentication-application-flow.md](../decisions/ADR-009-authentication-application-flow.md).
 
 ## Configuration
 
@@ -108,4 +119,4 @@ Flutter will never receive the MongoDB URI. The Flutter client will call this AP
 
 Backend infrastructure, liveness health, MongoDB connectivity, ping readiness, users persistence, Argon2id password-security primitives, access-token/refresh-session primitives, public authentication HTTP routes, and protected account routes exist.
 
-There is still no product CRUD. Auth endpoints are not ready for unrestricted public internet exposure until production rate limiting is added.
+There is still no booking or payment product. Auth endpoints are not ready for unrestricted public internet exposure until production rate limiting is added.

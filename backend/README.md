@@ -19,8 +19,9 @@ MongoDB Atlas is the persistence provider. `mongo_dart` is the backend driver. U
 * `GET`/`PUT /api/v1/cleaner/profile`
 * `POST /api/v1/cleaner/onboarding/submit`
 * admin cleaner list, detail, approve, and reject
+* public service catalog, cleaner offerings, availability, and customer discovery
 
-TASK 013 did not create live profile, address, or onboarding documents in Atlas. Bookings, payments, chat, reviews, cleaner services, availability, and discovery are still absent.
+TASK 014 may ensure approved indexes and the canonical `home-cleaning` catalog document through controlled tools. It does not create live cleaner offerings or availability. Bookings, payments, chat, and reviews are still absent.
 
 Do not place a real MongoDB URI, passwords, or other secrets in this package. Flutter never receives the MongoDB connection URI.
 
@@ -45,8 +46,12 @@ Do not place a real MongoDB URI, passwords, or other secrets in this package. Fl
 * `GET /api/v1/admin/cleaners/{userId}`
 * `POST /api/v1/admin/cleaners/{userId}/approve`
 * `POST /api/v1/admin/cleaners/{userId}/reject`
+* `GET /api/v1/services`
+* `GET`/`PUT`/`DELETE /api/v1/cleaner/services[/{serviceId}]`
+* `GET`/`POST`/`PUT`/`DELETE /api/v1/cleaner/availability[/{slotId}]`
+* `GET /api/v1/discovery/cleaners[/{cleanerUserId}]`
 
-See [../documentation/api/authentication-api.md](../documentation/api/authentication-api.md), [../documentation/api/profile-address-onboarding-admin-api.md](../documentation/api/profile-address-onboarding-admin-api.md), and [../documentation/architecture/protected-api-authentication.md](../documentation/architecture/protected-api-authentication.md). These auth endpoints require production rate limiting before unrestricted internet exposure. Bookings, payments, chat, and cleaner services are still absent.
+See [../documentation/api/authentication-api.md](../documentation/api/authentication-api.md), [../documentation/api/profile-address-onboarding-admin-api.md](../documentation/api/profile-address-onboarding-admin-api.md), [../documentation/api/services-availability-discovery-api.md](../documentation/api/services-availability-discovery-api.md), and [../documentation/architecture/protected-api-authentication.md](../documentation/architecture/protected-api-authentication.md). These auth endpoints require production rate limiting before unrestricted internet exposure. Bookings, payments, chat, and reviews are still absent.
 
 ## Configuration
 
@@ -103,6 +108,10 @@ When the Flutter Android emulator calls this API, use `http://10.0.2.2:8080` ins
 * `lib/src/features/customer_profiles/` — customer profile application/repository
 * `lib/src/features/addresses/` — owned service addresses
 * `lib/src/features/cleaner_profiles/` — cleaner onboarding and admin review
+* `lib/src/features/services/` — platform catalog
+* `lib/src/features/cleaner_services/` — cleaner offerings
+* `lib/src/features/availability/` — UTC availability slots
+* `lib/src/features/discovery/` — customer-safe discovery
 * `lib/src/features/auth/application/` — authentication use cases
 * `lib/src/features/auth/http/` — auth JSON parsing, Bearer verification, and error mapping
 * `lib/src/features/auth/security/` — password policy and Argon2id hashing
@@ -124,7 +133,9 @@ Business logic should not accumulate in route handlers. Future features should a
 * Protected account routes (`GET /account/me`, `DELETE /account/sessions`)
 * Role-scoped customer profile and address routes
 * Cleaner onboarding and admin review routes
-* Approved `customer_profiles`, `cleaner_profiles`, and `addresses` indexes
-* No bookings, payments, chat, or cleaner service catalog
+* Platform service catalog, cleaner offerings, availability, and customer discovery
+* Approved `customer_profiles`, `cleaner_profiles`, `addresses`, `services`, `cleaner_services`, and `availability_slots` indexes
+* No bookings, payments, chat, or reviews
+* No production rate limiting yet
 * No production rate limiting yet
 * CORS is a small development-oriented foundation, not a complete production security policy

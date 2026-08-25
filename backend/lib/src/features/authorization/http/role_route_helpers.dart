@@ -57,3 +57,30 @@ Response cleanerApplicationNotFoundResponse() {
     statusCode: HttpStatus.notFound,
   );
 }
+
+/// 404 used when a cleaner availability path id is malformed or not owned.
+Response availabilityNotFoundResponse() {
+  return jsonError(
+    code: 'availability_not_found',
+    message: 'Availability slot was not found.',
+    statusCode: HttpStatus.notFound,
+  );
+}
+
+/// 404 used when a platform service path id is malformed or unknown.
+Response serviceNotFoundResponse() {
+  return jsonError(
+    code: 'service_not_found',
+    message: 'Service was not found.',
+    statusCode: HttpStatus.notFound,
+  );
+}
+
+/// 404 used when a customer cannot see the requested cleaner.
+Response cleanerNotFoundResponse() {
+  return jsonError(
+    code: 'cleaner_not_found',
+    message: 'Cleaner was not found.',
+    statusCode: HttpStatus.notFound,
+  );
+}

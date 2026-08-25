@@ -7,8 +7,11 @@ import 'package:home_cleaning_marketplace_api/src/database/database_indexes.dart
 import 'package:home_cleaning_marketplace_api/src/database/mongo_database.dart';
 import 'package:home_cleaning_marketplace_api/src/features/addresses/data/address_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/session_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/availability/data/availability_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/services/data/service_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/user_indexes.dart';
 
 /// Ensures approved MongoDB indexes. Prints only sanitized operational status.
@@ -49,6 +52,15 @@ Future<void> main() async {
     final addressIndexes = await db
         .collection(CollectionNames.addresses)
         .getIndexes();
+    final serviceIndexes = await db
+        .collection(CollectionNames.services)
+        .getIndexes();
+    final offeringIndexes = await db
+        .collection(CollectionNames.cleanerServices)
+        .getIndexes();
+    final slotIndexes = await db
+        .collection(CollectionNames.availabilitySlots)
+        .getIndexes();
 
     if (!_hasNamedIndex(usersIndexes, usersEmailNormalizedUniqueIndexName) ||
         !_hasNamedIndex(
@@ -74,6 +86,29 @@ Future<void> main() async {
         !_hasNamedIndex(
           addressIndexes,
           addressesUserIdCreatedAtIndexName,
+        ) ||
+        !_hasNamedIndex(serviceIndexes, servicesSlugUniqueIndexName) ||
+        !_hasNamedIndex(serviceIndexes, servicesActiveSlugIndexName) ||
+        !_hasNamedIndex(
+          offeringIndexes,
+          cleanerServicesCleanerServiceUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(
+          offeringIndexes,
+          cleanerServicesServiceActiveIdIndexName,
+        ) ||
+        !_hasNamedIndex(
+          offeringIndexes,
+          cleanerServicesServiceCurrencyRateIdIndexName,
+        ) ||
+        !_hasNamedIndex(
+          slotIndexes,
+          availabilitySlotsCleanerStartUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(slotIndexes, availabilitySlotsServiceStartIndexName) ||
+        !_hasNamedIndex(
+          slotIndexes,
+          availabilitySlotsCleanerServiceStartIndexName,
         )) {
       stderr.writeln('Database indexes could not be ensured.');
       exitCode = 1;
@@ -111,7 +146,30 @@ Future<void> main() async {
       ..writeln(
         'key = $addressesUserIdField ascending, '
         '$addressesCreatedAtField descending',
-      );
+      )
+      ..writeln('$servicesSlugUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('key = $servicesSlugField ascending')
+      ..writeln('$servicesActiveSlugIndexName exists')
+      ..writeln(
+        'key = $servicesActiveField ascending, $servicesSlugField ascending',
+      )
+      ..writeln('$cleanerServicesCleanerServiceUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln(
+        'key = $cleanerServicesCleanerUserIdField ascending, '
+        '$cleanerServicesServiceIdField ascending',
+      )
+      ..writeln('$cleanerServicesServiceActiveIdIndexName exists')
+      ..writeln('$cleanerServicesServiceCurrencyRateIdIndexName exists')
+      ..writeln('$availabilitySlotsCleanerStartUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln(
+        'key = $availabilitySlotsCleanerUserIdField ascending, '
+        '$availabilitySlotsStartAtField ascending',
+      )
+      ..writeln('$availabilitySlotsServiceStartIndexName exists')
+      ..writeln('$availabilitySlotsCleanerServiceStartIndexName exists');
   } catch (_) {
     stderr.writeln('Database indexes could not be ensured.');
     exitCode = 1;

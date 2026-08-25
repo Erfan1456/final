@@ -61,7 +61,7 @@ features/
 
 Those nested folders are created only when a real feature needs them. Empty architecture folders are not created for unimplemented features.
 
-Authentication now lives under `features/auth/`. Customer, address, cleaner, and admin feature folders were added in TASK 013. See [flutter-authentication.md](flutter-authentication.md) and [profile-address-and-cleaner-onboarding.md](profile-address-and-cleaner-onboarding.md).
+Authentication now lives under `features/auth/`. Customer, address, cleaner, admin, catalog, cleaner_services, availability, and discovery feature folders exist. See [flutter-authentication.md](flutter-authentication.md), [profile-address-and-cleaner-onboarding.md](profile-address-and-cleaner-onboarding.md), and [service-availability-and-discovery.md](service-availability-and-discovery.md).
 
 ## State Management
 
@@ -79,7 +79,7 @@ Future feature view models may use `Notifier` or `AsyncNotifier` when they have 
 
 `go_router` provides declarative navigation, a route hierarchy, and a boundary for later deep linking and authentication/role redirects.
 
-TASK 012 registers `/splash`, `/login`, `/signup`, and a compatibility `/home` redirect. TASK 013 adds role destinations `/customer/home`, `/cleaner/home`, and `/admin/home` plus profile, address, onboarding, and admin approval screens. Router guards are UX only; backend authorization remains authoritative. Bookings, payments, chat, and cleaner services remain unimplemented.
+TASK 012 registers `/splash`, `/login`, `/signup`, and a compatibility `/home` redirect. TASK 013 adds role destinations `/customer/home`, `/cleaner/home`, and `/admin/home` plus profile, address, onboarding, and admin approval screens. TASK 014 adds cleaner service/availability management and customer discovery, detail, and comparison routes. Router guards are UX only; backend authorization remains authoritative. Bookings, payments, chat, and reviews remain unimplemented.
 
 ## Networking
 
@@ -138,4 +138,4 @@ The domain/use-case layer is optional. Add it only when justified by complexity,
 
 ## Current State
 
-TASK 013 adds customer, address, cleaner onboarding, and admin review controller/widget/API tests. Marketplace product features such as booking, cleaner search, and payments are not implemented.
+TASK 014 adds catalog, cleaner offering/availability, discovery, and comparison controller/widget/API tests. Marketplace product features such as booking, payments, chat, and reviews are not implemented.

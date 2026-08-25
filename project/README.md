@@ -8,9 +8,9 @@ Repository-level documentation lives at [`../documentation/`](../documentation/)
 
 Flutter commands should be executed from this directory.
 
-Authentication is implemented as a vertical slice: secure token storage, signup/login/logout, session restoration, and go_router guards. TASK 013 adds role-aware customer, cleaner, and admin dashboards plus profile, address, onboarding, and approval screens. Bookings, payments, chat, and cleaner services are not implemented yet.
+Authentication is implemented as a vertical slice: secure token storage, signup/login/logout, session restoration, and go_router guards. TASK 013 adds role-aware customer, cleaner, and admin dashboards plus profile, address, onboarding, and approval screens. TASK 014 adds cleaner service/availability management and customer discovery, detail, and local comparison. Bookings, payments, chat, and reviews are not implemented yet.
 
-See [../documentation/architecture/flutter-authentication.md](../documentation/architecture/flutter-authentication.md) and [../documentation/architecture/profile-address-and-cleaner-onboarding.md](../documentation/architecture/profile-address-and-cleaner-onboarding.md).
+See [../documentation/architecture/flutter-authentication.md](../documentation/architecture/flutter-authentication.md), [../documentation/architecture/profile-address-and-cleaner-onboarding.md](../documentation/architecture/profile-address-and-cleaner-onboarding.md), and [../documentation/architecture/service-availability-and-discovery.md](../documentation/architecture/service-availability-and-discovery.md).
 
 ## Architecture
 
@@ -25,7 +25,7 @@ Major `lib/` directories:
 
 * `lib/app/` — application shell, routing, and theme
 * `lib/core/` — shared configuration and networking infrastructure
-* `lib/features/` — feature-oriented product code, including `auth`, `customer`, `addresses`, `cleaner`, and `admin`
+* `lib/features/` — feature-oriented product code, including `auth`, `customer`, `addresses`, `cleaner`, `admin`, `catalog`, `cleaner_services`, `availability`, and `discovery`
 
 `API_BASE_URL` is public runtime configuration supplied at compile time. It is not a secret. The Flutter client must never contain a MongoDB URI, `ACCESS_TOKEN_SECRET`, or other private credentials.
 

@@ -20,6 +20,11 @@ void main() {
       contains('cannot be edited'),
     );
     expect(
+      messageForApiCode('availability_overlap'),
+      equals('This availability window overlaps another slot.'),
+    );
+    expect(messageForApiCode('cleaner_not_approved'), contains('approved'));
+    expect(
       messageForApiCode('some_unknown_code'),
       equals('Something went wrong. Please try again.'),
     );

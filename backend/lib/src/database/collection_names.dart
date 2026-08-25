@@ -16,4 +16,13 @@ abstract final class CollectionNames {
 
   /// One cleaner marketplace profile and current onboarding lifecycle.
   static const String cleanerProfiles = 'cleaner_profiles';
+
+  /// Platform-owned service catalog definitions.
+  static const String services = 'services';
+
+  /// Cleaner offerings of platform services (pricing and activation).
+  static const String cleanerServices = 'cleaner_services';
+
+  /// Open future bookable availability windows for a cleaner and service.
+  static const String availabilitySlots = 'availability_slots';
 }

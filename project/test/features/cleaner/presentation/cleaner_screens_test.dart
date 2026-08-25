@@ -77,7 +77,9 @@ void main() {
     expect(find.text('Edit and resubmit'), findsOneWidget);
   });
 
-  testWidgets('approved states that services come next', (tester) async {
+  testWidgets('approved shows service and availability actions', (
+    tester,
+  ) async {
     await pumpCleanerHome(
       tester,
       CleanerOnboardingState(
@@ -85,10 +87,9 @@ void main() {
         profile: testCleanerProfile(status: OnboardingStatus.approved),
       ),
     );
-    expect(
-      find.textContaining('Service and availability setup comes next'),
-      findsOneWidget,
-    );
+    expect(find.text('Manage Services'), findsOneWidget);
+    expect(find.text('Manage Availability'), findsOneWidget);
+    expect(find.text('Start onboarding'), findsNothing);
   });
 
   testWidgets('onboarding draft is editable', (tester) async {

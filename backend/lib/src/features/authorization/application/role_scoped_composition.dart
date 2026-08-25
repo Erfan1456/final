@@ -5,13 +5,20 @@ import 'package:home_cleaning_marketplace_api/src/features/account/application/a
 import 'package:home_cleaning_marketplace_api/src/features/addresses/data/address_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/application/auth_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/http/access_authenticator.dart';
+import 'package:home_cleaning_marketplace_api/src/features/authorization/approved_cleaner_policy.dart';
 import 'package:home_cleaning_marketplace_api/src/features/authorization/current_authenticated_user_resolver.dart';
 import 'package:home_cleaning_marketplace_api/src/features/authorization/role_request_authorizer.dart';
+import 'package:home_cleaning_marketplace_api/src/features/availability/application/cleaner_availability_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/availability/data/availability_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/application/admin_cleaner_review_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/application/cleaner_onboarding_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/application/cleaner_service_management_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/application/customer_account_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/discovery/application/cleaner_discovery_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/services/data/service_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/mongo_user_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/user_repository.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide ServerConfig;
@@ -25,6 +32,10 @@ class RoleScopedComposition {
   static AdminCleanerReviewService? _admin;
   static CurrentAuthenticatedUserResolver? _resolver;
   static UserRepository? _users;
+  static ServiceRepository? _services;
+  static CleanerServiceManagementService? _serviceManagement;
+  static CleanerAvailabilityService? _availability;
+  static CleanerDiscoveryService? _discovery;
 
   /// Builds a [RoleRequestAuthorizer] from request providers.
   ///
@@ -88,6 +99,71 @@ class RoleScopedComposition {
     return _admin = AdminCleanerReviewService(
       profiles: MongoCleanerProfileRepository.fromDb(db),
       users: MongoUserRepository.fromDb(db),
+    );
+  }
+
+  /// Shared platform catalog repository.
+  static Future<ServiceRepository> services({
+    required MongoDatabase mongo,
+  }) async {
+    final cached = _services;
+    if (cached != null) {
+      return cached;
+    }
+    final db = await _requireDb(mongo);
+    return _services = MongoServiceRepository.fromDb(db);
+  }
+
+  /// Shared cleaner offering management.
+  static Future<CleanerServiceManagementService> cleanerServices({
+    required MongoDatabase mongo,
+  }) async {
+    final cached = _serviceManagement;
+    if (cached != null) {
+      return cached;
+    }
+    final db = await _requireDb(mongo);
+    final profiles = MongoCleanerProfileRepository.fromDb(db);
+    return _serviceManagement = CleanerServiceManagementService(
+      policy: ApprovedCleanerPolicy(profiles: profiles),
+      services: await services(mongo: mongo),
+      offerings: MongoCleanerServiceRepository.fromDb(db),
+    );
+  }
+
+  /// Shared cleaner availability management.
+  static Future<CleanerAvailabilityService> cleanerAvailability({
+    required MongoDatabase mongo,
+  }) async {
+    final cached = _availability;
+    if (cached != null) {
+      return cached;
+    }
+    final db = await _requireDb(mongo);
+    final profiles = MongoCleanerProfileRepository.fromDb(db);
+    return _availability = CleanerAvailabilityService(
+      policy: ApprovedCleanerPolicy(profiles: profiles),
+      services: await services(mongo: mongo),
+      offerings: MongoCleanerServiceRepository.fromDb(db),
+      slots: MongoAvailabilityRepository.fromDb(db),
+    );
+  }
+
+  /// Shared customer discovery.
+  static Future<CleanerDiscoveryService> discovery({
+    required MongoDatabase mongo,
+  }) async {
+    final cached = _discovery;
+    if (cached != null) {
+      return cached;
+    }
+    final db = await _requireDb(mongo);
+    return _discovery = CleanerDiscoveryService(
+      services: await services(mongo: mongo),
+      offerings: MongoCleanerServiceRepository.fromDb(db),
+      profiles: MongoCleanerProfileRepository.fromDb(db),
+      users: _users ??= MongoUserRepository.fromDb(db),
+      slots: MongoAvailabilityRepository.fromDb(db),
     );
   }
 

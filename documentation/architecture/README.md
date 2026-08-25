@@ -29,3 +29,4 @@ No architecture has been chosen in TASK 001. Concrete architecture documents sho
 * [protected-api-authentication.md](protected-api-authentication.md)
 * [flutter-authentication.md](flutter-authentication.md) — authentication application service, signup/login/refresh/logout flow, dummy-hash login, and transparent rehash.
 * [profile-address-and-cleaner-onboarding.md](profile-address-and-cleaner-onboarding.md) — persisted-role authorization, profiles, addresses, cleaner lifecycle, and Flutter role dashboards.
+* [service-availability-and-discovery.md](service-availability-and-discovery.md) — catalog, offerings, UTC availability, customer discovery, and local comparison.

@@ -73,6 +73,19 @@ abstract final class DocumentFields {
     throw onError('$field must be int.');
   }
 
+  /// Requires [field] to be a Dart [bool]. Rejects other types.
+  static bool requireBool(
+    Map<String, dynamic> document,
+    String field,
+    Exception Function(String message) onError,
+  ) {
+    final value = document[field];
+    if (value is bool) {
+      return value;
+    }
+    throw onError('$field must be bool.');
+  }
+
   /// Requires [field] to be a UTC [DateTime].
   static DateTime requireUtcDateTime(
     Map<String, dynamic> document,

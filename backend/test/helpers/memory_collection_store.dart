@@ -1,5 +1,6 @@
 import 'package:home_cleaning_marketplace_api/src/database/collection_document_store.dart';
 import 'package:home_cleaning_marketplace_api/src/database/document_write_results.dart';
+import 'package:mongo_dart/mongo_dart.dart' hide ServerConfig;
 
 /// In-memory [CollectionDocumentStore] for Atlas-free repository tests.
 class MemoryCollectionDocumentStore implements CollectionDocumentStore {
@@ -18,8 +19,18 @@ class MemoryCollectionDocumentStore implements CollectionDocumentStore {
   /// Last update selector observed.
   Map<String, dynamic>? lastUpdateSelector;
 
+  /// Last delete selector observed.
+  Map<String, dynamic>? lastDeleteSelector;
+
+  /// Number of [findOne] invocations.
+  int findOneCalls = 0;
+
+  /// Number of [findMany] invocations.
+  int findManyCalls = 0;
+
   @override
   Future<Map<String, dynamic>?> findOne(Map<String, dynamic> selector) async {
+    findOneCalls += 1;
     for (final document in documents) {
       if (documentMatches(document, selector)) {
         return Map<String, dynamic>.from(document);
@@ -34,6 +45,7 @@ class MemoryCollectionDocumentStore implements CollectionDocumentStore {
     Map<String, int>? sort,
     int? limit,
   }) async {
+    findManyCalls += 1;
     final matched = [
       for (final document in documents)
         if (documentMatches(document, selector))
@@ -104,6 +116,7 @@ class MemoryCollectionDocumentStore implements CollectionDocumentStore {
 
   @override
   Future<DocumentDeleteResult> deleteOne(Map<String, dynamic> selector) async {
+    lastDeleteSelector = Map<String, dynamic>.from(selector);
     final index = documents.indexWhere(
       (document) => documentMatches(document, selector),
     );
@@ -121,6 +134,15 @@ bool documentMatches(
   Map<String, dynamic> selector,
 ) {
   for (final entry in selector.entries) {
+    if (entry.key == r'$and' && entry.value is List) {
+      for (final clause in entry.value as List) {
+        if (clause is! Map ||
+            !documentMatches(document, Map<String, dynamic>.from(clause))) {
+          return false;
+        }
+      }
+      continue;
+    }
     if (!_fieldMatches(document[entry.key], entry.value)) {
       return false;
     }
@@ -130,16 +152,38 @@ bool documentMatches(
 
 bool _fieldMatches(Object? actual, Object? expected) {
   if (expected is Map) {
-    if (expected.containsKey(r'$in')) {
-      final options = expected[r'$in'];
-      if (options is! List) {
-        return false;
+    for (final entry in expected.entries) {
+      switch (entry.key) {
+        case r'$in':
+          final options = entry.value;
+          if (options is! List || !options.any((option) => actual == option)) {
+            return false;
+          }
+        case r'$gt':
+          if (_compare(actual, entry.value) <= 0) {
+            return false;
+          }
+        case r'$gte':
+          if (_compare(actual, entry.value) < 0) {
+            return false;
+          }
+        case r'$lt':
+          if (_compare(actual, entry.value) >= 0) {
+            return false;
+          }
+        case r'$lte':
+          if (_compare(actual, entry.value) > 0) {
+            return false;
+          }
+        case r'$ne':
+          if (actual == entry.value) {
+            return false;
+          }
+        default:
+          return false;
       }
-      return options.any((option) => actual == option);
     }
-    if (expected.containsKey(r'$gt')) {
-      return _compare(actual, expected[r'$gt']) > 0;
-    }
+    return true;
   }
   return actual == expected;
 }
@@ -172,6 +216,9 @@ void _applyUpdate(
 }
 
 int _compare(Object? left, Object? right) {
+  if (left is ObjectId && right is ObjectId) {
+    return left.oid.compareTo(right.oid);
+  }
   if (left is DateTime && right is DateTime) {
     return left.compareTo(right);
   }

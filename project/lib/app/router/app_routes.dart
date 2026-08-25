@@ -23,6 +23,16 @@ abstract final class AppRoutes {
   static const String cleanerHomePath = '/cleaner/home';
   static const String cleanerHomeName = 'cleanerHome';
   static const String cleanerOnboardingPath = '/cleaner/onboarding';
+  static const String cleanerServicesPath = '/cleaner/services';
+  static const String cleanerAvailabilityPath = '/cleaner/availability';
+  static const String cleanerAvailabilityNewPath = '/cleaner/availability/new';
+  static const String cleanerAvailabilityEditPath =
+      '/cleaner/availability/:slotId/edit';
+
+  static const String customerDiscoverPath = '/customer/discover';
+  static const String customerCleanerDetailPath =
+      '/customer/cleaners/:cleanerUserId';
+  static const String customerComparePath = '/customer/compare';
 
   static const String adminHomePath = '/admin/home';
   static const String adminHomeName = 'adminHome';

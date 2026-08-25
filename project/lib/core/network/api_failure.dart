@@ -34,6 +34,26 @@ String messageForApiCode(String code) {
       return 'This onboarding action is not allowed right now.';
     case 'cleaner_application_not_found':
       return 'Cleaner application was not found.';
+    case 'service_not_found':
+      return 'Service was not found.';
+    case 'cleaner_not_approved':
+      return 'Your cleaner account must be approved before managing services.';
+    case 'cleaner_service_not_found':
+      return 'Service offering was not found.';
+    case 'invalid_hourly_rate':
+      return 'Hourly rate must be a whole number in minor units.';
+    case 'invalid_currency_code':
+      return 'Currency code must be three letters.';
+    case 'availability_not_found':
+      return 'Availability slot was not found.';
+    case 'availability_overlap':
+      return 'This availability window overlaps another slot.';
+    case 'availability_limit_reached':
+      return 'You can save at most 180 future availability slots.';
+    case 'invalid_availability_window':
+      return 'The availability window is invalid.';
+    case 'cleaner_not_found':
+      return 'Cleaner was not found.';
     case 'invalid_input':
       return 'Please check your details and try again.';
     case 'invalid_access_token':

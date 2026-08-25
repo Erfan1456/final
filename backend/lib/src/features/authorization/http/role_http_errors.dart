@@ -6,9 +6,12 @@ import 'package:home_cleaning_marketplace_api/src/features/auth/application/auth
 import 'package:home_cleaning_marketplace_api/src/features/auth/http/auth_http_errors.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/tokens/access_token_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/authorization/forbidden_exception.dart';
+import 'package:home_cleaning_marketplace_api/src/features/availability/domain/availability_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/domain/cleaner_profile_exceptions.dart';
+import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/domain/cleaner_service_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/domain/customer_profile_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/domain/profile_validation_exception.dart';
+import 'package:home_cleaning_marketplace_api/src/features/services/domain/service_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/http/json_response.dart';
 
 /// Maps role-scoped application failures to the JSON error envelope.
@@ -69,6 +72,62 @@ Response mapRoleScopedException(Exception error) {
     return jsonError(
       code: 'cleaner_application_not_found',
       message: 'Cleaner application was not found.',
+      statusCode: HttpStatus.notFound,
+    );
+  }
+  if (error is ServiceNotFoundException) {
+    return jsonError(
+      code: 'service_not_found',
+      message: 'Service was not found.',
+      statusCode: HttpStatus.notFound,
+    );
+  }
+  if (error is CleanerNotApprovedException) {
+    return jsonError(
+      code: 'cleaner_not_approved',
+      message:
+          'Your cleaner account must be approved before managing services.',
+      statusCode: HttpStatus.forbidden,
+    );
+  }
+  if (error is CleanerServiceNotFoundException) {
+    return jsonError(
+      code: 'cleaner_service_not_found',
+      message: 'Service offering was not found.',
+      statusCode: HttpStatus.notFound,
+    );
+  }
+  if (error is AvailabilityNotFoundException) {
+    return jsonError(
+      code: 'availability_not_found',
+      message: 'Availability slot was not found.',
+      statusCode: HttpStatus.notFound,
+    );
+  }
+  if (error is AvailabilityOverlapException) {
+    return jsonError(
+      code: 'availability_overlap',
+      message: 'This availability window overlaps another slot.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is AvailabilityLimitReachedException) {
+    return jsonError(
+      code: 'availability_limit_reached',
+      message: 'You can save at most 180 future availability slots.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is InvalidAvailabilityWindowException) {
+    return jsonError(
+      code: 'invalid_availability_window',
+      message: error.message,
+    );
+  }
+  if (error is CleanerNotFoundException) {
+    return jsonError(
+      code: 'cleaner_not_found',
+      message: 'Cleaner was not found.',
       statusCode: HttpStatus.notFound,
     );
   }

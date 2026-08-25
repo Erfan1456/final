@@ -41,6 +41,7 @@ void main() {
     expect(find.text('No default address selected'), findsOneWidget);
     expect(find.text('Manage Profile'), findsOneWidget);
     expect(find.text('Manage Addresses'), findsOneWidget);
+    expect(find.text('Find Cleaners'), findsOneWidget);
   });
 
   testWidgets('CustomerHome shows profile complete and default address', (

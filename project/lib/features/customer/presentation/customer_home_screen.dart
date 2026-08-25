@@ -55,6 +55,11 @@ class CustomerHomeScreen extends ConsumerWidget {
                 onPressed: () => context.push(AppRoutes.customerAddressesPath),
                 child: const Text('Manage Addresses'),
               ),
+              const SizedBox(height: 12),
+              FilledButton.tonal(
+                onPressed: () => context.push(AppRoutes.customerDiscoverPath),
+                child: const Text('Find Cleaners'),
+              ),
               const Spacer(),
               const LogoutActions(),
             ],

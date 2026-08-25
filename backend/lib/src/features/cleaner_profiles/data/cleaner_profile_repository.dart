@@ -52,6 +52,9 @@ abstract class CleanerProfileRepository {
   /// Returns the profile owned by [userId], or `null`.
   Future<CleanerProfile?> findByUserId(ObjectId userId);
 
+  /// Returns profiles whose `user_id` is in [ids]. Missing ids are omitted.
+  Future<List<CleanerProfile>> findByUserIds(Iterable<ObjectId> ids);
+
   /// Inserts a draft profile. Duplicate `user_id` is reported.
   Future<CleanerProfile> createDraft({
     required ObjectId userId,
@@ -108,6 +111,20 @@ class MongoCleanerProfileRepository implements CleanerProfileRepository {
   @override
   Future<CleanerProfile?> findByUserId(ObjectId userId) {
     return _find(<String, dynamic>{'user_id': userId});
+  }
+
+  @override
+  Future<List<CleanerProfile>> findByUserIds(Iterable<ObjectId> ids) async {
+    final unique = ids.toSet().toList();
+    if (unique.isEmpty) {
+      return const <CleanerProfile>[];
+    }
+    final documents = await _documents.findMany(
+      selector: <String, dynamic>{
+        'user_id': <String, dynamic>{r'$in': unique},
+      },
+    );
+    return documents.map(CleanerProfile.fromDocument).toList();
   }
 
   @override

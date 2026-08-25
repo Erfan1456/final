@@ -18,6 +18,8 @@ import 'package:test/test.dart';
 import '../../../../../routes/api/v1/admin/_middleware.dart' as admin_mw;
 import '../../../../../routes/api/v1/cleaner/_middleware.dart' as cleaner_mw;
 import '../../../../../routes/api/v1/customer/_middleware.dart' as customer_mw;
+import '../../../../../routes/api/v1/discovery/_middleware.dart'
+    as discovery_mw;
 
 class _MockUsers extends Mock implements UserRepository {}
 
@@ -259,6 +261,23 @@ void main() {
         jsonEncode(body),
         isNot(contains('hashed-password-must-not-appear')),
       );
+    });
+
+    test('cleaner and admin cannot use customer discovery routes', () async {
+      final cleaner = await send(
+        wrap: discovery_mw.middleware,
+        path: '/api/v1/discovery/cleaners',
+        jwtRole: UserRole.cleaner,
+        persisted: account(role: UserRole.cleaner),
+      );
+      expect(cleaner.statusCode, equals(HttpStatus.forbidden));
+      final admin = await send(
+        wrap: discovery_mw.middleware,
+        path: '/api/v1/discovery/cleaners',
+        jwtRole: UserRole.admin,
+        persisted: account(role: UserRole.admin),
+      );
+      expect(admin.statusCode, equals(HttpStatus.forbidden));
     });
   });
 }

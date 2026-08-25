@@ -41,7 +41,11 @@ The Dart Frog backend currently implements:
 * `GET /api/v1/admin/cleaners/{userId}` — application detail
 * `POST /api/v1/admin/cleaners/{userId}/approve` — approve pending cleaner
 * `POST /api/v1/admin/cleaners/{userId}/reject` — reject pending cleaner
+* `GET /api/v1/services` — public active catalog
+* cleaner service offering routes
+* cleaner availability routes
+* customer discovery list/detail
 
-See [authentication-api.md](authentication-api.md) and [profile-address-onboarding-admin-api.md](profile-address-onboarding-admin-api.md). `/api/v1/health` remains available even when MongoDB is unconfigured or unreachable. `/api/v1/ready` returns HTTP 200 when ping succeeds and HTTP 503 when the database is unconfigured or unavailable.
+See [authentication-api.md](authentication-api.md), [profile-address-onboarding-admin-api.md](profile-address-onboarding-admin-api.md), and [services-availability-discovery-api.md](services-availability-discovery-api.md). `/api/v1/health` remains available even when MongoDB is unconfigured or unreachable. `/api/v1/ready` returns HTTP 200 when ping succeeds and HTTP 503 when the database is unconfigured or unavailable.
 
-Bookings, payments, chat, reviews, cleaner services, availability, earnings, and discovery are not implemented. The auth routes are not ready for unrestricted public internet exposure until production rate limiting exists.
+Bookings, payments, chat, reviews, earnings, maps, and geocoding are not implemented. The auth routes are not ready for unrestricted public internet exposure until production rate limiting exists.

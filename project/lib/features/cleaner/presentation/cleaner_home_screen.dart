@@ -35,7 +35,7 @@ class CleanerHomeScreen extends ConsumerWidget {
           'Rejected: ${profile.rejectionReason ?? 'Please edit and resubmit.'}';
       actionLabel = 'Edit and resubmit';
     } else if (status == OnboardingStatus.approved) {
-      message = 'You are approved. Service and availability setup comes next.';
+      message = 'You are approved. Manage services and availability below.';
     } else {
       message = 'Onboarding status is unavailable.';
     }
@@ -59,6 +59,19 @@ class CleanerHomeScreen extends ConsumerWidget {
                   onPressed: () =>
                       context.push(AppRoutes.cleanerOnboardingPath),
                   child: Text(actionLabel),
+                ),
+              ],
+              if (status == OnboardingStatus.approved) ...[
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: () => context.push(AppRoutes.cleanerServicesPath),
+                  child: const Text('Manage Services'),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: () =>
+                      context.push(AppRoutes.cleanerAvailabilityPath),
+                  child: const Text('Manage Availability'),
                 ),
               ],
               const Spacer(),

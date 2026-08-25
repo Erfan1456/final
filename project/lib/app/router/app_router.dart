@@ -12,10 +12,16 @@ import 'package:home_cleaning_marketplace/features/auth/presentation/auth_contro
 import 'package:home_cleaning_marketplace/features/auth/presentation/login_screen.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/signup_screen.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/splash_screen.dart';
+import 'package:home_cleaning_marketplace/features/availability/presentation/cleaner_availability_form_screen.dart';
+import 'package:home_cleaning_marketplace/features/availability/presentation/cleaner_availability_screen.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/presentation/cleaner_home_screen.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/presentation/cleaner_onboarding_screen.dart';
+import 'package:home_cleaning_marketplace/features/cleaner_services/presentation/cleaner_service_management_screen.dart';
 import 'package:home_cleaning_marketplace/features/customer/presentation/customer_home_screen.dart';
 import 'package:home_cleaning_marketplace/features/customer/presentation/customer_profile_screen.dart';
+import 'package:home_cleaning_marketplace/features/discovery/presentation/cleaner_comparison_screen.dart';
+import 'package:home_cleaning_marketplace/features/discovery/presentation/cleaner_discovery_detail_screen.dart';
+import 'package:home_cleaning_marketplace/features/discovery/presentation/cleaner_discovery_screen.dart';
 
 class _RouterRefresh extends ChangeNotifier {
   void ping() => notifyListeners();
@@ -117,6 +123,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: AppRoutes.customerDiscoverPath,
+        builder: (context, state) => const CleanerDiscoveryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.customerCleanerDetailPath,
+        builder: (context, state) {
+          return CleanerDiscoveryDetailScreen(
+            cleanerUserId: state.pathParameters['cleanerUserId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.customerComparePath,
+        builder: (context, state) => const CleanerComparisonScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.cleanerHomePath,
         name: AppRoutes.cleanerHomeName,
         builder: (context, state) => const CleanerHomeScreen(),
@@ -124,6 +146,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.cleanerOnboardingPath,
         builder: (context, state) => const CleanerOnboardingScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.cleanerServicesPath,
+        builder: (context, state) => const CleanerServiceManagementScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.cleanerAvailabilityPath,
+        builder: (context, state) => const CleanerAvailabilityScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.cleanerAvailabilityNewPath,
+        builder: (context, state) => const CleanerAvailabilityFormScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.cleanerAvailabilityEditPath,
+        builder: (context, state) {
+          return CleanerAvailabilityFormScreen(
+            slotId: state.pathParameters['slotId'],
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.adminHomePath,
