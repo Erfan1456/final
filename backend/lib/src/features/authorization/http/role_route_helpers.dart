@@ -94,11 +94,38 @@ Response bookingNotFoundResponse() {
   );
 }
 
-/// 404 used when a payment path id is malformed or unknown.
+/// 404 used when a payment path id is malformed or not owned.
 Response paymentNotFoundResponse() {
   return jsonError(
     code: 'payment_not_found',
     message: 'Payment was not found.',
+    statusCode: HttpStatus.notFound,
+  );
+}
+
+/// 404 used when a conversation path id is malformed or not a member.
+Response conversationNotFoundResponse() {
+  return jsonError(
+    code: 'conversation_not_found',
+    message: 'Conversation was not found.',
+    statusCode: HttpStatus.notFound,
+  );
+}
+
+/// 404 used when a notification path id is malformed or not owned.
+Response notificationNotFoundResponse() {
+  return jsonError(
+    code: 'notification_not_found',
+    message: 'Notification was not found.',
+    statusCode: HttpStatus.notFound,
+  );
+}
+
+/// 404 used when a review path id is malformed or unknown.
+Response reviewNotFoundResponse() {
+  return jsonError(
+    code: 'review_not_found',
+    message: 'Review was not found.',
     statusCode: HttpStatus.notFound,
   );
 }

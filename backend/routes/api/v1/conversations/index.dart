@@ -1,0 +1,17 @@
+import 'package:dart_frog/dart_frog.dart';
+import 'package:home_cleaning_marketplace_api/src/features/authorization/http/role_route_helpers.dart';
+import 'package:home_cleaning_marketplace_api/src/features/chat/application/booking_conversation_service.dart';
+import 'package:home_cleaning_marketplace_api/src/http/json_response.dart';
+
+Future<Response> onRequest(RequestContext context) {
+  return handleRoleRequest(
+    context,
+    methods: {HttpMethod.get},
+    action: (scoped) async {
+      final conversations = context.read<BookingConversationService>();
+      return jsonSuccess(
+        await conversations.listConversations(user: scoped.currentUser),
+      );
+    },
+  );
+}

@@ -12,4 +12,11 @@ abstract final class RoleAuthorizer {
       throw const ForbiddenException();
     }
   }
+
+  /// Requires the persisted user role to be one of [allowedRoles].
+  static void requireAny(UserAccount user, Set<UserRole> allowedRoles) {
+    if (!allowedRoles.contains(user.role)) {
+      throw const ForbiddenException();
+    }
+  }
 }

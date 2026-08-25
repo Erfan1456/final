@@ -32,6 +32,7 @@ Current documents:
 * [service-availability-and-discovery.md](architecture/service-availability-and-discovery.md)
 * [booking-reservation-and-lifecycle.md](architecture/booking-reservation-and-lifecycle.md)
 * [payment-processing-and-webhooks.md](architecture/payment-processing-and-webhooks.md)
+* [chat-notifications-and-reviews.md](architecture/chat-notifications-and-reviews.md)
 
 ### `setup/`
 
@@ -60,6 +61,11 @@ Current documents:
 * [payments-collection.md](database/payments-collection.md)
 * [payment-webhook-events-collection.md](database/payment-webhook-events-collection.md)
 * [payment-refund-requests-collection.md](database/payment-refund-requests-collection.md)
+* [conversations-collection.md](database/conversations-collection.md)
+* [conversation-members-collection.md](database/conversation-members-collection.md)
+* [messages-collection.md](database/messages-collection.md)
+* [notifications-collection.md](database/notifications-collection.md)
+* [reviews-collection.md](database/reviews-collection.md)
 
 ### `api/`
 
@@ -72,6 +78,9 @@ Current documents:
 * [services-availability-discovery-api.md](api/services-availability-discovery-api.md)
 * [booking-api.md](api/booking-api.md)
 * [payment-api.md](api/payment-api.md)
+* [chat-api.md](api/chat-api.md)
+* [notification-api.md](api/notification-api.md)
+* [review-api.md](api/review-api.md)
 
 ### `features/`
 
@@ -96,6 +105,7 @@ Current documents:
 * [ADR-012-service-offerings-availability-and-discovery.md](decisions/ADR-012-service-offerings-availability-and-discovery.md)
 * [ADR-013-booking-reservation-idempotency-and-lifecycle.md](decisions/ADR-013-booking-reservation-idempotency-and-lifecycle.md)
 * [ADR-014-payment-provider-webhooks-and-refunds.md](decisions/ADR-014-payment-provider-webhooks-and-refunds.md)
+* [ADR-015-chat-notifications-and-verified-reviews.md](decisions/ADR-015-chat-notifications-and-verified-reviews.md)
 
 ### `workflows/`
 

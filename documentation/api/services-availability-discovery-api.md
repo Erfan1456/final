@@ -1,6 +1,6 @@
 # Services, Availability, and Discovery API
 
-TASK 014 adds a public service catalog, approved-cleaner service offerings, future availability slots, and customer-only discovery. TASK 015 books those slots; payment, chat, reviews, maps, geocoding, and admin catalog editors are not implemented. Discovery list/detail exclude slots with an active booking reservation via a batched lookup. See [booking-api.md](booking-api.md).
+TASK 014 adds a public service catalog, approved-cleaner service offerings, future availability slots, and customer-only discovery. TASK 015 books those slots. TASK 016 adds sandbox payments. TASK 017 adds published-review aggregates on discovery. Maps, geocoding, and admin catalog editors are not implemented. Discovery list/detail exclude slots with an active booking reservation via a batched lookup. See [booking-api.md](booking-api.md) and [review-api.md](review-api.md).
 
 All timestamps in requests must be ISO-8601 strings with an explicit timezone/offset. The backend normalizes to UTC. Timezone-less values are rejected.
 

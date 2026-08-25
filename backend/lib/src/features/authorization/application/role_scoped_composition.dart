@@ -13,6 +13,10 @@ import 'package:home_cleaning_marketplace_api/src/features/availability/data/ava
 import 'package:home_cleaning_marketplace_api/src/features/bookings/application/cleaner_booking_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/application/customer_booking_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/data/booking_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/chat/application/booking_conversation_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/chat/data/conversation_member_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/chat/data/conversation_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/chat/data/message_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/application/admin_cleaner_review_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/application/cleaner_onboarding_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_repository.dart';
@@ -21,6 +25,8 @@ import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/application/customer_account_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/discovery/application/cleaner_discovery_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/notifications/application/notification_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/notifications/data/notification_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/admin_payment_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/booking_cancellation_orchestrator.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/customer_payment_service.dart';
@@ -32,6 +38,10 @@ import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment
 import 'package:home_cleaning_marketplace_api/src/features/payments/provider/payment_provider.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/provider/payment_provider_resolver.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/provider/sandbox_payment_provider.dart';
+import 'package:home_cleaning_marketplace_api/src/features/reviews/application/admin_review_moderation_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/reviews/application/cleaner_review_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/reviews/application/customer_review_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/reviews/data/review_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/data/service_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/mongo_user_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/user_repository.dart';
@@ -57,6 +67,11 @@ class RoleScopedComposition {
   static PaymentWebhookService? _paymentWebhooks;
   static SandboxPaymentSimulationService? _sandboxSimulation;
   static BookingCancellationOrchestrator? _bookingCancellation;
+  static NotificationService? _notifications;
+  static BookingConversationService? _conversations;
+  static CustomerReviewService? _customerReviews;
+  static CleanerReviewService? _cleanerReviews;
+  static AdminReviewModerationService? _adminReviews;
 
   /// Builds a [RoleRequestAuthorizer] from request providers.
   ///
@@ -187,6 +202,7 @@ class RoleScopedComposition {
       users: _users ??= MongoUserRepository.fromDb(db),
       slots: MongoAvailabilityRepository.fromDb(db),
       bookings: MongoBookingRepository.fromDb(db),
+      reviews: MongoReviewRepository.fromDb(db),
     );
   }
 
@@ -210,6 +226,7 @@ class RoleScopedComposition {
       offerings: MongoCleanerServiceRepository.fromDb(db),
       bookings: bookings,
       cancellation: await bookingCancellation(mongo: mongo, config: config),
+      notifications: await notifications(mongo: mongo),
     );
   }
 
@@ -227,6 +244,7 @@ class RoleScopedComposition {
       bookings: MongoBookingRepository.fromDb(db),
       customerProfiles: MongoCustomerProfileRepository.fromDb(db),
       cancellation: await bookingCancellation(mongo: mongo, config: config),
+      notifications: await notifications(mongo: mongo),
     );
   }
 
@@ -319,6 +337,84 @@ class RoleScopedComposition {
     );
   }
 
+  /// Shared in-app notification service.
+  static Future<NotificationService> notifications({
+    required MongoDatabase mongo,
+  }) async {
+    final cached = _notifications;
+    if (cached != null) {
+      return cached;
+    }
+    final db = await _requireDb(mongo);
+    return _notifications = NotificationService(
+      notifications: MongoNotificationRepository.fromDb(db),
+    );
+  }
+
+  /// Shared booking conversation service.
+  static Future<BookingConversationService> conversations({
+    required MongoDatabase mongo,
+  }) async {
+    final cached = _conversations;
+    if (cached != null) {
+      return cached;
+    }
+    final db = await _requireDb(mongo);
+    return _conversations = BookingConversationService(
+      bookings: MongoBookingRepository.fromDb(db),
+      conversations: MongoConversationRepository.fromDb(db),
+      members: MongoConversationMemberRepository.fromDb(db),
+      messages: MongoMessageRepository.fromDb(db),
+      customerProfiles: MongoCustomerProfileRepository.fromDb(db),
+      cleanerProfiles: MongoCleanerProfileRepository.fromDb(db),
+      notifications: await notifications(mongo: mongo),
+    );
+  }
+
+  /// Shared customer review service.
+  static Future<CustomerReviewService> customerReviews({
+    required MongoDatabase mongo,
+  }) async {
+    final cached = _customerReviews;
+    if (cached != null) {
+      return cached;
+    }
+    final db = await _requireDb(mongo);
+    return _customerReviews = CustomerReviewService(
+      bookings: MongoBookingRepository.fromDb(db),
+      reviews: MongoReviewRepository.fromDb(db),
+      notifications: await notifications(mongo: mongo),
+    );
+  }
+
+  /// Shared cleaner review list service.
+  static Future<CleanerReviewService> cleanerReviews({
+    required MongoDatabase mongo,
+  }) async {
+    final cached = _cleanerReviews;
+    if (cached != null) {
+      return cached;
+    }
+    final db = await _requireDb(mongo);
+    return _cleanerReviews = CleanerReviewService(
+      reviews: MongoReviewRepository.fromDb(db),
+    );
+  }
+
+  /// Shared admin review moderation.
+  static Future<AdminReviewModerationService> adminReviews({
+    required MongoDatabase mongo,
+  }) async {
+    final cached = _adminReviews;
+    if (cached != null) {
+      return cached;
+    }
+    final db = await _requireDb(mongo);
+    return _adminReviews = AdminReviewModerationService(
+      reviews: MongoReviewRepository.fromDb(db),
+    );
+  }
+
   static _PaymentStack? _paymentStackCache;
 
   static Future<_PaymentStack> _paymentStack({
@@ -339,6 +435,7 @@ class RoleScopedComposition {
       provider: provider,
       payments: payments,
       events: events,
+      notifications: await notifications(mongo: mongo),
     );
     return _paymentStackCache = _PaymentStack(
       payments: payments,

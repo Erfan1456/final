@@ -6,6 +6,7 @@ import 'package:home_cleaning_marketplace/features/addresses/presentation/addres
 import 'package:home_cleaning_marketplace/features/auth/presentation/auth_controller.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/logout_actions.dart';
 import 'package:home_cleaning_marketplace/features/customer/presentation/customer_profile_controller.dart';
+import 'package:home_cleaning_marketplace/features/notifications/presentation/notification_home_link.dart';
 
 /// Customer dashboard.
 class CustomerHomeScreen extends ConsumerWidget {
@@ -21,54 +22,53 @@ class CustomerHomeScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Customer home')),
       body: SafeArea(
-        child: Padding(
+        child: ListView(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          children: [
+            Text(
+              'Home Cleaning Service Marketplace',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(user?.email ?? ''),
+            const SizedBox(height: 16),
+            Text(
+              profile.hasProfile
+                  ? 'Profile complete'
+                  : 'Profile not created yet',
+            ),
+            const SizedBox(height: 8),
+            if (defaultAddress != null)
               Text(
-                'Home Cleaning Service Marketplace',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(user?.email ?? ''),
-              const SizedBox(height: 16),
-              Text(
-                profile.hasProfile
-                    ? 'Profile complete'
-                    : 'Profile not created yet',
-              ),
-              const SizedBox(height: 8),
-              if (defaultAddress != null)
-                Text(
-                  'Default address: ${defaultAddress.label}, ${defaultAddress.line1}, ${defaultAddress.city}',
-                )
-              else
-                const Text('No default address selected'),
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: () => context.push(AppRoutes.customerProfilePath),
-                child: const Text('Manage Profile'),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () => context.push(AppRoutes.customerAddressesPath),
-                child: const Text('Manage Addresses'),
-              ),
-              const SizedBox(height: 12),
-              FilledButton.tonal(
-                onPressed: () => context.push(AppRoutes.customerDiscoverPath),
-                child: const Text('Find Cleaners'),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () => context.push(AppRoutes.customerBookingsPath),
-                child: const Text('My Bookings'),
-              ),
-              const Spacer(),
-              const LogoutActions(),
-            ],
-          ),
+                'Default address: ${defaultAddress.label}, ${defaultAddress.line1}, ${defaultAddress.city}',
+              )
+            else
+              const Text('No default address selected'),
+            const SizedBox(height: 24),
+            FilledButton(
+              onPressed: () => context.push(AppRoutes.customerProfilePath),
+              child: const Text('Manage Profile'),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: () => context.push(AppRoutes.customerAddressesPath),
+              child: const Text('Manage Addresses'),
+            ),
+            const SizedBox(height: 12),
+            FilledButton.tonal(
+              onPressed: () => context.push(AppRoutes.customerDiscoverPath),
+              child: const Text('Find Cleaners'),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: () => context.push(AppRoutes.customerBookingsPath),
+              child: const Text('My Bookings'),
+            ),
+            const SizedBox(height: 12),
+            const NotificationHomeLink(),
+            const SizedBox(height: 24),
+            const LogoutActions(),
+          ],
         ),
       ),
     );

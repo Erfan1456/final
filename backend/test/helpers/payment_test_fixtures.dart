@@ -5,6 +5,7 @@ import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booki
 import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_service_snapshot.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_status.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_status_history_entry.dart';
+import 'package:home_cleaning_marketplace_api/src/features/notifications/application/notification_sink.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/admin_payment_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/booking_cancellation_orchestrator.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/customer_payment_service.dart';
@@ -122,6 +123,7 @@ class PaymentTestStack {
     String environment = 'test',
     DateTime Function()? clock,
     List<int> Function(int length)? randomBytesFn,
+    NotificationSink? notifications,
   }) : bookings = MemoryCollectionDocumentStore(),
        payments = MemoryCollectionDocumentStore(),
        events = MemoryCollectionDocumentStore(),
@@ -141,6 +143,7 @@ class PaymentTestStack {
       provider: sandbox,
       payments: paymentRepo,
       events: eventRepo,
+      notifications: notifications,
       clock: tick,
     );
     customerPayments = CustomerPaymentService(

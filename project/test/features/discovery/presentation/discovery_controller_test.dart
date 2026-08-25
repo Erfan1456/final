@@ -72,6 +72,27 @@ class _FakeDiscoveryApi extends DiscoveryApi {
 }
 
 void main() {
+  test('missing rating fields default to null average and zero count', () {
+    final summary = CleanerDiscoverySummary.fromJson(discoverySummaryJson());
+    expect(summary.ratingAverage, isNull);
+    expect(summary.reviewCount, equals(0));
+    expect(
+      formatDiscoveryRating(summary.ratingAverage, summary.reviewCount),
+      equals('No reviews yet'),
+    );
+    final withRatings = CleanerDiscoverySummary.fromJson({
+      ...discoverySummaryJson(),
+      'rating_average': 4.7,
+      'review_count': 23,
+    });
+    expect(withRatings.ratingAverage, equals(4.7));
+    expect(withRatings.reviewCount, equals(23));
+    expect(
+      formatDiscoveryRating(withRatings.ratingAverage, withRatings.reviewCount),
+      equals('4.7 ★ (23 reviews)'),
+    );
+  });
+
   late _FakeDiscoveryApi api;
   late ProviderContainer container;
 

@@ -32,3 +32,4 @@ No architecture has been chosen in TASK 001. Concrete architecture documents sho
 * [service-availability-and-discovery.md](service-availability-and-discovery.md) — catalog, offerings, UTC availability, customer discovery, and local comparison.
 * [booking-reservation-and-lifecycle.md](booking-reservation-and-lifecycle.md) — complete-slot reservation, idempotency, conditional lifecycle, and privacy DTOs.
 * [payment-processing-and-webhooks.md](payment-processing-and-webhooks.md) — sandbox payment ledger, HMAC webhooks, refunds, and payment-aware cancellation.
+* [chat-notifications-and-reviews.md](chat-notifications-and-reviews.md) — booking-scoped REST chat, in-app notifications, verified reviews, and admin moderation.

@@ -15,6 +15,9 @@ import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/doma
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/domain/cleaner_service_offering.dart';
 import 'package:home_cleaning_marketplace_api/src/features/discovery/application/cleaner_discovery_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/reviews/data/review_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/reviews/domain/review.dart';
+import 'package:home_cleaning_marketplace_api/src/features/reviews/domain/review_moderation_status.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/data/service_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/account_status.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_role.dart';
@@ -38,6 +41,7 @@ void main() {
   late MemoryCollectionDocumentStore profiles;
   late MemoryCollectionDocumentStore slots;
   late MemoryCollectionDocumentStore bookings;
+  late MemoryCollectionDocumentStore reviews;
   late MemoryUserRepository users;
   late CleanerDiscoveryService discovery;
   late AuthenticatedUserContext scoped;
@@ -49,6 +53,7 @@ void main() {
     profiles = MemoryCollectionDocumentStore();
     slots = MemoryCollectionDocumentStore();
     bookings = MemoryCollectionDocumentStore();
+    reviews = MemoryCollectionDocumentStore();
     users = MemoryUserRepository();
     final home = testHomeCleaningService();
     serviceId = home.id;
@@ -60,6 +65,7 @@ void main() {
       users: users,
       slots: MongoAvailabilityRepository(documents: slots),
       bookings: MongoBookingRepository(documents: bookings),
+      reviews: MongoReviewRepository(documents: reviews),
       clock: marketplaceTestNow,
     );
     scoped = AuthenticatedUserContext(
@@ -404,5 +410,57 @@ void main() {
         expect(afterRelease.availability.single.id, equals(slotId));
       },
     );
+  });
+
+  group('discovery reviews', () {
+    test('aggregates published reviews and hides private identity', () async {
+      final cleaner = seedCleaner(hexSuffix: 'rated');
+      final listedNone = await discovery.listCleaners();
+      expect(listedNone.items.single.ratingAverage, isNull);
+      expect(listedNone.items.single.reviewCount, 0);
+      reviews.documents.add(
+        Review(
+          id: ObjectId(),
+          bookingId: ObjectId(),
+          customerUserId: ObjectId(),
+          cleanerUserId: cleaner,
+          rating: 5,
+          comment: 'Great',
+          moderationStatus: ReviewModerationStatus.published,
+          createdAt: marketplaceTestNow(),
+          updatedAt: marketplaceTestNow(),
+        ).toDocument(),
+      );
+      reviews.documents.add(
+        Review(
+          id: ObjectId(),
+          bookingId: ObjectId(),
+          customerUserId: ObjectId(),
+          cleanerUserId: cleaner,
+          rating: 3,
+          comment: 'Hidden should not count',
+          moderationStatus: ReviewModerationStatus.hidden,
+          createdAt: marketplaceTestNow(),
+          updatedAt: marketplaceTestNow(),
+        ).toDocument(),
+      );
+      reviews.findManyCalls = 0;
+      final listed = await discovery.listCleaners();
+      expect(reviews.findManyCalls, equals(1));
+      expect(listed.items.single.ratingAverage, 5);
+      expect(listed.items.single.reviewCount, 1);
+      final detail = await discovery.getCleanerDetail(cleanerUserId: cleaner);
+      expect(detail.ratingAverage, 5);
+      expect(detail.reviewCount, 1);
+      expect(detail.reviews, hasLength(1));
+      expect(
+        detail.reviews.single['reviewer_display_name'],
+        'Verified customer',
+      );
+      expect(detail.reviews.single['verified_booking'], isTrue);
+      expect(jsonEncode(detail.toJson()), isNot(contains('customer_user_id')));
+      expect(jsonEncode(detail.toJson()), isNot(contains('phone')));
+      expect(jsonEncode(detail.toJson()), isNot(contains('email')));
+    });
   });
 }

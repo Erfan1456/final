@@ -1,6 +1,6 @@
 # Service Offerings, Availability, and Discovery Architecture
 
-TASK 014 makes approved cleaners configurable and discoverable. TASK 015 books complete availability slots; payment, chat, reviews, maps, geocoding, ranking, and admin catalog UI are not implemented.
+TASK 014 makes approved cleaners configurable and discoverable. TASK 015 books complete availability slots. TASK 017 adds published-review `rating_average` / `review_count` on discovery list/detail and the latest 10 public reviews on detail. Maps, geocoding, ranking, and admin catalog UI are not implemented.
 
 ## Product flow
 
@@ -62,7 +62,7 @@ Application overlap queries plus a unique cleaner/start index prevent most confl
 
 ## Privacy DTO
 
-Customer-facing models exclude email, phone, review metadata, account internals, and security fields. Contact remains for later booking workflow, not marketplace browsing.
+Customer-facing models exclude email, phone, customer review identity, account internals, and security fields. Public reviews use the neutral label `Verified customer`. Contact remains for later booking workflow, not marketplace browsing.
 
 ## Flutter
 

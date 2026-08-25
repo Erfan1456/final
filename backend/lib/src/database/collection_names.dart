@@ -37,4 +37,19 @@ abstract final class CollectionNames {
 
   /// Idempotent admin/system refund commands.
   static const String paymentRefundRequests = 'payment_refund_requests';
+
+  /// One booking-scoped customer/cleaner conversation.
+  static const String conversations = 'conversations';
+
+  /// Conversation participant read-cursor rows.
+  static const String conversationMembers = 'conversation_members';
+
+  /// Immutable booking-chat messages.
+  static const String messages = 'messages';
+
+  /// Persistent in-app notifications. Not push/email/SMS.
+  static const String notifications = 'notifications';
+
+  /// Verified completed-booking customer reviews.
+  static const String reviews = 'reviews';
 }

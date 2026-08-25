@@ -50,7 +50,13 @@ The Dart Frog backend currently implements:
 * sandbox webhook and development simulate (dev/test only)
 * admin payment list/detail/events/refund
 * cleaner booking list/detail/accept/decline/cancel/start/complete
+* booking-scoped conversations and messages (customer/cleaner)
+* in-app notifications (customer/cleaner/admin)
+* customer booking review create/get
+* cleaner review list
+* admin review list/detail/hide/unhide
+* discovery rating_average, review_count, and latest published reviews
 
-See [authentication-api.md](authentication-api.md), [profile-address-onboarding-admin-api.md](profile-address-onboarding-admin-api.md), [services-availability-discovery-api.md](services-availability-discovery-api.md), [booking-api.md](booking-api.md), and [payment-api.md](payment-api.md). `/api/v1/health` remains available even when MongoDB is unconfigured or unreachable. `/api/v1/ready` returns HTTP 200 when ping succeeds and HTTP 503 when the database is unconfigured or unavailable.
+See [authentication-api.md](authentication-api.md), [profile-address-onboarding-admin-api.md](profile-address-onboarding-admin-api.md), [services-availability-discovery-api.md](services-availability-discovery-api.md), [booking-api.md](booking-api.md), [payment-api.md](payment-api.md), [chat-api.md](chat-api.md), [notification-api.md](notification-api.md), and [review-api.md](review-api.md). `/api/v1/health` remains available even when MongoDB is unconfigured or unreachable. `/api/v1/ready` returns HTTP 200 when ping succeeds and HTTP 503 when the database is unconfigured or unavailable.
 
-Chat, reviews, earnings, maps, geocoding, and a production payment processor are not implemented. The sandbox payment provider is development/test only. The auth routes are not ready for unrestricted public internet exposure until production rate limiting exists.
+WebSockets, push notifications, earnings, maps, geocoding, and a production payment processor are not implemented. The sandbox payment provider is development/test only. The auth routes are not ready for unrestricted public internet exposure until production rate limiting exists.

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_cleaning_marketplace/features/availability/presentation/cleaner_availability_screen.dart';
 import 'package:home_cleaning_marketplace/features/catalog/data/marketplace_service.dart';
+import 'package:home_cleaning_marketplace/features/discovery/data/cleaner_discovery_models.dart';
 import 'package:home_cleaning_marketplace/features/discovery/presentation/comparison_controller.dart';
 
 /// Local comparison of up to three discovered cleaners.
@@ -57,6 +58,12 @@ class CleanerComparisonScreen extends ConsumerWidget {
                                         formatMinorHourlyRate(
                                           item.hourlyRateMinor,
                                           item.currencyCode,
+                                        ),
+                                      ),
+                                      Text(
+                                        formatDiscoveryRating(
+                                          item.ratingAverage,
+                                          item.reviewCount,
                                         ),
                                       ),
                                       Text(

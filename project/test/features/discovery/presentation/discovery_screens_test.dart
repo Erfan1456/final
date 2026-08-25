@@ -9,6 +9,7 @@ import 'package:home_cleaning_marketplace/features/discovery/presentation/cleane
 import 'package:home_cleaning_marketplace/features/discovery/presentation/cleaner_discovery_screen.dart';
 import 'package:home_cleaning_marketplace/features/discovery/presentation/comparison_controller.dart';
 import 'package:home_cleaning_marketplace/features/discovery/presentation/discovery_controller.dart';
+import 'package:home_cleaning_marketplace/features/reviews/data/review_models.dart';
 
 import '../../../helpers/feature_test_fakes.dart';
 
@@ -57,6 +58,7 @@ void main() {
 
     expect(find.text('Ada Cleaner'), findsOneWidget);
     expect(find.text('4 years · Dhaka North'), findsOneWidget);
+    expect(find.text('No reviews yet'), findsOneWidget);
     expect(find.text(formatMinorHourlyRate(250000, 'BDT')), findsOneWidget);
     expect(find.text('View Details'), findsOneWidget);
     expect(find.text('Add to Compare'), findsOneWidget);
@@ -167,6 +169,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Ada Cleaner'), findsOneWidget);
     expect(find.text('Reliable cleaner for apartments.'), findsOneWidget);
+    expect(find.text('No reviews yet'), findsOneWidget);
     expect(find.text('Home Cleaning'), findsOneWidget);
     expect(find.text('Billing: hourly'), findsOneWidget);
     expect(find.text('Book This Slot'), findsOneWidget);
@@ -254,5 +257,42 @@ void main() {
     );
     expect(find.text(formatMinorHourlyRate(250000, 'BDT')), findsOneWidget);
     expect(find.text(formatMinorHourlyRate(4000, 'USD')), findsOneWidget);
+  });
+
+  testWidgets('discovery cards and detail show ratings', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          discoveryControllerProvider.overrideWith(
+            () => SeededDiscoveryController(
+              DiscoveryState(
+                loading: false,
+                items: [
+                  testDiscoverySummary(ratingAverage: 4.7, reviewCount: 23),
+                ],
+                detail: testDiscoveryDetail(
+                  ratingAverage: 4.7,
+                  reviewCount: 23,
+                  reviews: [
+                    PublicCleanerReview.fromJson(publicCleanerReviewJson()),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          comparisonControllerProvider.overrideWith(
+            () => SeededComparisonController(
+              ComparisonState(
+                items: [
+                  testDiscoverySummary(ratingAverage: 4.7, reviewCount: 23),
+                ],
+              ),
+            ),
+          ),
+        ],
+        child: const MaterialApp(home: CleanerDiscoveryScreen()),
+      ),
+    );
+    expect(find.text('4.7 ★ (23 reviews)'), findsOneWidget);
   });
 }

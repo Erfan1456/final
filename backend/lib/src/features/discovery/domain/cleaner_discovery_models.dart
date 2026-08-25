@@ -16,6 +16,8 @@ class CleanerDiscoverySummary {
     required this.currencyCode,
     required this.offeringId,
     this.nextAvailableAt,
+    this.ratingAverage,
+    this.reviewCount = 0,
   });
 
   /// Builds a summary from joined records.
@@ -27,6 +29,8 @@ class CleanerDiscoverySummary {
     required int yearsExperience,
     required String serviceArea,
     required DateTime? nextAvailableAt,
+    double? ratingAverage,
+    int reviewCount = 0,
   }) {
     return CleanerDiscoverySummary(
       offeringId: offering.id.oid,
@@ -39,6 +43,8 @@ class CleanerDiscoverySummary {
       hourlyRateMinor: offering.hourlyRateMinor,
       currencyCode: offering.currencyCode,
       nextAvailableAt: nextAvailableAt,
+      ratingAverage: ratingAverage,
+      reviewCount: reviewCount,
     );
   }
 
@@ -72,6 +78,12 @@ class CleanerDiscoverySummary {
   /// Next future slot start, if any.
   final DateTime? nextAvailableAt;
 
+  /// Average of published review ratings, or null when none.
+  final double? ratingAverage;
+
+  /// Count of published reviews.
+  final int reviewCount;
+
   /// Customer JSON. Must not include email, phone, or review metadata.
   Map<String, Object?> toJson() {
     return <String, Object?>{
@@ -88,6 +100,8 @@ class CleanerDiscoverySummary {
       'hourly_rate_minor': hourlyRateMinor,
       'currency_code': currencyCode,
       'next_available_at': nextAvailableAt?.toUtc().toIso8601String(),
+      'rating_average': ratingAverage,
+      'review_count': reviewCount,
     };
   }
 }
@@ -105,6 +119,9 @@ class CleanerDiscoveryDetail {
     required this.hourlyRateMinor,
     required this.currencyCode,
     required this.availability,
+    this.ratingAverage,
+    this.reviewCount = 0,
+    this.reviews = const <Map<String, Object?>>[],
   });
 
   /// Public cleaner user id.
@@ -134,6 +151,15 @@ class CleanerDiscoveryDetail {
   /// Future slots for the requested service.
   final List<AvailabilitySlot> availability;
 
+  /// Average of published review ratings, or null when none.
+  final double? ratingAverage;
+
+  /// Count of published reviews.
+  final int reviewCount;
+
+  /// Latest published public reviews (max 10).
+  final List<Map<String, Object?>> reviews;
+
   /// Customer JSON. Must not include email, phone, or review metadata.
   Map<String, Object?> toJson() {
     return <String, Object?>{
@@ -159,6 +185,9 @@ class CleanerDiscoveryDetail {
             'end_at': slot.endAt.toUtc().toIso8601String(),
           },
       ],
+      'rating_average': ratingAverage,
+      'review_count': reviewCount,
+      'reviews': reviews,
     };
   }
 }

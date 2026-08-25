@@ -64,5 +64,6 @@ Cleaner JSON: customer display name (profile full name or `Customer`), snapshots
 * `/customer/bookings` and `/customer/bookings/:bookingId` with cancel
 * Cleaner `/cleaner/bookings` and `/cleaner/bookings/:bookingId` with accept/decline/cancel/start/complete
 * Role guards redirect foreign roles; backend authorization remains authoritative
+* TASK 017: **Message Cleaner** / **Message Customer** from booking detail; completed bookings show **Leave Review** / **Edit Review**
 
 Quoted amounts display as minor units (`BDT 250000 minor units / hour`, `Quoted total: BDT 500000 minor units`) without dividing by 100.

@@ -9,12 +9,17 @@ import 'package:home_cleaning_marketplace_api/src/features/addresses/data/addres
 import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/session_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/data/availability_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/data/booking_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/chat/data/conversation_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/chat/data/conversation_member_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/chat/data/message_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/notifications/data/notification_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_refund_request_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_webhook_event_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/reviews/data/review_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/data/service_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/user_indexes.dart';
 
@@ -76,6 +81,21 @@ Future<void> main() async {
         .getIndexes();
     final refundIndexes = await db
         .collection(CollectionNames.paymentRefundRequests)
+        .getIndexes();
+    final conversationIndexes = await db
+        .collection(CollectionNames.conversations)
+        .getIndexes();
+    final conversationMemberIndexes = await db
+        .collection(CollectionNames.conversationMembers)
+        .getIndexes();
+    final messageIndexes = await db
+        .collection(CollectionNames.messages)
+        .getIndexes();
+    final notificationIndexes = await db
+        .collection(CollectionNames.notifications)
+        .getIndexes();
+    final reviewIndexes = await db
+        .collection(CollectionNames.reviews)
         .getIndexes();
 
     if (!_hasNamedIndex(usersIndexes, usersEmailNormalizedUniqueIndexName) ||
@@ -169,6 +189,52 @@ Future<void> main() async {
         !_hasNamedIndex(
           refundIndexes,
           paymentRefundPaymentCreatedIndexName,
+        ) ||
+        !_hasNamedIndex(
+          conversationIndexes,
+          conversationsBookingUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(
+          conversationIndexes,
+          conversationsCustomerLastMessageIndexName,
+        ) ||
+        !_hasNamedIndex(
+          conversationIndexes,
+          conversationsCleanerLastMessageIndexName,
+        ) ||
+        !_hasNamedIndex(
+          conversationMemberIndexes,
+          conversationMembersConversationUserUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(
+          messageIndexes,
+          messagesConversationIdDescIndexName,
+        ) ||
+        !_hasNamedIndex(
+          messageIndexes,
+          messagesSenderIdempotencyUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(
+          notificationIndexes,
+          notificationsUserIdDescIndexName,
+        ) ||
+        !_hasNamedIndex(
+          notificationIndexes,
+          notificationsUserReadIdDescIndexName,
+        ) ||
+        !_hasNamedIndex(
+          notificationIndexes,
+          notificationsUserDedupeUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(reviewIndexes, reviewsBookingUniqueIndexName) ||
+        !_hasNamedIndex(
+          reviewIndexes,
+          reviewsCleanerStatusIdDescIndexName,
+        ) ||
+        !_hasNamedIndex(reviewIndexes, reviewsCustomerIdDescIndexName) ||
+        !_hasNamedIndex(
+          reviewIndexes,
+          reviewsStatusRatingIdDescIndexName,
         )) {
       stderr.writeln('Database indexes could not be ensured.');
       exitCode = 1;
@@ -259,7 +325,25 @@ Future<void> main() async {
       ..writeln('$paymentWebhookEventsPaymentCreatedIndexName exists')
       ..writeln('$paymentRefundAdminIdempotencyUniqueIndexName exists')
       ..writeln('unique = true')
-      ..writeln('$paymentRefundPaymentCreatedIndexName exists');
+      ..writeln('$paymentRefundPaymentCreatedIndexName exists')
+      ..writeln('$conversationsBookingUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('$conversationsCustomerLastMessageIndexName exists')
+      ..writeln('$conversationsCleanerLastMessageIndexName exists')
+      ..writeln('$conversationMembersConversationUserUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('$messagesConversationIdDescIndexName exists')
+      ..writeln('$messagesSenderIdempotencyUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('$notificationsUserIdDescIndexName exists')
+      ..writeln('$notificationsUserReadIdDescIndexName exists')
+      ..writeln('$notificationsUserDedupeUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('$reviewsBookingUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('$reviewsCleanerStatusIdDescIndexName exists')
+      ..writeln('$reviewsCustomerIdDescIndexName exists')
+      ..writeln('$reviewsStatusRatingIdDescIndexName exists');
   } catch (_) {
     stderr.writeln('Database indexes could not be ensured.');
     exitCode = 1;

@@ -1,5 +1,33 @@
 import 'package:home_cleaning_marketplace/features/availability/data/availability_slot.dart';
 import 'package:home_cleaning_marketplace/features/catalog/data/marketplace_service.dart';
+import 'package:home_cleaning_marketplace/features/reviews/data/review_models.dart';
+
+String formatDiscoveryRating(double? ratingAverage, int reviewCount) {
+  if (reviewCount <= 0 || ratingAverage == null) {
+    return 'No reviews yet';
+  }
+  return '${ratingAverage.toStringAsFixed(1)} ★ ($reviewCount reviews)';
+}
+
+double? parseOptionalRatingAverage(Object? raw) {
+  if (raw == null) {
+    return null;
+  }
+  if (raw is num) {
+    return raw.toDouble();
+  }
+  throw const FormatException('Discovery rating JSON is invalid.');
+}
+
+int parseReviewCount(Object? raw) {
+  if (raw == null) {
+    return 0;
+  }
+  if (raw is int) {
+    return raw;
+  }
+  throw const FormatException('Discovery review count JSON is invalid.');
+}
 
 /// Customer-safe discovery list item.
 class CleanerDiscoverySummary {
@@ -13,6 +41,8 @@ class CleanerDiscoverySummary {
     required this.hourlyRateMinor,
     required this.currencyCode,
     this.nextAvailableAt,
+    this.ratingAverage,
+    this.reviewCount = 0,
   });
 
   factory CleanerDiscoverySummary.fromJson(Map<String, dynamic> json) {
@@ -51,6 +81,8 @@ class CleanerDiscoverySummary {
       hourlyRateMinor: rate,
       currencyCode: currency,
       nextAvailableAt: next is String ? DateTime.parse(next).toUtc() : null,
+      ratingAverage: parseOptionalRatingAverage(json['rating_average']),
+      reviewCount: parseReviewCount(json['review_count']),
     );
   }
 
@@ -63,6 +95,8 @@ class CleanerDiscoverySummary {
   final int hourlyRateMinor;
   final String currencyCode;
   final DateTime? nextAvailableAt;
+  final double? ratingAverage;
+  final int reviewCount;
 }
 
 /// Customer-safe discovery detail.
@@ -77,6 +111,9 @@ class CleanerDiscoveryDetail {
     required this.hourlyRateMinor,
     required this.currencyCode,
     required this.availability,
+    this.ratingAverage,
+    this.reviewCount = 0,
+    this.reviews = const <PublicCleanerReview>[],
   });
 
   factory CleanerDiscoveryDetail.fromJson(Map<String, dynamic> json) {
@@ -119,6 +156,14 @@ class CleanerDiscoveryDetail {
           if (item is Map)
             AvailabilitySlot.fromJson(Map<String, dynamic>.from(item)),
       ],
+      ratingAverage: parseOptionalRatingAverage(json['rating_average']),
+      reviewCount: parseReviewCount(json['review_count']),
+      reviews: [
+        if (json['reviews'] is List)
+          for (final item in json['reviews'] as List)
+            if (item is Map)
+              PublicCleanerReview.fromJson(Map<String, dynamic>.from(item)),
+      ],
     );
   }
 
@@ -131,6 +176,9 @@ class CleanerDiscoveryDetail {
   final int hourlyRateMinor;
   final String currencyCode;
   final List<AvailabilitySlot> availability;
+  final double? ratingAverage;
+  final int reviewCount;
+  final List<PublicCleanerReview> reviews;
 }
 
 /// One discovery page.

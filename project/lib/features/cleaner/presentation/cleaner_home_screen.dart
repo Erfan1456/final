@@ -6,6 +6,7 @@ import 'package:home_cleaning_marketplace/features/auth/presentation/auth_contro
 import 'package:home_cleaning_marketplace/features/auth/presentation/logout_actions.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/data/cleaner_profile.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/presentation/cleaner_onboarding_controller.dart';
+import 'package:home_cleaning_marketplace/features/notifications/presentation/notification_home_link.dart';
 
 /// Cleaner dashboard with onboarding status.
 class CleanerHomeScreen extends ConsumerWidget {
@@ -43,46 +44,49 @@ class CleanerHomeScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Cleaner home')),
       body: SafeArea(
-        child: Padding(
+        child: ListView(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(user?.email ?? ''),
-              const SizedBox(height: 8),
-              Text('Onboarding: ${status?.wireValue ?? 'none'}'),
+          children: [
+            Text(user?.email ?? ''),
+            const SizedBox(height: 8),
+            Text('Onboarding: ${status?.wireValue ?? 'none'}'),
+            const SizedBox(height: 16),
+            Text(message),
+            if (actionLabel != null) ...[
               const SizedBox(height: 16),
-              Text(message),
-              if (actionLabel != null) ...[
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: () =>
-                      context.push(AppRoutes.cleanerOnboardingPath),
-                  child: Text(actionLabel),
-                ),
-              ],
-              const SizedBox(height: 16),
-              FilledButton.tonal(
-                onPressed: () => context.push(AppRoutes.cleanerBookingsPath),
-                child: const Text('Booking Requests / Jobs'),
+              FilledButton(
+                onPressed: () => context.push(AppRoutes.cleanerOnboardingPath),
+                child: Text(actionLabel),
               ),
-              if (status == OnboardingStatus.approved) ...[
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: () => context.push(AppRoutes.cleanerServicesPath),
-                  child: const Text('Manage Services'),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton(
-                  onPressed: () =>
-                      context.push(AppRoutes.cleanerAvailabilityPath),
-                  child: const Text('Manage Availability'),
-                ),
-              ],
-              const Spacer(),
-              const LogoutActions(),
             ],
-          ),
+            const SizedBox(height: 16),
+            FilledButton.tonal(
+              onPressed: () => context.push(AppRoutes.cleanerBookingsPath),
+              child: const Text('Booking Requests / Jobs'),
+            ),
+            const SizedBox(height: 16),
+            const NotificationHomeLink(),
+            if (status == OnboardingStatus.approved) ...[
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: () => context.push(AppRoutes.cleanerServicesPath),
+                child: const Text('Manage Services'),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: () =>
+                    context.push(AppRoutes.cleanerAvailabilityPath),
+                child: const Text('Manage Availability'),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: () => context.push(AppRoutes.cleanerReviewsPath),
+                child: const Text('My Reviews'),
+              ),
+            ],
+            const SizedBox(height: 24),
+            const LogoutActions(),
+          ],
         ),
       ),
     );

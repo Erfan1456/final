@@ -22,6 +22,7 @@ import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/domain/cleaner_service_offering.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/domain/customer_profile.dart';
+import 'package:home_cleaning_marketplace_api/src/features/notifications/domain/notification_type.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/booking_cancellation_orchestrator.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/payment_webhook_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_repository.dart';
@@ -41,6 +42,7 @@ import '../../../helpers/account_route_test_utils.dart';
 import '../../../helpers/auth_route_test_utils.dart';
 import '../../../helpers/marketplace_test_fixtures.dart';
 import '../../../helpers/memory_collection_store.dart';
+import '../../../helpers/recording_notification_sink.dart';
 
 class _MockContext extends Mock implements RequestContext {}
 
@@ -57,6 +59,7 @@ void main() {
   late MemoryUserRepository users;
   late CustomerBookingService customerBookings;
   late CleanerBookingService cleanerBookings;
+  late RecordingNotificationSink notifications;
   late AuthenticatedUserContext customerScoped;
   late AuthenticatedUserContext cleanerScoped;
   late ObjectId customerId;
@@ -91,6 +94,7 @@ void main() {
     paymentEvents = MemoryCollectionDocumentStore();
     customerProfiles = MemoryCollectionDocumentStore();
     users = MemoryUserRepository();
+    notifications = RecordingNotificationSink();
     final home = testHomeCleaningService();
     serviceId = home.id;
     services.documents.add(home.toDocument());
@@ -157,6 +161,7 @@ void main() {
       offerings: MongoCleanerServiceRepository(documents: offerings),
       bookings: bookingRepo,
       cancellation: cancellation,
+      notifications: notifications,
       clock: () => clock,
     );
     cleanerBookings = CleanerBookingService(
@@ -165,6 +170,7 @@ void main() {
         documents: customerProfiles,
       ),
       cancellation: cancellation,
+      notifications: notifications,
       clock: () => clock,
     );
     customerScoped = AuthenticatedUserContext(
@@ -249,6 +255,43 @@ void main() {
       final stored = Booking.fromDocument(bookings.documents.single);
       expect(stored.customerUserId, equals(customerId));
       expect(stored.reservationActive, isTrue);
+      expect(notifications.created, hasLength(1));
+      expect(
+        notifications.created.single['type'],
+        NotificationType.bookingRequested,
+      );
+    });
+
+    test('create replay and notification failure stay booking-safe', () async {
+      await create();
+      final replay = await create();
+      expect(replay.created, isFalse);
+      expect(
+        notifications.created.where((row) {
+          return row['type'] == NotificationType.bookingRequested;
+        }),
+        hasLength(1),
+      );
+      notifications.throwOnCreate = true;
+      slots.documents.add(
+        AvailabilitySlot(
+          id: ObjectId(),
+          cleanerUserId: cleanerId,
+          serviceId: serviceId,
+          startAt: DateTime.utc(2026, 9, 2, 3),
+          endAt: DateTime.utc(2026, 9, 2, 5),
+          createdAt: marketplaceTestNow(),
+          updatedAt: marketplaceTestNow(),
+        ).toDocument(),
+      );
+      final second = await customerBookings.createBooking(
+        user: customerScoped.currentUser,
+        idempotencyKeyRaw: 'idempotency-key-17',
+        availabilitySlotIdRaw: (slots.documents.last['_id'] as ObjectId).oid,
+        addressIdRaw: addressId.oid,
+        customerNotesRaw: null,
+      );
+      expect(second.created, isTrue);
     });
 
     test('foreign address is 404 and unavailable cases are 409', () async {
@@ -389,6 +432,10 @@ void main() {
         );
         expect(cancelled['status'], equals('cancelled'));
         expect(
+          notifications.created.last['type'],
+          NotificationType.bookingCancelled,
+        );
+        expect(
           (cancelled['status_history']! as List).last,
           containsPair('to_status', 'cancelled'),
         );
@@ -440,6 +487,10 @@ void main() {
         );
         expect(accepted['status'], equals('confirmed'));
         expect(
+          notifications.created.last['type'],
+          NotificationType.bookingConfirmed,
+        );
+        expect(
           (accepted['address_snapshot']! as Map)['line1'],
           equals('12 Test Street'),
         );
@@ -454,6 +505,10 @@ void main() {
         );
         expect(declined['status'], equals('declined'));
         expect(
+          notifications.created.last['type'],
+          NotificationType.bookingDeclined,
+        );
+        expect(
           (declined['address_snapshot']! as Map).containsKey('line1'),
           isFalse,
         );
@@ -467,6 +522,10 @@ void main() {
           reasonRaw: 'Emergency absence',
         );
         expect(cancelled['status'], equals('cancelled'));
+        expect(
+          notifications.created.last['type'],
+          NotificationType.bookingCancelled,
+        );
 
         bookings.documents.single['status'] = 'confirmed';
         bookings.documents.single['reservation_active'] = true;
@@ -478,12 +537,19 @@ void main() {
           bookingId: id,
         );
         expect(started['status'], equals('in_progress'));
-
+        expect(
+          notifications.created.last['type'],
+          NotificationType.jobStarted,
+        );
         final completed = await cleanerBookings.complete(
           user: cleanerScoped.currentUser,
           bookingId: id,
         );
         expect(completed['status'], equals('completed'));
+        expect(
+          notifications.created.last['type'],
+          NotificationType.jobCompleted,
+        );
 
         try {
           await cleanerBookings.accept(

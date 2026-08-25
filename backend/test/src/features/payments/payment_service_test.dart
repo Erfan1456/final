@@ -11,6 +11,7 @@ import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/domain/customer_profile.dart';
+import 'package:home_cleaning_marketplace_api/src/features/notifications/domain/notification_type.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/booking_cancellation_orchestrator.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/customer_payment_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/domain/payment_exceptions.dart';
@@ -26,6 +27,7 @@ import '../../../helpers/auth_route_test_utils.dart';
 import '../../../helpers/marketplace_test_fixtures.dart';
 import '../../../helpers/memory_collection_store.dart';
 import '../../../helpers/payment_test_fixtures.dart';
+import '../../../helpers/recording_notification_sink.dart';
 
 void main() {
   late PaymentTestStack stack;
@@ -315,6 +317,56 @@ void main() {
         (await stack.paymentRepo.findById(payment.id))!.status,
         equals(PaymentStatus.failed),
       );
+    });
+
+    test('paid webhook notifies once; invalid signature does not', () async {
+      final sink = RecordingNotificationSink();
+      stack = PaymentTestStack(notifications: sink);
+      stack.bookings.documents.add(
+        testConfirmedBooking(
+          customerId: customerId,
+          cleanerId: cleanerId,
+          id: bookingId,
+        ).toDocument(),
+      );
+      expect(
+        () => stack.webhooks.process(
+          rawBodyBytes: utf8.encode('{"event_id":"x"}'),
+          signatureHeader: '00' * 32,
+        ),
+        throwsA(isA<InvalidWebhookSignatureException>()),
+      );
+      expect(sink.created, isEmpty);
+      final started = await stack.customerPayments.startPayment(
+        user: fakeAuthResult().user,
+        bookingId: bookingId,
+        idempotencyKeyRaw: 'payment-idempotency-1',
+      );
+      final payment = await stack.paymentRepo.findById(
+        ObjectId.fromHexString(started.payment['id']! as String),
+      );
+      final dispatch = stack.sandbox.signEvent(
+        eventId: 'evt_notify_paid',
+        eventType: PaymentWebhookEventType.paymentSucceeded,
+        providerPaymentId: payment!.providerPaymentId!,
+        amountMinor: payment.amountMinor,
+        currencyCode: payment.currencyCode,
+      );
+      await stack.webhooks.process(
+        rawBodyBytes: utf8.encode(dispatch.rawBody),
+        signatureHeader: dispatch.signature,
+      );
+      await stack.webhooks.process(
+        rawBodyBytes: utf8.encode(dispatch.rawBody),
+        signatureHeader: dispatch.signature,
+      );
+      expect(
+        sink.created.where(
+          (row) => row['type'] == NotificationType.paymentPaid,
+        ),
+        hasLength(1),
+      );
+      expect(sink.created.single['user_id'], customerId);
     });
 
     test('invalid signature is rejected', () async {

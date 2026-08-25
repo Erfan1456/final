@@ -200,6 +200,116 @@ void main() {
     expect(find.text('Payment'), findsWidgets);
   });
 
+  testWidgets('customer can open shared notifications', (tester) async {
+    await pumpApp(tester, AuthState.authenticated(testUser()));
+    final context = tester.element(find.byType(CustomerHomeScreen));
+    GoRouter.of(context).go(AppRoutes.notificationsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Notifications'), findsWidgets);
+  });
+
+  testWidgets('cleaner can open shared notifications', (tester) async {
+    await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
+    final context = tester.element(find.text('Cleaner home'));
+    GoRouter.of(context).go(AppRoutes.notificationsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Notifications'), findsWidgets);
+  });
+
+  testWidgets('admin can open shared notifications', (tester) async {
+    await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
+    final context = tester.element(find.text('Admin Dashboard'));
+    GoRouter.of(context).go(AppRoutes.notificationsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Notifications'), findsWidgets);
+  });
+
+  testWidgets('customer can open booking chat and review', (tester) async {
+    await pumpApp(tester, AuthState.authenticated(testUser()));
+    final context = tester.element(find.byType(CustomerHomeScreen));
+    final router = GoRouter.of(context);
+    router.go(
+      AppRoutes.customerBookingChatLocation('507f1f77bcf86cd799439091'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Chat'), findsWidgets);
+    router.go(
+      AppRoutes.customerBookingReviewLocation('507f1f77bcf86cd799439091'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Review'), findsWidgets);
+  });
+
+  testWidgets('cleaner can open booking chat and my reviews', (tester) async {
+    await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
+    final context = tester.element(find.text('Cleaner home'));
+    final router = GoRouter.of(context);
+    router.go(AppRoutes.cleanerBookingChatLocation('507f1f77bcf86cd799439091'));
+    await tester.pumpAndSettle();
+    expect(find.text('Chat'), findsWidgets);
+    router.go(AppRoutes.cleanerReviewsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('My Reviews'), findsWidgets);
+  });
+
+  testWidgets('admin can open review moderation', (tester) async {
+    await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
+    final context = tester.element(find.text('Admin Dashboard'));
+    final router = GoRouter.of(context);
+    router.go(AppRoutes.adminReviewsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Review Moderation'), findsWidgets);
+    router.go(AppRoutes.adminReviewDetailLocation('507f1f77bcf86cd7994390e1'));
+    await tester.pumpAndSettle();
+    expect(find.text('Review moderation'), findsOneWidget);
+  });
+
+  testWidgets('customer is redirected from cleaner chat and admin reviews', (
+    tester,
+  ) async {
+    await pumpApp(tester, AuthState.authenticated(testUser()));
+    final context = tester.element(find.byType(CustomerHomeScreen));
+    final router = GoRouter.of(context);
+    router.go(AppRoutes.cleanerBookingChatLocation('507f1f77bcf86cd799439091'));
+    await tester.pumpAndSettle();
+    expect(find.text('Manage Profile'), findsOneWidget);
+    router.go(AppRoutes.adminReviewsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Manage Profile'), findsOneWidget);
+  });
+
+  testWidgets('cleaner is redirected from customer chat and admin reviews', (
+    tester,
+  ) async {
+    await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
+    final context = tester.element(find.text('Cleaner home'));
+    final router = GoRouter.of(context);
+    router.go(
+      AppRoutes.customerBookingChatLocation('507f1f77bcf86cd799439091'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Cleaner home'), findsOneWidget);
+    router.go(AppRoutes.adminReviewsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Cleaner home'), findsOneWidget);
+  });
+
+  testWidgets('admin is redirected from customer chat and cleaner reviews', (
+    tester,
+  ) async {
+    await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
+    final context = tester.element(find.text('Admin Dashboard'));
+    final router = GoRouter.of(context);
+    router.go(
+      AppRoutes.customerBookingChatLocation('507f1f77bcf86cd799439091'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Admin Dashboard'), findsOneWidget);
+    router.go(AppRoutes.cleanerReviewsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Admin Dashboard'), findsOneWidget);
+  });
+
   testWidgets('cleaner can open booking list and detail', (tester) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
     final context = tester.element(find.text('Cleaner home'));

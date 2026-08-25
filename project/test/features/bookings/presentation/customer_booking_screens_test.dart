@@ -11,6 +11,8 @@ import 'package:home_cleaning_marketplace/features/bookings/presentation/custome
 import 'package:home_cleaning_marketplace/features/bookings/presentation/customer_booking_list_screen.dart';
 import 'package:home_cleaning_marketplace/features/catalog/data/marketplace_service.dart';
 import 'package:home_cleaning_marketplace/features/discovery/presentation/discovery_controller.dart';
+import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_controller.dart';
+import 'package:home_cleaning_marketplace/features/reviews/presentation/customer_review_controller.dart';
 
 import '../../../helpers/feature_test_fakes.dart';
 
@@ -181,6 +183,16 @@ void main() {
       ProviderScope(
         overrides: [
           customerBookingControllerProvider.overrideWith(() => bookings),
+          customerPaymentControllerProvider.overrideWith(
+            () => SeededCustomerPaymentController(
+              const CustomerPaymentState(loading: false),
+            ),
+          ),
+          customerReviewControllerProvider.overrideWith(
+            () => SeededCustomerReviewController(
+              const CustomerReviewState(loading: false),
+            ),
+          ),
         ],
         child: const MaterialApp(
           home: CustomerBookingDetailScreen(
@@ -194,6 +206,8 @@ void main() {
     expect(find.text('1 Test Street'), findsOneWidget);
     expect(find.text('Notes: Please use the side entrance.'), findsOneWidget);
     expect(find.textContaining('Status history'), findsOneWidget);
+    expect(find.text('Message Cleaner'), findsOneWidget);
+    expect(find.text('Leave Review'), findsNothing);
     expect(find.text('Cancel Booking'), findsOneWidget);
     await tester.tap(find.text('Cancel Booking'));
     await tester.pump();

@@ -79,7 +79,7 @@ Future feature view models may use `Notifier` or `AsyncNotifier` when they have 
 
 `go_router` provides declarative navigation, a route hierarchy, and a boundary for later deep linking and authentication/role redirects.
 
-TASK 012 registers `/splash`, `/login`, `/signup`, and a compatibility `/home` redirect. TASK 013 adds role destinations `/customer/home`, `/cleaner/home`, and `/admin/home` plus profile, address, onboarding, and admin approval screens. TASK 014 adds cleaner service/availability management and customer discovery, detail, and comparison routes. TASK 015 adds `/customer/book/:cleanerUserId/:slotId`, `/customer/bookings`, `/customer/bookings/:bookingId`, `/cleaner/bookings`, and `/cleaner/bookings/:bookingId`. Router guards are UX only; backend authorization remains authoritative. Payments, chat, and reviews remain unimplemented.
+TASK 012 registers `/splash`, `/login`, `/signup`, and a compatibility `/home` redirect. TASK 013 adds role destinations `/customer/home`, `/cleaner/home`, and `/admin/home` plus profile, address, onboarding, and admin approval screens. TASK 014 adds cleaner service/availability management and customer discovery, detail, and comparison routes. TASK 015 adds `/customer/book/:cleanerUserId/:slotId`, `/customer/bookings`, `/customer/bookings/:bookingId`, `/cleaner/bookings`, and `/cleaner/bookings/:bookingId`. TASK 016 adds customer payment and admin transaction routes. TASK 017 adds `/customer/bookings/:bookingId/chat`, `/customer/bookings/:bookingId/review`, `/cleaner/bookings/:bookingId/chat`, `/cleaner/reviews`, `/notifications`, `/admin/reviews`, and `/admin/reviews/:reviewId`. Router guards are UX only; backend authorization remains authoritative. WebSockets and push notifications remain unimplemented.
 
 ## Networking
 
@@ -138,4 +138,4 @@ The domain/use-case layer is optional. Add it only when justified by complexity,
 
 ## Current State
 
-TASK 015 adds booking model/API/controller/widget/router tests. TASK 016 adds customer/admin payment models, sandbox-aware UI, and transaction screens. Chat and reviews are not implemented.
+TASK 015 adds booking model/API/controller/widget/router tests. TASK 016 adds customer/admin payment models, sandbox-aware UI, and transaction screens. TASK 017 adds booking chat with REST polling, a notification center with unread counts, customer/cleaner/admin review flows, and discovery rating display.

@@ -93,6 +93,28 @@ String messageForApiCode(String code) {
       return 'Refund reason must be between 5 and 500 characters.';
     case 'webhook_event_conflict':
       return 'This payment event could not be processed.';
+    case 'conversation_not_found':
+      return 'Conversation was not found.';
+    case 'conversation_read_only':
+      return 'This conversation is read-only because the booking is closed.';
+    case 'invalid_message':
+      return 'Message must be plain text up to 2000 characters.';
+    case 'invalid_message_cursor':
+      return 'The message list could not be loaded.';
+    case 'notification_not_found':
+      return 'Notification was not found.';
+    case 'review_not_allowed':
+      return 'You can review a booking only after it is completed.';
+    case 'review_not_found':
+      return 'Review was not found.';
+    case 'invalid_review_rating':
+      return 'Rating must be a whole number from 1 to 5.';
+    case 'invalid_review_comment':
+      return 'Comment must be plain text up to 1000 characters.';
+    case 'invalid_review_reason':
+      return 'Reason must be between 5 and 500 characters.';
+    case 'invalid_review_state':
+      return 'This review cannot be changed in its current state.';
     case 'invalid_input':
       return 'Please check your details and try again.';
     case 'invalid_access_token':

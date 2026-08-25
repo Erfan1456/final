@@ -30,4 +30,16 @@ class RoleRequestAuthorizer {
     RoleAuthorizer.require(user, requiredRole);
     return AuthenticatedUserContext(principal: principal, currentUser: user);
   }
+
+  /// Verifies the Bearer token, loads the persisted user, and requires one of
+  /// [allowedRoles]. Persisted role is authoritative.
+  Future<AuthenticatedUserContext> authorizeAny({
+    required String? authorizationHeader,
+    required Set<UserRole> allowedRoles,
+  }) async {
+    final principal = _authenticator.authenticate(authorizationHeader);
+    final user = await _resolver.resolve(principal.userId);
+    RoleAuthorizer.requireAny(user, allowedRoles);
+    return AuthenticatedUserContext(principal: principal, currentUser: user);
+  }
 }

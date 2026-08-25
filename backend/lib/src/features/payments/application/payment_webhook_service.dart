@@ -1,3 +1,5 @@
+import 'package:home_cleaning_marketplace_api/src/features/notifications/application/notification_sink.dart';
+import 'package:home_cleaning_marketplace_api/src/features/notifications/domain/notification_type.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_webhook_event_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/domain/payment.dart';
@@ -17,15 +19,18 @@ class PaymentWebhookService {
     required PaymentProvider? provider,
     required PaymentRepository payments,
     required PaymentWebhookEventRepository events,
+    NotificationSink? notifications,
     DateTime Function()? clock,
   }) : _provider = provider,
        _payments = payments,
        _events = events,
+       _notifications = notifications ?? const NoOpNotificationSink(),
        _clock = clock ?? DateTime.now;
 
   final PaymentProvider? _provider;
   final PaymentRepository _payments;
   final PaymentWebhookEventRepository _events;
+  final NotificationSink _notifications;
   final DateTime Function() _clock;
 
   /// Verifies, records, and applies a provider webhook.
@@ -186,6 +191,13 @@ class PaymentWebhookService {
       return;
     }
     await _events.markProcessed(id: event.id, now: now);
+    await _notifyCustomer(
+      payment: updated,
+      eventId: event.providerEventId,
+      type: NotificationType.paymentPaid,
+      title: 'Payment completed',
+      body: 'Payment completed.',
+    );
   }
 
   Future<void> _applyFailed({
@@ -212,6 +224,13 @@ class PaymentWebhookService {
       return;
     }
     await _events.markProcessed(id: event.id, now: now);
+    await _notifyCustomer(
+      payment: updated,
+      eventId: event.providerEventId,
+      type: NotificationType.paymentFailed,
+      title: 'Payment failed',
+      body: 'Payment could not be completed.',
+    );
   }
 
   Future<void> _applyRefund({
@@ -246,6 +265,33 @@ class PaymentWebhookService {
       return;
     }
     await _events.markProcessed(id: event.id, now: now);
+    await _notifyCustomer(
+      payment: updated,
+      eventId: event.providerEventId,
+      type: NotificationType.paymentRefunded,
+      title: 'Payment refunded',
+      body: fullRefund
+          ? 'Your payment was refunded.'
+          : 'A partial refund was issued.',
+    );
+  }
+
+  Future<void> _notifyCustomer({
+    required Payment payment,
+    required String eventId,
+    required NotificationType type,
+    required String title,
+    required String body,
+  }) {
+    return _notifications.notifyBestEffort(
+      userId: payment.customerUserId,
+      type: type,
+      title: title,
+      body: body,
+      dedupeKey: 'payment-event:$eventId',
+      resourceType: 'booking',
+      resourceId: payment.bookingId,
+    );
   }
 
   bool _integrityMatches(Payment payment, VerifiedWebhookEvent verified) {

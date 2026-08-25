@@ -7,6 +7,7 @@ import 'package:home_cleaning_marketplace/features/auth/presentation/auth_contro
 import 'package:home_cleaning_marketplace/features/customer/presentation/customer_home_screen.dart';
 import 'package:home_cleaning_marketplace/features/customer/presentation/customer_profile_controller.dart';
 import 'package:home_cleaning_marketplace/features/customer/presentation/customer_profile_screen.dart';
+import 'package:home_cleaning_marketplace/features/notifications/presentation/notification_controller.dart';
 
 import '../../../helpers/auth_test_fakes.dart';
 import '../../../helpers/feature_test_fakes.dart';
@@ -30,6 +31,11 @@ void main() {
             () =>
                 SeededAddressController(const AddressListState(loading: false)),
           ),
+          notificationControllerProvider.overrideWith(
+            () => SeededNotificationController(
+              const NotificationState(loading: false),
+            ),
+          ),
         ],
         child: const MaterialApp(home: CustomerHomeScreen()),
       ),
@@ -43,6 +49,7 @@ void main() {
     expect(find.text('Manage Addresses'), findsOneWidget);
     expect(find.text('Find Cleaners'), findsOneWidget);
     expect(find.text('My Bookings'), findsOneWidget);
+    expect(find.text('Notifications'), findsOneWidget);
   });
 
   testWidgets('CustomerHome shows profile complete and default address', (
@@ -68,6 +75,11 @@ void main() {
                 loading: false,
                 addresses: [testAddress(isDefault: true)],
               ),
+            ),
+          ),
+          notificationControllerProvider.overrideWith(
+            () => SeededNotificationController(
+              const NotificationState(loading: false),
             ),
           ),
         ],

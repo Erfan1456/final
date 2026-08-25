@@ -9,6 +9,7 @@ import 'package:home_cleaning_marketplace/features/bookings/presentation/custome
 import 'package:home_cleaning_marketplace/features/payments/data/payment_models.dart';
 import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_controller.dart';
 import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_screen.dart';
+import 'package:home_cleaning_marketplace/features/reviews/presentation/customer_review_controller.dart';
 
 import '../../../helpers/feature_test_fakes.dart';
 
@@ -30,6 +31,11 @@ void main() {
           customerPaymentControllerProvider.overrideWith(
             () => SeededCustomerPaymentController(
               const CustomerPaymentState(loading: false),
+            ),
+          ),
+          customerReviewControllerProvider.overrideWith(
+            () => SeededCustomerReviewController(
+              const CustomerReviewState(loading: false),
             ),
           ),
         ],
@@ -94,6 +100,11 @@ void main() {
             ),
           ),
           customerPaymentControllerProvider.overrideWith(() => payments),
+          customerReviewControllerProvider.overrideWith(
+            () => SeededCustomerReviewController(
+              const CustomerReviewState(loading: false),
+            ),
+          ),
         ],
         child: const MaterialApp(
           home: CustomerBookingDetailScreen(
@@ -156,6 +167,11 @@ void main() {
                     ],
                   ),
                 ),
+              ),
+            ),
+            customerReviewControllerProvider.overrideWith(
+              () => SeededCustomerReviewController(
+                const CustomerReviewState(loading: false),
               ),
             ),
           ],

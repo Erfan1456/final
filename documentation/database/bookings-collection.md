@@ -2,7 +2,7 @@
 
 This document describes the `bookings` collection.
 
-TASK 015 stores the marketplace's first transaction: a customer reservation of **one complete** availability slot, immutable service/address/pricing snapshots, and an embedded status history. Payment, refund, payout, chat, reviews, ratings, disputes, rescheduling, and recurring bookings are not stored here.
+TASK 015 stores the marketplace's first transaction: a customer reservation of **one complete** availability slot, immutable service/address/pricing snapshots, and an embedded status history. Payment, chat, notifications, and reviews live in their own collections. Payout, disputes, rescheduling, and recurring bookings are not stored here.
 
 A booking preserves the agreement at creation time. Later edits to `addresses`, `services`, or `cleaner_services` must not change historical booking terms. Snapshots copy only approved booking fields. Passwords, `email_normalized`, JWTs, refresh tokens, session ids, token hashes, Mongo URIs, and `ACCESS_TOKEN_SECRET` are never stored on a booking.
 

@@ -50,6 +50,9 @@ enum BookingStatus {
     }
   }
 
+  /// Whether a booking participant may send chat messages.
+  bool get allowsChatMessages => reservationActive;
+
   /// Whether this status is terminal.
   bool get isTerminal {
     switch (this) {

@@ -66,6 +66,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Location: Dhaka, Dhaka, BD'), findsOneWidget);
     expect(find.text('1 Test Street'), findsNothing);
+    expect(find.text('Message Customer'), findsOneWidget);
     expect(find.text('Accept'), findsOneWidget);
     expect(find.text('Decline'), findsOneWidget);
     expect(find.text('Start Job'), findsNothing);

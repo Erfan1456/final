@@ -73,3 +73,5 @@ Do not mark the booking cancelled first and hope refund succeeds later.
 ## Flutter honesty
 
 Sandbox UI appears only when the API sets `simulation_available == true`. It is labeled **Development Sandbox**. There is no card-number or CVV form. The app does not claim real card, Stripe, or production processing.
+
+TASK 017 notifies the customer after a successful paid, failed, or refunded webhook transition. Invalid signatures, integrity mismatches, ignored unknown payments, and stale no-op events do not notify.

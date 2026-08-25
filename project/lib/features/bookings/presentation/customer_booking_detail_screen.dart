@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:home_cleaning_marketplace/app/router/app_routes.dart';
 import 'package:home_cleaning_marketplace/features/availability/presentation/cleaner_availability_screen.dart';
 import 'package:home_cleaning_marketplace/features/bookings/data/booking_models.dart';
 import 'package:home_cleaning_marketplace/features/bookings/presentation/booking_widgets.dart';
@@ -7,6 +9,7 @@ import 'package:home_cleaning_marketplace/features/bookings/presentation/custome
 import 'package:home_cleaning_marketplace/features/catalog/data/marketplace_service.dart';
 import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_controller.dart';
 import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_section.dart';
+import 'package:home_cleaning_marketplace/features/reviews/presentation/customer_review_controller.dart';
 
 class CustomerBookingDetailScreen extends ConsumerStatefulWidget {
   const CustomerBookingDetailScreen({super.key, required this.bookingId});
@@ -32,6 +35,9 @@ class _CustomerBookingDetailScreenState
           .loadDetail(widget.bookingId);
       ref
           .read(customerPaymentControllerProvider.notifier)
+          .load(widget.bookingId);
+      ref
+          .read(customerReviewControllerProvider.notifier)
           .load(widget.bookingId);
     });
   }
@@ -81,6 +87,27 @@ class _CustomerBookingDetailScreenState
                     ],
                     const SizedBox(height: 16),
                     BookingPaymentSection(booking: booking),
+                    const SizedBox(height: 16),
+                    FilledButton.tonal(
+                      onPressed: () => context.push(
+                        AppRoutes.customerBookingChatLocation(booking.id),
+                      ),
+                      child: const Text('Message Cleaner'),
+                    ),
+                    if (booking.status == BookingStatus.completed) ...[
+                      const SizedBox(height: 8),
+                      OutlinedButton(
+                        onPressed: () => context.push(
+                          AppRoutes.customerBookingReviewLocation(booking.id),
+                        ),
+                        child: Text(
+                          ref.watch(customerReviewControllerProvider).review ==
+                                  null
+                              ? 'Leave Review'
+                              : 'Edit Review',
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     BookingStatusHistoryList(history: booking.statusHistory),
                     if (state.errorMessage != null) Text(state.errorMessage!),

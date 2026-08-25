@@ -40,9 +40,18 @@ abstract final class AppRoutes {
       '/customer/bookings/:bookingId';
   static const String customerBookingPaymentPath =
       '/customer/bookings/:bookingId/payment';
+  static const String customerBookingChatPath =
+      '/customer/bookings/:bookingId/chat';
+  static const String customerBookingReviewPath =
+      '/customer/bookings/:bookingId/review';
 
   static const String cleanerBookingsPath = '/cleaner/bookings';
   static const String cleanerBookingDetailPath = '/cleaner/bookings/:bookingId';
+  static const String cleanerBookingChatPath =
+      '/cleaner/bookings/:bookingId/chat';
+  static const String cleanerReviewsPath = '/cleaner/reviews';
+
+  static const String notificationsPath = '/notifications';
 
   static const String adminHomePath = '/admin/home';
   static const String adminHomeName = 'adminHome';
@@ -50,6 +59,8 @@ abstract final class AppRoutes {
   static const String adminCleanerDetailPath = '/admin/cleaners/:userId';
   static const String adminPaymentsPath = '/admin/payments';
   static const String adminPaymentDetailPath = '/admin/payments/:paymentId';
+  static const String adminReviewsPath = '/admin/reviews';
+  static const String adminReviewDetailPath = '/admin/reviews/:reviewId';
 
   /// Role-specific authenticated home.
   static String homeForRole(String role) {
@@ -98,5 +109,21 @@ abstract final class AppRoutes {
 
   static String cleanerBookingDetailLocation(String bookingId) {
     return '/cleaner/bookings/$bookingId';
+  }
+
+  static String customerBookingChatLocation(String bookingId) {
+    return '/customer/bookings/$bookingId/chat';
+  }
+
+  static String cleanerBookingChatLocation(String bookingId) {
+    return '/cleaner/bookings/$bookingId/chat';
+  }
+
+  static String customerBookingReviewLocation(String bookingId) {
+    return '/customer/bookings/$bookingId/review';
+  }
+
+  static String adminReviewDetailLocation(String reviewId) {
+    return '/admin/reviews/$reviewId';
   }
 }

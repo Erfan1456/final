@@ -21,7 +21,7 @@ MongoDB Atlas is the persistence provider. `mongo_dart` is the backend driver. U
 * admin cleaner list, detail, approve, and reject
 * public service catalog, cleaner offerings, availability, and customer discovery
 
-TASK 015 may ensure approved booking indexes (including the partial unique active-slot constraint) through the controlled index tool. It does not create live bookings, users, or availability fixtures. Payments, chat, and reviews are still absent.
+TASK 015–017 may ensure approved booking, payment, conversation, notification, and review indexes through the controlled index tool. It does not create live bookings, conversations, messages, notifications, reviews, users, or availability fixtures.
 
 Do not place a real MongoDB URI, passwords, or other secrets in this package. Flutter never receives the MongoDB connection URI.
 
@@ -56,8 +56,13 @@ Do not place a real MongoDB URI, passwords, or other secrets in this package. Fl
 * `GET /api/v1/cleaner/bookings`
 * `GET /api/v1/cleaner/bookings/{bookingId}`
 * `POST /api/v1/cleaner/bookings/{bookingId}/accept|decline|cancel|start|complete`
+* customer/cleaner booking-scoped conversations and messages
+* in-app notifications list/unread-count/read/read-all
+* `GET`/`PUT /api/v1/customer/bookings/{bookingId}/review`
+* `GET /api/v1/cleaner/reviews`
+* admin review list/detail/hide/unhide
 
-See [../documentation/api/authentication-api.md](../documentation/api/authentication-api.md), [../documentation/api/profile-address-onboarding-admin-api.md](../documentation/api/profile-address-onboarding-admin-api.md), [../documentation/api/services-availability-discovery-api.md](../documentation/api/services-availability-discovery-api.md), [../documentation/api/booking-api.md](../documentation/api/booking-api.md), and [../documentation/architecture/protected-api-authentication.md](../documentation/architecture/protected-api-authentication.md). These auth endpoints require production rate limiting before unrestricted internet exposure. Payments, chat, and reviews are still absent.
+See [../documentation/api/authentication-api.md](../documentation/api/authentication-api.md), [../documentation/api/profile-address-onboarding-admin-api.md](../documentation/api/profile-address-onboarding-admin-api.md), [../documentation/api/services-availability-discovery-api.md](../documentation/api/services-availability-discovery-api.md), [../documentation/api/booking-api.md](../documentation/api/booking-api.md), [../documentation/api/payment-api.md](../documentation/api/payment-api.md), [../documentation/api/chat-api.md](../documentation/api/chat-api.md), [../documentation/api/notification-api.md](../documentation/api/notification-api.md), [../documentation/api/review-api.md](../documentation/api/review-api.md), and [../documentation/architecture/protected-api-authentication.md](../documentation/architecture/protected-api-authentication.md). These auth endpoints require production rate limiting before unrestricted internet exposure. WebSockets, push notifications, and a production payment processor are still absent.
 
 ## Configuration
 
@@ -117,7 +122,11 @@ When the Flutter Android emulator calls this API, use `http://10.0.2.2:8080` ins
 * `lib/src/features/services/` — platform catalog
 * `lib/src/features/cleaner_services/` — cleaner offerings
 * `lib/src/features/availability/` — UTC availability slots
-* `lib/src/features/discovery/` — customer-safe discovery
+* `lib/src/features/bookings/` — booking reservation and lifecycle
+* `lib/src/features/payments/` — sandbox payment ledger and webhooks
+* `lib/src/features/chat/` — booking-scoped conversations and messages
+* `lib/src/features/notifications/` — in-app notification feed
+* `lib/src/features/reviews/` — verified reviews and admin moderation
 * `lib/src/features/auth/application/` — authentication use cases
 * `lib/src/features/auth/http/` — auth JSON parsing, Bearer verification, and error mapping
 * `lib/src/features/auth/security/` — password policy and Argon2id hashing
@@ -140,8 +149,9 @@ Business logic should not accumulate in route handlers. Future features should a
 * Role-scoped customer profile and address routes
 * Cleaner onboarding and admin review routes
 * Platform service catalog, cleaner offerings, availability, customer discovery, and booking reservation/lifecycle
-* Approved `customer_profiles`, `cleaner_profiles`, `addresses`, `services`, `cleaner_services`, `availability_slots`, and `bookings` indexes
-* No payments, chat, or reviews
-* No production rate limiting yet
+* Sandbox payment ledger, signed webhooks, and refund foundation
+* Booking-scoped chat, in-app notifications, verified reviews, and admin moderation
+* Approved indexes for profiles, catalog, bookings, payments, conversations, messages, notifications, and reviews
+* No production payment processor, WebSockets, or push notifications
 * No production rate limiting yet
 * CORS is a small development-oriented foundation, not a complete production security policy

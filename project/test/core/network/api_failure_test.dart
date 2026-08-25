@@ -43,6 +43,22 @@ void main() {
     );
     expect(messageForApiCode('booking_not_payable'), contains('confirmed'));
     expect(
+      messageForApiCode('conversation_not_found'),
+      equals('Conversation was not found.'),
+    );
+    expect(messageForApiCode('conversation_read_only'), contains('read-only'));
+    expect(messageForApiCode('invalid_message'), contains('plain text'));
+    expect(
+      messageForApiCode('notification_not_found'),
+      contains('Notification'),
+    );
+    expect(messageForApiCode('review_not_allowed'), contains('completed'));
+    expect(
+      messageForApiCode('review_not_found'),
+      equals('Review was not found.'),
+    );
+    expect(messageForApiCode('invalid_review_rating'), contains('1 to 5'));
+    expect(
       messageForApiCode('some_unknown_code'),
       equals('Something went wrong. Please try again.'),
     );

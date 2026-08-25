@@ -12,6 +12,9 @@ import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/doma
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/domain/cleaner_service_validation.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/domain/profile_validation_exception.dart';
 import 'package:home_cleaning_marketplace_api/src/features/discovery/domain/cleaner_discovery_models.dart';
+import 'package:home_cleaning_marketplace_api/src/features/reviews/data/review_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/reviews/domain/review.dart';
+import 'package:home_cleaning_marketplace_api/src/features/reviews/domain/review_validation.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/application/canonical_service_catalog.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/data/service_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/domain/marketplace_service.dart';
@@ -30,6 +33,7 @@ class CleanerDiscoveryService {
     required UserRepository users,
     required AvailabilityRepository slots,
     required BookingRepository bookings,
+    ReviewRepository? reviews,
     DateTime Function()? clock,
   }) : _services = services,
        _offerings = offerings,
@@ -37,6 +41,7 @@ class CleanerDiscoveryService {
        _users = users,
        _slots = slots,
        _bookings = bookings,
+       _reviews = reviews,
        _clock = clock ?? DateTime.now;
 
   /// Default page size.
@@ -55,6 +60,7 @@ class CleanerDiscoveryService {
   final UserRepository _users;
   final AvailabilityRepository _slots;
   final BookingRepository _bookings;
+  final ReviewRepository? _reviews;
   final DateTime Function() _clock;
 
   /// Lists discoverable cleaners using the supplied query values.
@@ -166,6 +172,20 @@ class CleanerDiscoveryService {
         limit: AvailabilityValidation.maxDetailSlots,
       ),
     );
+    final reviews = _reviews;
+    CleanerReviewAggregate? aggregate;
+    var publicReviews = const <Map<String, Object?>>[];
+    if (reviews != null) {
+      final aggregates = await reviews.aggregateForCleanerIds([cleanerUserId]);
+      aggregate = aggregates[cleanerUserId];
+      publicReviews = [
+        for (final review in await reviews.latestPublishedForCleaner(
+          cleanerUserId: cleanerUserId,
+          limit: ReviewValidation.publicDetailLimit,
+        ))
+          review.toPublicJson(),
+      ];
+    }
     return CleanerDiscoveryDetail(
       cleanerUserId: cleanerUserId.oid,
       fullName: profile.fullName,
@@ -176,6 +196,9 @@ class CleanerDiscoveryService {
       hourlyRateMinor: offering.hourlyRateMinor,
       currencyCode: offering.currencyCode,
       availability: slots,
+      ratingAverage: aggregate?.ratingAverage,
+      reviewCount: aggregate?.reviewCount ?? 0,
+      reviews: publicReviews,
     );
   }
 
@@ -253,6 +276,10 @@ class CleanerDiscoveryService {
       nextByCleaner.putIfAbsent(slot.cleanerUserId.oid, () => slot.startAt);
     }
 
+    final aggregates = await _reviewAggregates([
+      for (final offering in remaining) offering.cleanerUserId,
+    ]);
+
     return [
       for (final offering in remaining)
         CleanerDiscoverySummary.fromJoined(
@@ -265,8 +292,20 @@ class CleanerDiscoveryService {
           serviceArea:
               profilesByUserId[offering.cleanerUserId.oid]!.serviceArea,
           nextAvailableAt: nextByCleaner[offering.cleanerUserId.oid],
+          ratingAverage: aggregates[offering.cleanerUserId]?.ratingAverage,
+          reviewCount: aggregates[offering.cleanerUserId]?.reviewCount ?? 0,
         ),
     ];
+  }
+
+  Future<Map<ObjectId, CleanerReviewAggregate>> _reviewAggregates(
+    List<ObjectId> cleanerIds,
+  ) async {
+    final reviews = _reviews;
+    if (reviews == null || cleanerIds.isEmpty) {
+      return <ObjectId, CleanerReviewAggregate>{};
+    }
+    return reviews.aggregateForCleanerIds(cleanerIds);
   }
 
   /// Batch-excludes slots with an active booking reservation. One query.

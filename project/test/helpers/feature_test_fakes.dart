@@ -8,6 +8,8 @@ import 'package:home_cleaning_marketplace/features/bookings/data/booking_models.
 import 'package:home_cleaning_marketplace/features/bookings/presentation/cleaner_booking_controller.dart';
 import 'package:home_cleaning_marketplace/features/bookings/presentation/customer_booking_controller.dart';
 import 'package:home_cleaning_marketplace/features/catalog/data/marketplace_service.dart';
+import 'package:home_cleaning_marketplace/features/chat/data/chat_models.dart';
+import 'package:home_cleaning_marketplace/features/chat/presentation/booking_chat_controller.dart';
 import 'package:home_cleaning_marketplace/features/catalog/presentation/catalog_controller.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/data/cleaner_profile.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/presentation/cleaner_onboarding_controller.dart';
@@ -18,9 +20,15 @@ import 'package:home_cleaning_marketplace/features/customer/presentation/custome
 import 'package:home_cleaning_marketplace/features/discovery/data/cleaner_discovery_models.dart';
 import 'package:home_cleaning_marketplace/features/discovery/presentation/comparison_controller.dart';
 import 'package:home_cleaning_marketplace/features/discovery/presentation/discovery_controller.dart';
+import 'package:home_cleaning_marketplace/features/notifications/data/notification_models.dart';
+import 'package:home_cleaning_marketplace/features/notifications/presentation/notification_controller.dart';
 import 'package:home_cleaning_marketplace/features/payments/data/payment_models.dart';
 import 'package:home_cleaning_marketplace/features/payments/presentation/admin_payment_controller.dart';
 import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_controller.dart';
+import 'package:home_cleaning_marketplace/features/reviews/data/review_models.dart';
+import 'package:home_cleaning_marketplace/features/reviews/presentation/admin_review_controller.dart';
+import 'package:home_cleaning_marketplace/features/reviews/presentation/cleaner_reviews_controller.dart';
+import 'package:home_cleaning_marketplace/features/reviews/presentation/customer_review_controller.dart';
 
 class SeededCustomerProfileController extends CustomerProfileController {
   SeededCustomerProfileController(this._seed);
@@ -582,6 +590,219 @@ class SeededCleanerBookingController extends CleanerBookingController {
   }
 }
 
+class SeededBookingChatController extends BookingChatController {
+  SeededBookingChatController(this._seed);
+
+  final BookingChatState _seed;
+  int loadCalls = 0;
+  int loadOlderCalls = 0;
+  int sendCalls = 0;
+  int markReadCalls = 0;
+  int startPollingCalls = 0;
+  int stopPollingCalls = 0;
+
+  @override
+  BookingChatState build() => _seed;
+
+  @override
+  Future<void> load(String bookingId) async {
+    loadCalls += 1;
+  }
+
+  @override
+  Future<void> loadOlder() async {
+    loadOlderCalls += 1;
+  }
+
+  @override
+  Future<void> send({String Function()? keyFactory}) async {
+    if (state.sending) {
+      return;
+    }
+    sendCalls += 1;
+  }
+
+  @override
+  Future<void> markRead() async {
+    markReadCalls += 1;
+  }
+
+  @override
+  void startPolling({Duration interval = const Duration(seconds: 5)}) {
+    startPollingCalls += 1;
+  }
+
+  @override
+  void stopPolling() {
+    stopPollingCalls += 1;
+  }
+}
+
+class SeededNotificationController extends NotificationController {
+  SeededNotificationController(this._seed);
+
+  final NotificationState _seed;
+  int loadCalls = 0;
+  int loadMoreCalls = 0;
+  int markOneCalls = 0;
+  int markAllCalls = 0;
+  int unreadFilterCalls = 0;
+  String? lastMarkedId;
+
+  @override
+  NotificationState build() => _seed;
+
+  @override
+  Future<void> load({bool? unreadOnly}) async {
+    loadCalls += 1;
+    if (unreadOnly != null) {
+      state = state.copyWith(unreadOnly: unreadOnly, loading: false);
+    }
+  }
+
+  @override
+  Future<void> loadMore() async {
+    loadMoreCalls += 1;
+  }
+
+  @override
+  Future<void> setUnreadFilter(bool unreadOnly) {
+    unreadFilterCalls += 1;
+    return load(unreadOnly: unreadOnly);
+  }
+
+  @override
+  Future<void> refreshUnreadCount() async {}
+
+  @override
+  Future<void> markOne(String notificationId) async {
+    markOneCalls += 1;
+    lastMarkedId = notificationId;
+  }
+
+  @override
+  Future<void> markAll() async {
+    markAllCalls += 1;
+  }
+}
+
+class SeededCustomerReviewController extends CustomerReviewController {
+  SeededCustomerReviewController(this._seed);
+
+  final CustomerReviewState _seed;
+  int loadCalls = 0;
+  int saveCalls = 0;
+  int? lastRating;
+  String? lastComment;
+
+  @override
+  CustomerReviewState build() => _seed;
+
+  @override
+  Future<void> load(String bookingId) async {
+    loadCalls += 1;
+  }
+
+  @override
+  Future<bool> save({
+    required String bookingId,
+    required int rating,
+    String? comment,
+  }) async {
+    if (state.saving) {
+      return false;
+    }
+    saveCalls += 1;
+    lastRating = rating;
+    lastComment = comment;
+    return true;
+  }
+}
+
+class SeededCleanerReviewsController extends CleanerReviewsController {
+  SeededCleanerReviewsController(this._seed);
+
+  final CleanerReviewsState _seed;
+  int loadCalls = 0;
+  int loadMoreCalls = 0;
+  String? lastStatus;
+
+  @override
+  CleanerReviewsState build() => _seed;
+
+  @override
+  Future<void> load({String? status, bool clearStatus = false}) async {
+    loadCalls += 1;
+    lastStatus = clearStatus ? null : status;
+    state = state.copyWith(
+      loading: false,
+      status: lastStatus,
+      clearStatus: lastStatus == null,
+    );
+  }
+
+  @override
+  Future<void> loadMore() async {
+    loadMoreCalls += 1;
+  }
+}
+
+class SeededAdminReviewController extends AdminReviewController {
+  SeededAdminReviewController(this._seed);
+
+  final AdminReviewState _seed;
+  int loadCalls = 0;
+  int loadMoreCalls = 0;
+  int loadDetailCalls = 0;
+  int hideCalls = 0;
+  int unhideCalls = 0;
+  AdminReviewFilters? lastFilters;
+  String? lastHideReason;
+
+  @override
+  AdminReviewState build() => _seed;
+
+  @override
+  Future<void> load({AdminReviewFilters? filters}) async {
+    loadCalls += 1;
+    lastFilters = filters ?? state.filters;
+    if (filters != null) {
+      state = state.copyWith(filters: filters, loading: false);
+    }
+  }
+
+  @override
+  Future<void> applyFilters(AdminReviewFilters filters) {
+    return load(filters: filters);
+  }
+
+  @override
+  Future<void> loadMore() async {
+    loadMoreCalls += 1;
+  }
+
+  @override
+  Future<void> loadDetail(String reviewId) async {
+    loadDetailCalls += 1;
+  }
+
+  @override
+  Future<bool> hide({required String reviewId, required String reason}) async {
+    if (state.saving) {
+      return false;
+    }
+    hideCalls += 1;
+    lastHideReason = reason;
+    return true;
+  }
+
+  @override
+  Future<bool> unhide(String reviewId) async {
+    unhideCalls += 1;
+    return true;
+  }
+}
+
 CustomerProfile testCustomerProfile() {
   final created = DateTime.utc(2026, 8, 25, 12);
   return CustomerProfile(
@@ -699,6 +920,26 @@ List<dynamic> featureControllerOverrides() {
       () =>
           SeededAdminPaymentController(const AdminPaymentState(loading: false)),
     ),
+    bookingChatControllerProvider.overrideWith(
+      () => SeededBookingChatController(const BookingChatState(loading: false)),
+    ),
+    notificationControllerProvider.overrideWith(
+      () =>
+          SeededNotificationController(const NotificationState(loading: false)),
+    ),
+    customerReviewControllerProvider.overrideWith(
+      () => SeededCustomerReviewController(
+        const CustomerReviewState(loading: false),
+      ),
+    ),
+    cleanerReviewsControllerProvider.overrideWith(
+      () => SeededCleanerReviewsController(
+        const CleanerReviewsState(loading: false),
+      ),
+    ),
+    adminReviewControllerProvider.overrideWith(
+      () => SeededAdminReviewController(const AdminReviewState(loading: false)),
+    ),
   ];
 }
 
@@ -751,6 +992,8 @@ CleanerDiscoverySummary testDiscoverySummary({
   String fullName = 'Ada Cleaner',
   String currencyCode = 'BDT',
   int hourlyRateMinor = 250000,
+  double? ratingAverage,
+  int reviewCount = 0,
 }) {
   return CleanerDiscoverySummary(
     cleanerUserId: cleanerUserId,
@@ -762,11 +1005,16 @@ CleanerDiscoverySummary testDiscoverySummary({
     hourlyRateMinor: hourlyRateMinor,
     currencyCode: currencyCode,
     nextAvailableAt: DateTime.utc(2026, 9, 1, 3),
+    ratingAverage: ratingAverage,
+    reviewCount: reviewCount,
   );
 }
 
 CleanerDiscoveryDetail testDiscoveryDetail({
   String cleanerUserId = '507f1f77bcf86cd799439081',
+  double? ratingAverage,
+  int reviewCount = 0,
+  List<PublicCleanerReview> reviews = const <PublicCleanerReview>[],
 }) {
   return CleanerDiscoveryDetail(
     cleanerUserId: cleanerUserId,
@@ -778,6 +1026,9 @@ CleanerDiscoveryDetail testDiscoveryDetail({
     hourlyRateMinor: 250000,
     currencyCode: 'BDT',
     availability: [testAvailabilitySlot()],
+    ratingAverage: ratingAverage,
+    reviewCount: reviewCount,
+    reviews: reviews,
   );
 }
 
@@ -1145,4 +1396,226 @@ AdminPaymentDetail testAdminPaymentDetail({String status = 'paid'}) {
     'payment': adminPaymentJson(status: status),
     'events': [webhookEventJson()],
   });
+}
+
+Map<String, dynamic> conversationJson({
+  String id = '507f1f77bcf86cd7994390a1',
+  String bookingId = '507f1f77bcf86cd799439091',
+  String bookingStatus = 'confirmed',
+  bool readOnly = false,
+  String otherPartyDisplayName = 'Ada Cleaner',
+  String otherPartyRole = 'cleaner',
+  int unreadCount = 0,
+  String? lastMessagePreview = 'See you at 9.',
+}) {
+  return <String, dynamic>{
+    'id': id,
+    'booking_id': bookingId,
+    'other_party_display_name': otherPartyDisplayName,
+    'other_party_role': otherPartyRole,
+    'booking_status': bookingStatus,
+    'last_message_preview': lastMessagePreview,
+    'last_message_at': '2026-08-25T12:10:00.000Z',
+    'unread_count': unreadCount,
+    'read_only': readOnly,
+  };
+}
+
+Map<String, dynamic> chatMessageJson({
+  String id = '507f1f77bcf86cd7994390b1',
+  String conversationId = '507f1f77bcf86cd7994390a1',
+  String senderUserId = '507f1f77bcf86cd799439011',
+  String senderRole = 'customer',
+  String body = 'Hello there',
+  String createdAt = '2026-08-25T12:10:00.000Z',
+  bool isMine = true,
+}) {
+  return <String, dynamic>{
+    'id': id,
+    'conversation_id': conversationId,
+    'sender_user_id': senderUserId,
+    'sender_role': senderRole,
+    'body': body,
+    'created_at': createdAt,
+    'is_mine': isMine,
+  };
+}
+
+ConversationDetail testConversationDetail({
+  String bookingStatus = 'confirmed',
+  bool readOnly = false,
+  String otherPartyDisplayName = 'Ada Cleaner',
+}) {
+  return ConversationDetail.fromJson(
+    conversationJson(
+      bookingStatus: bookingStatus,
+      readOnly: readOnly,
+      otherPartyDisplayName: otherPartyDisplayName,
+    ),
+  );
+}
+
+ChatMessage testChatMessage({
+  String id = '507f1f77bcf86cd7994390b1',
+  String body = 'Hello there',
+  bool isMine = true,
+  String senderRole = 'customer',
+}) {
+  return ChatMessage.fromJson(
+    chatMessageJson(id: id, body: body, isMine: isMine, senderRole: senderRole),
+  );
+}
+
+Map<String, dynamic> inboxNotificationJson({
+  String id = '507f1f77bcf86cd7994390c1',
+  String type = 'booking_confirmed',
+  String title = 'Booking confirmed',
+  String body = 'Your booking was confirmed.',
+  String? resourceType = 'booking',
+  String? resourceId = '507f1f77bcf86cd799439091',
+  String? readAt,
+}) {
+  return <String, dynamic>{
+    'id': id,
+    'type': type,
+    'title': title,
+    'body': body,
+    'resource_type': resourceType,
+    'resource_id': resourceId,
+    'read_at': readAt,
+    'created_at': '2026-08-25T12:00:00.000Z',
+  };
+}
+
+InboxNotification testInboxNotification({
+  String id = '507f1f77bcf86cd7994390c1',
+  String type = 'booking_confirmed',
+  String title = 'Booking confirmed',
+  String body = 'Your booking was confirmed.',
+  String? resourceType = 'booking',
+  String? resourceId = '507f1f77bcf86cd799439091',
+  String? readAt,
+}) {
+  return InboxNotification.fromJson(
+    inboxNotificationJson(
+      id: id,
+      type: type,
+      title: title,
+      body: body,
+      resourceType: resourceType,
+      resourceId: resourceId,
+      readAt: readAt,
+    ),
+  );
+}
+
+Map<String, dynamic> customerReviewJson({
+  String id = '507f1f77bcf86cd7994390e1',
+  String bookingId = '507f1f77bcf86cd799439091',
+  int rating = 5,
+  String? comment = 'Great job.',
+  String moderationStatus = 'published',
+}) {
+  return <String, dynamic>{
+    'id': id,
+    'booking_id': bookingId,
+    'rating': rating,
+    'comment': comment,
+    'moderation_status': moderationStatus,
+    'verified_booking': true,
+    'created_at': '2026-08-25T12:00:00.000Z',
+    'updated_at': '2026-08-25T12:00:00.000Z',
+  };
+}
+
+Map<String, dynamic> cleanerReviewJson({
+  String id = '507f1f77bcf86cd7994390e1',
+  int rating = 5,
+  String comment = 'Great job.',
+  String moderationStatus = 'published',
+}) {
+  return <String, dynamic>{
+    ...customerReviewJson(
+      id: id,
+      rating: rating,
+      comment: comment,
+      moderationStatus: moderationStatus,
+    ),
+    'reviewer_display_name': 'Verified customer',
+  };
+}
+
+Map<String, dynamic> publicCleanerReviewJson({
+  int rating = 5,
+  String comment = 'Great job.',
+}) {
+  return <String, dynamic>{
+    'rating': rating,
+    'comment': comment,
+    'created_at': '2026-08-25T12:00:00.000Z',
+    'verified_booking': true,
+    'reviewer_display_name': 'Verified customer',
+  };
+}
+
+Map<String, dynamic> adminReviewJson({
+  String id = '507f1f77bcf86cd7994390e1',
+  int rating = 5,
+  String comment = 'Great job.',
+  String moderationStatus = 'published',
+  String? hiddenReason,
+  String? hiddenBy,
+  String? hiddenAt,
+}) {
+  return <String, dynamic>{
+    'id': id,
+    'booking_id': '507f1f77bcf86cd799439091',
+    'customer_user_id': '507f1f77bcf86cd799439011',
+    'cleaner_user_id': '507f1f77bcf86cd799439081',
+    'rating': rating,
+    'comment': comment,
+    'moderation_status': moderationStatus,
+    'hidden_reason': hiddenReason,
+    'hidden_by': hiddenBy,
+    'hidden_at': hiddenAt,
+    'created_at': '2026-08-25T12:00:00.000Z',
+    'updated_at': '2026-08-25T12:00:00.000Z',
+  };
+}
+
+CustomerReview testCustomerReview({
+  int rating = 5,
+  String moderationStatus = 'published',
+}) {
+  return CustomerReview.fromJson(
+    customerReviewJson(rating: rating, moderationStatus: moderationStatus),
+  );
+}
+
+CleanerReview testCleanerReview({String moderationStatus = 'published'}) {
+  return CleanerReview.fromJson(
+    cleanerReviewJson(moderationStatus: moderationStatus),
+  );
+}
+
+AdminReviewSummary testAdminReviewSummary({
+  String moderationStatus = 'published',
+}) {
+  return AdminReviewSummary.fromJson(
+    adminReviewJson(moderationStatus: moderationStatus),
+  );
+}
+
+AdminReviewDetail testAdminReviewDetail({
+  String moderationStatus = 'published',
+  String? hiddenReason,
+}) {
+  return AdminReviewDetail.fromJson(
+    adminReviewJson(
+      moderationStatus: moderationStatus,
+      hiddenReason: hiddenReason,
+      hiddenBy: hiddenReason == null ? null : '507f1f77bcf86cd799439099',
+      hiddenAt: hiddenReason == null ? null : '2026-08-25T13:00:00.000Z',
+    ),
+  );
 }

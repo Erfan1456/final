@@ -13,6 +13,8 @@ import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booki
 import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_validation.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/notifications/application/notification_sink.dart';
+import 'package:home_cleaning_marketplace_api/src/features/notifications/domain/notification_type.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/booking_cancellation_orchestrator.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/data/service_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/user_repository.dart';
@@ -33,6 +35,7 @@ class CustomerBookingService {
     required CleanerServiceRepository offerings,
     required BookingRepository bookings,
     required BookingCancellationOrchestrator cancellation,
+    NotificationSink? notifications,
     DateTime Function()? clock,
   }) : _addresses = addresses,
        _slots = slots,
@@ -42,6 +45,7 @@ class CustomerBookingService {
        _offerings = offerings,
        _bookings = bookings,
        _cancellation = cancellation,
+       _notifications = notifications ?? const NoOpNotificationSink(),
        _clock = clock ?? DateTime.now;
 
   final AddressRepository _addresses;
@@ -52,6 +56,7 @@ class CustomerBookingService {
   final CleanerServiceRepository _offerings;
   final BookingRepository _bookings;
   final BookingCancellationOrchestrator _cancellation;
+  final NotificationSink _notifications;
   final DateTime Function() _clock;
 
   /// Creates a booking or returns an identical idempotent replay.
@@ -191,6 +196,15 @@ class CustomerBookingService {
 
     try {
       final stored = await _bookings.create(booking);
+      await _notifications.notifyBestEffort(
+        userId: stored.cleanerUserId,
+        type: NotificationType.bookingRequested,
+        title: 'New booking request',
+        body: 'You have a new booking request.',
+        dedupeKey: 'booking:${stored.id.oid}:created',
+        resourceType: 'booking',
+        resourceId: stored.id,
+      );
       return (
         booking: stored.toCustomerJson(cleanerPublicName: profile.fullName),
         created: true,
@@ -265,6 +279,15 @@ class CustomerBookingService {
       user: user,
       bookingId: bookingId,
       reason: reason,
+    );
+    await _notifications.notifyBestEffort(
+      userId: updated.cleanerUserId,
+      type: NotificationType.bookingCancelled,
+      title: 'Booking cancelled',
+      body: 'A booking was cancelled.',
+      dedupeKey: 'booking:${updated.id.oid}:cancelled',
+      resourceType: 'booking',
+      resourceId: updated.id,
     );
     final names = await _cleanerNames([updated.cleanerUserId]);
     return updated.toCustomerJson(

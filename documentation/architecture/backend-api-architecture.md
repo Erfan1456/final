@@ -2,7 +2,7 @@
 
 This document describes the Dart Frog backend for the Home Cleaning Service Marketplace.
 
-TASK 013 added role-scoped customer profile, address, cleaner onboarding, and admin review routes. TASK 014 added the public service catalog, cleaner offerings, availability, and customer discovery. TASK 015 added customer/cleaner booking reservation and lifecycle. TASK 016 added a sandbox-backed payment ledger, signed webhooks, refund foundation, and admin transaction inspection. There is no production payment processor, chat, or reviews.
+TASK 013 added role-scoped customer profile, address, cleaner onboarding, and admin review routes. TASK 014 added the public service catalog, cleaner offerings, availability, and customer discovery. TASK 015 added customer/cleaner booking reservation and lifecycle. TASK 016 added a sandbox-backed payment ledger, signed webhooks, refund foundation, and admin transaction inspection. TASK 017 added booking-scoped chat, in-app notifications, verified reviews, discovery rating aggregates, and admin review moderation. There is no production payment processor, WebSocket, or push notification product.
 
 ## Current Architecture
 
@@ -101,9 +101,26 @@ POST /api/v1/cleaner/bookings/<bookingId>/decline
 POST /api/v1/cleaner/bookings/<bookingId>/cancel
 POST /api/v1/cleaner/bookings/<bookingId>/start
 POST /api/v1/cleaner/bookings/<bookingId>/complete
+POST /api/v1/conversations/booking/<bookingId>
+GET /api/v1/conversations
+GET /api/v1/conversations/<conversationId>
+GET /api/v1/conversations/<conversationId>/messages
+POST /api/v1/conversations/<conversationId>/messages
+POST /api/v1/conversations/<conversationId>/read
+GET /api/v1/notifications
+GET /api/v1/notifications/unread-count
+POST /api/v1/notifications/<notificationId>/read
+POST /api/v1/notifications/read-all
+GET /api/v1/customer/bookings/<bookingId>/review
+PUT /api/v1/customer/bookings/<bookingId>/review
+GET /api/v1/cleaner/reviews
+GET /api/v1/admin/reviews
+GET /api/v1/admin/reviews/<reviewId>
+POST /api/v1/admin/reviews/<reviewId>/hide
+POST /api/v1/admin/reviews/<reviewId>/unhide
 ```
 
-`GET /api/v1/health` is liveness and does not depend on MongoDB. `GET /api/v1/ready` is readiness and performs a MongoDB ping. Authentication routes are documented in [../api/authentication-api.md](../api/authentication-api.md). Role-scoped profile, address, onboarding, and admin review routes are documented in [../api/profile-address-onboarding-admin-api.md](../api/profile-address-onboarding-admin-api.md). Catalog, offering, availability, and discovery routes are documented in [../api/services-availability-discovery-api.md](../api/services-availability-discovery-api.md). Booking routes are documented in [../api/booking-api.md](../api/booking-api.md). See also [authentication-application-flow.md](authentication-application-flow.md), [protected-api-authentication.md](protected-api-authentication.md), [profile-address-and-cleaner-onboarding.md](profile-address-and-cleaner-onboarding.md), [service-availability-and-discovery.md](service-availability-and-discovery.md), [booking-reservation-and-lifecycle.md](booking-reservation-and-lifecycle.md), and [../decisions/ADR-009-authentication-application-flow.md](../decisions/ADR-009-authentication-application-flow.md).
+`GET /api/v1/health` is liveness and does not depend on MongoDB. `GET /api/v1/ready` is readiness and performs a MongoDB ping. Authentication routes are documented in [../api/authentication-api.md](../api/authentication-api.md). Role-scoped profile, address, onboarding, and admin review routes are documented in [../api/profile-address-onboarding-admin-api.md](../api/profile-address-onboarding-admin-api.md). Catalog, offering, availability, and discovery routes are documented in [../api/services-availability-discovery-api.md](../api/services-availability-discovery-api.md). Booking routes are documented in [../api/booking-api.md](../api/booking-api.md). Payment routes are documented in [../api/payment-api.md](../api/payment-api.md). Chat, notification, and review routes are documented in [../api/chat-api.md](../api/chat-api.md), [../api/notification-api.md](../api/notification-api.md), and [../api/review-api.md](../api/review-api.md). See also [authentication-application-flow.md](authentication-application-flow.md), [protected-api-authentication.md](protected-api-authentication.md), [profile-address-and-cleaner-onboarding.md](profile-address-and-cleaner-onboarding.md), [service-availability-and-discovery.md](service-availability-and-discovery.md), [booking-reservation-and-lifecycle.md](booking-reservation-and-lifecycle.md), [payment-processing-and-webhooks.md](payment-processing-and-webhooks.md), [chat-notifications-and-reviews.md](chat-notifications-and-reviews.md), and [../decisions/ADR-009-authentication-application-flow.md](../decisions/ADR-009-authentication-application-flow.md).
 
 ## Configuration
 
@@ -130,4 +147,4 @@ Flutter will never receive the MongoDB URI. The Flutter client will call this AP
 
 Backend infrastructure, liveness health, MongoDB connectivity, ping readiness, users persistence, Argon2id password-security primitives, access-token/refresh-session primitives, public authentication HTTP routes, and protected account routes exist.
 
-There is still no chat or review product. Auth endpoints are not ready for unrestricted public internet exposure until production rate limiting is added. TASK 016 payment is a development/test sandbox ledger only; it is not a production card processor.
+There is no WebSocket, push, or production payment processor. Auth endpoints are not ready for unrestricted public internet exposure until production rate limiting is added. TASK 016 payment is a development/test sandbox ledger only; it is not a production card processor.

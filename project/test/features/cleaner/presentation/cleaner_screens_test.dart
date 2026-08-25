@@ -7,6 +7,7 @@ import 'package:home_cleaning_marketplace/features/cleaner/data/cleaner_profile.
 import 'package:home_cleaning_marketplace/features/cleaner/presentation/cleaner_home_screen.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/presentation/cleaner_onboarding_controller.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/presentation/cleaner_onboarding_screen.dart';
+import 'package:home_cleaning_marketplace/features/notifications/presentation/notification_controller.dart';
 
 import '../../../helpers/auth_test_fakes.dart';
 import '../../../helpers/feature_test_fakes.dart';
@@ -25,6 +26,11 @@ Future<void> pumpCleanerHome(
         ),
         cleanerOnboardingControllerProvider.overrideWith(
           () => SeededCleanerOnboardingController(onboarding),
+        ),
+        notificationControllerProvider.overrideWith(
+          () => SeededNotificationController(
+            const NotificationState(loading: false),
+          ),
         ),
       ],
       child: const MaterialApp(home: CleanerHomeScreen()),
@@ -90,6 +96,8 @@ void main() {
     );
     expect(find.text('Manage Services'), findsOneWidget);
     expect(find.text('Manage Availability'), findsOneWidget);
+    expect(find.text('My Reviews'), findsOneWidget);
+    expect(find.text('Notifications'), findsOneWidget);
     expect(find.text('Booking Requests / Jobs'), findsOneWidget);
     expect(find.text('Start onboarding'), findsNothing);
   });

@@ -164,6 +164,9 @@ class _DiscoveryCard extends ConsumerWidget {
                 summary.currencyCode,
               ),
             ),
+            Text(
+              formatDiscoveryRating(summary.ratingAverage, summary.reviewCount),
+            ),
             if (summary.nextAvailableAt != null)
               Text('Next available: ${summary.nextAvailableAt!.toLocal()}'),
             const SizedBox(height: 8),

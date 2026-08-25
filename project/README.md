@@ -8,9 +8,9 @@ Repository-level documentation lives at [`../documentation/`](../documentation/)
 
 Flutter commands should be executed from this directory.
 
-Authentication is implemented as a vertical slice: secure token storage, signup/login/logout, session restoration, and go_router guards. TASK 013 adds role-aware customer, cleaner, and admin dashboards plus profile, address, onboarding, and approval screens. TASK 014 adds cleaner service/availability management and customer discovery, detail, and local comparison. TASK 015 adds customer booking creation, My Bookings, and cleaner booking requests/jobs. Payments, chat, and reviews are not implemented yet.
+Authentication is implemented as a vertical slice: secure token storage, signup/login/logout, session restoration, and go_router guards. TASK 013 adds role-aware customer, cleaner, and admin dashboards plus profile, address, onboarding, and approval screens. TASK 014 adds cleaner service/availability management and customer discovery, detail, and local comparison. TASK 015 adds customer booking creation, My Bookings, and cleaner booking requests/jobs. TASK 016 adds customer sandbox payment UX and admin transactions. TASK 017 adds booking chat, a notification center, customer/cleaner/admin reviews, and discovery ratings.
 
-See [../documentation/architecture/flutter-authentication.md](../documentation/architecture/flutter-authentication.md), [../documentation/architecture/profile-address-and-cleaner-onboarding.md](../documentation/architecture/profile-address-and-cleaner-onboarding.md), [../documentation/architecture/service-availability-and-discovery.md](../documentation/architecture/service-availability-and-discovery.md), and [../documentation/architecture/booking-reservation-and-lifecycle.md](../documentation/architecture/booking-reservation-and-lifecycle.md).
+See [../documentation/architecture/flutter-authentication.md](../documentation/architecture/flutter-authentication.md), [../documentation/architecture/profile-address-and-cleaner-onboarding.md](../documentation/architecture/profile-address-and-cleaner-onboarding.md), [../documentation/architecture/service-availability-and-discovery.md](../documentation/architecture/service-availability-and-discovery.md), [../documentation/architecture/booking-reservation-and-lifecycle.md](../documentation/architecture/booking-reservation-and-lifecycle.md), [../documentation/architecture/payment-processing-and-webhooks.md](../documentation/architecture/payment-processing-and-webhooks.md), and [../documentation/architecture/chat-notifications-and-reviews.md](../documentation/architecture/chat-notifications-and-reviews.md).
 
 ## Architecture
 
@@ -25,7 +25,7 @@ Major `lib/` directories:
 
 * `lib/app/` — application shell, routing, and theme
 * `lib/core/` — shared configuration and networking infrastructure
-* `lib/features/` — feature-oriented product code, including `auth`, `customer`, `addresses`, `cleaner`, `admin`, `catalog`, `cleaner_services`, `availability`, and `discovery`
+* `lib/features/` — feature-oriented product code, including `auth`, `customer`, `addresses`, `cleaner`, `admin`, `catalog`, `cleaner_services`, `availability`, `discovery`, `bookings`, `payments`, `chat`, `notifications`, and `reviews`
 
 `API_BASE_URL` is public runtime configuration supplied at compile time. It is not a secret. The Flutter client must never contain a MongoDB URI, `ACCESS_TOKEN_SECRET`, or other private credentials.
 

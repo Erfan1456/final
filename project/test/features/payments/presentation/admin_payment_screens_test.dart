@@ -8,6 +8,7 @@ import 'package:home_cleaning_marketplace/features/payments/data/payment_models.
 import 'package:home_cleaning_marketplace/features/payments/presentation/admin_payment_controller.dart';
 import 'package:home_cleaning_marketplace/features/payments/presentation/admin_payment_detail_screen.dart';
 import 'package:home_cleaning_marketplace/features/payments/presentation/admin_payment_list_screen.dart';
+import 'package:home_cleaning_marketplace/features/notifications/presentation/notification_controller.dart';
 
 import '../../../helpers/auth_test_fakes.dart';
 import '../../../helpers/feature_test_fakes.dart';
@@ -20,6 +21,11 @@ void main() {
           authControllerProvider.overrideWith(
             () => SeededAuthController(
               AuthState.authenticated(testUser(role: 'admin')),
+            ),
+          ),
+          notificationControllerProvider.overrideWith(
+            () => SeededNotificationController(
+              const NotificationState(loading: false),
             ),
           ),
         ],

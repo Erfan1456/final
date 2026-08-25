@@ -15,7 +15,7 @@ Planned coverage includes:
 * database security
 * development vs production considerations
 
-The first implemented collections are `users` and `user_sessions`. TASK 013 added `customer_profiles`, `cleaner_profiles`, and `addresses`. TASK 014 added `services`, `cleaner_services`, and `availability_slots`. TASK 015 added `bookings`. TASK 016 added `payments`, `payment_webhook_events`, and `payment_refund_requests`.
+The first implemented collections are `users` and `user_sessions`. TASK 013 added `customer_profiles`, `cleaner_profiles`, and `addresses`. TASK 014 added `services`, `cleaner_services`, and `availability_slots`. TASK 015 added `bookings`. TASK 016 added `payments`, `payment_webhook_events`, and `payment_refund_requests`. TASK 017 added `conversations`, `conversation_members`, `messages`, `notifications`, and `reviews`.
 
 ## Current documents
 
@@ -32,9 +32,15 @@ The first implemented collections are `users` and `user_sessions`. TASK 013 adde
 * [payments-collection.md](payments-collection.md) — payment ledger, attempts, quote amount authority, active/settlement uniqueness.
 * [payment-webhook-events-collection.md](payment-webhook-events-collection.md) — signed webhook receipts and event idempotency.
 * [payment-refund-requests-collection.md](payment-refund-requests-collection.md) — admin refund command idempotency.
+* [conversations-collection.md](conversations-collection.md) — one conversation per booking.
+* [conversation-members-collection.md](conversation-members-collection.md) — customer/cleaner read-cursor members.
+* [messages-collection.md](messages-collection.md) — immutable plaintext messages and send idempotency.
+* [notifications-collection.md](notifications-collection.md) — in-app notifications and user+dedupe uniqueness.
+* [reviews-collection.md](reviews-collection.md) — one verified review per completed booking and moderation.
 * [../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md](../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md) — accepted driver and connection-lifecycle decision.
 * [../decisions/ADR-006-user-account-persistence-model.md](../decisions/ADR-006-user-account-persistence-model.md) — accepted user account persistence model.
 * [../decisions/ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md](../decisions/ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md) — accepted profile/address/onboarding collections and authorization.
 * [../decisions/ADR-012-service-offerings-availability-and-discovery.md](../decisions/ADR-012-service-offerings-availability-and-discovery.md) — accepted catalog, offerings, availability, and discovery.
 * [../decisions/ADR-013-booking-reservation-idempotency-and-lifecycle.md](../decisions/ADR-013-booking-reservation-idempotency-and-lifecycle.md) — accepted complete-slot booking, snapshots, partial unique reservation, and idempotency.
 * [../decisions/ADR-014-payment-provider-webhooks-and-refunds.md](../decisions/ADR-014-payment-provider-webhooks-and-refunds.md) — accepted provider-neutral sandbox payment ledger, signed webhooks, and refund foundation.
+* [../decisions/ADR-015-chat-notifications-and-verified-reviews.md](../decisions/ADR-015-chat-notifications-and-verified-reviews.md) — accepted booking-scoped chat, in-app notifications, and verified reviews.

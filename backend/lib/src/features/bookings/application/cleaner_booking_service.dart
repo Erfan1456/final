@@ -1,8 +1,11 @@
 import 'package:home_cleaning_marketplace_api/src/features/bookings/data/booking_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_exceptions.dart';
+import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_status.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_validation.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/notifications/application/notification_sink.dart';
+import 'package:home_cleaning_marketplace_api/src/features/notifications/domain/notification_type.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/booking_cancellation_orchestrator.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_account.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide ServerConfig;
@@ -16,15 +19,18 @@ class CleanerBookingService {
     required BookingRepository bookings,
     required CustomerProfileRepository customerProfiles,
     required BookingCancellationOrchestrator cancellation,
+    NotificationSink? notifications,
     DateTime Function()? clock,
   }) : _bookings = bookings,
        _customerProfiles = customerProfiles,
        _cancellation = cancellation,
+       _notifications = notifications ?? const NoOpNotificationSink(),
        _clock = clock ?? DateTime.now;
 
   final BookingRepository _bookings;
   final CustomerProfileRepository _customerProfiles;
   final BookingCancellationOrchestrator _cancellation;
+  final NotificationSink _notifications;
   final DateTime Function() _clock;
 
   /// Lists assigned bookings with keyset pagination.
@@ -119,6 +125,15 @@ class CleanerBookingService {
       bookingId: bookingId,
       reason: reason,
     );
+    await _notifications.notifyBestEffort(
+      userId: updated.customerUserId,
+      type: NotificationType.bookingCancelled,
+      title: 'Booking cancelled',
+      body: 'A booking was cancelled.',
+      dedupeKey: 'booking:${updated.id.oid}:cancelled',
+      resourceType: 'booking',
+      resourceId: updated.id,
+    );
     return _toJson(updated);
   }
 
@@ -162,6 +177,7 @@ class CleanerBookingService {
     required Booking? updated,
   }) async {
     if (updated != null) {
+      await _notifyCustomerTransition(updated);
       return _toJson(updated);
     }
     await _requireOwned(user: user, bookingId: bookingId);
@@ -196,5 +212,46 @@ class CleanerBookingService {
     return <String, String>{
       for (final profile in profiles) profile.userId.oid: profile.fullName,
     };
+  }
+
+  Future<void> _notifyCustomerTransition(Booking booking) {
+    final NotificationType type;
+    final String title;
+    final String body;
+    final String suffix;
+    switch (booking.status) {
+      case BookingStatus.confirmed:
+        type = NotificationType.bookingConfirmed;
+        title = 'Your booking was confirmed';
+        body = 'Your booking was confirmed.';
+        suffix = 'confirmed';
+      case BookingStatus.declined:
+        type = NotificationType.bookingDeclined;
+        title = 'Booking declined';
+        body = 'Your booking was declined.';
+        suffix = 'declined';
+      case BookingStatus.inProgress:
+        type = NotificationType.jobStarted;
+        title = 'Job started';
+        body = 'Your cleaner has started the job.';
+        suffix = 'started';
+      case BookingStatus.completed:
+        type = NotificationType.jobCompleted;
+        title = 'Job completed';
+        body = 'Your booking was completed.';
+        suffix = 'completed';
+      case BookingStatus.pending:
+      case BookingStatus.cancelled:
+        return Future<void>.value();
+    }
+    return _notifications.notifyBestEffort(
+      userId: booking.customerUserId,
+      type: type,
+      title: title,
+      body: body,
+      dedupeKey: 'booking:${booking.id.oid}:$suffix',
+      resourceType: 'booking',
+      resourceId: booking.id,
+    );
   }
 }

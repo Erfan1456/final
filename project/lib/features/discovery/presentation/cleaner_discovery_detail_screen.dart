@@ -68,6 +68,23 @@ class _CleanerDiscoveryDetailScreenState
                         detail.currencyCode,
                       ),
                     ),
+                    Text(
+                      formatDiscoveryRating(
+                        detail.ratingAverage,
+                        detail.reviewCount,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('Reviews'),
+                    for (final review in detail.reviews)
+                      Card(
+                        child: ListTile(
+                          title: Text(
+                            '${review.reviewerDisplayName} · ${review.rating} ★',
+                          ),
+                          subtitle: Text(review.comment ?? ''),
+                        ),
+                      ),
                     const SizedBox(height: 16),
                     const Text('Future availability'),
                     const Text('Future availability'),
@@ -114,6 +131,8 @@ class _CleanerDiscoveryDetailScreenState
                           nextAvailableAt: detail.availability.isEmpty
                               ? null
                               : detail.availability.first.startAt,
+                          ratingAverage: detail.ratingAverage,
+                          reviewCount: detail.reviewCount,
                         );
                         final result = ref
                             .read(comparisonControllerProvider.notifier)

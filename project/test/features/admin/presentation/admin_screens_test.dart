@@ -9,6 +9,7 @@ import 'package:home_cleaning_marketplace/features/admin/presentation/cleaner_ap
 import 'package:home_cleaning_marketplace/features/auth/domain/auth_session_state.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/auth_controller.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/data/cleaner_profile.dart';
+import 'package:home_cleaning_marketplace/features/notifications/presentation/notification_controller.dart';
 
 import '../../../helpers/auth_test_fakes.dart';
 import '../../../helpers/feature_test_fakes.dart';
@@ -25,6 +26,11 @@ void main() {
               AuthState.authenticated(testUser(role: 'admin')),
             ),
           ),
+          notificationControllerProvider.overrideWith(
+            () => SeededNotificationController(
+              const NotificationState(loading: false),
+            ),
+          ),
         ],
         child: const MaterialApp(home: AdminHomeScreen()),
       ),
@@ -34,6 +40,8 @@ void main() {
     expect(find.text('person@example.com'), findsOneWidget);
     expect(find.text('Cleaner Approvals'), findsOneWidget);
     expect(find.text('Payments'), findsOneWidget);
+    expect(find.text('Review Moderation'), findsOneWidget);
+    expect(find.text('Notifications'), findsOneWidget);
   });
 
   testWidgets('approval list shows pending items and filters', (tester) async {

@@ -30,6 +30,12 @@ import 'package:home_cleaning_marketplace/features/customer/presentation/custome
 import 'package:home_cleaning_marketplace/features/discovery/presentation/cleaner_comparison_screen.dart';
 import 'package:home_cleaning_marketplace/features/discovery/presentation/cleaner_discovery_detail_screen.dart';
 import 'package:home_cleaning_marketplace/features/discovery/presentation/cleaner_discovery_screen.dart';
+import 'package:home_cleaning_marketplace/features/chat/presentation/booking_chat_screen.dart';
+import 'package:home_cleaning_marketplace/features/notifications/presentation/notification_center_screen.dart';
+import 'package:home_cleaning_marketplace/features/reviews/presentation/admin_review_detail_screen.dart';
+import 'package:home_cleaning_marketplace/features/reviews/presentation/admin_review_list_screen.dart';
+import 'package:home_cleaning_marketplace/features/reviews/presentation/cleaner_reviews_screen.dart';
+import 'package:home_cleaning_marketplace/features/reviews/presentation/customer_review_screen.dart';
 
 class _RouterRefresh extends ChangeNotifier {
   void ping() => notifyListeners();
@@ -176,6 +182,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: AppRoutes.customerBookingChatPath,
+        builder: (context, state) {
+          return BookingChatScreen(
+            bookingId: state.pathParameters['bookingId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.customerBookingReviewPath,
+        builder: (context, state) {
+          return CustomerReviewScreen(
+            bookingId: state.pathParameters['bookingId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.notificationsPath,
+        builder: (context, state) => const NotificationCenterScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.cleanerHomePath,
         name: AppRoutes.cleanerHomeName,
         builder: (context, state) => const CleanerHomeScreen(),
@@ -217,6 +243,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: AppRoutes.cleanerBookingChatPath,
+        builder: (context, state) {
+          return BookingChatScreen(
+            bookingId: state.pathParameters['bookingId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.cleanerReviewsPath,
+        builder: (context, state) => const CleanerReviewsScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.adminHomePath,
         name: AppRoutes.adminHomeName,
         builder: (context, state) => const AdminHomeScreen(),
@@ -242,6 +280,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           return AdminPaymentDetailScreen(
             paymentId: state.pathParameters['paymentId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.adminReviewsPath,
+        builder: (context, state) => const AdminReviewListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminReviewDetailPath,
+        builder: (context, state) {
+          return AdminReviewDetailScreen(
+            reviewId: state.pathParameters['reviewId'] ?? '',
           );
         },
       ),

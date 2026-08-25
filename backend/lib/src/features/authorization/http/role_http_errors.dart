@@ -8,11 +8,14 @@ import 'package:home_cleaning_marketplace_api/src/features/auth/tokens/access_to
 import 'package:home_cleaning_marketplace_api/src/features/authorization/forbidden_exception.dart';
 import 'package:home_cleaning_marketplace_api/src/features/availability/domain/availability_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_exceptions.dart';
+import 'package:home_cleaning_marketplace_api/src/features/chat/domain/chat_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/domain/cleaner_profile_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/domain/cleaner_service_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/domain/customer_profile_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/domain/profile_validation_exception.dart';
+import 'package:home_cleaning_marketplace_api/src/features/notifications/domain/notification_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/domain/payment_exceptions.dart';
+import 'package:home_cleaning_marketplace_api/src/features/reviews/domain/review_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/domain/service_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/http/json_response.dart';
 
@@ -272,6 +275,69 @@ Response mapRoleScopedException(Exception error) {
       code: 'cleaner_not_found',
       message: 'Cleaner was not found.',
       statusCode: HttpStatus.notFound,
+    );
+  }
+  if (error is ConversationNotFoundException) {
+    return jsonError(
+      code: 'conversation_not_found',
+      message: 'Conversation was not found.',
+      statusCode: HttpStatus.notFound,
+    );
+  }
+  if (error is ConversationReadOnlyException) {
+    return jsonError(
+      code: 'conversation_read_only',
+      message: 'This conversation is read-only because the booking is closed.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is InvalidMessageException) {
+    return jsonError(code: 'invalid_message', message: error.message);
+  }
+  if (error is InvalidMessageCursorException) {
+    return jsonError(
+      code: 'invalid_message_cursor',
+      message: 'Message cursor is invalid.',
+    );
+  }
+  if (error is NotificationNotFoundException) {
+    return jsonError(
+      code: 'notification_not_found',
+      message: 'Notification was not found.',
+      statusCode: HttpStatus.notFound,
+    );
+  }
+  if (error is ReviewNotFoundException) {
+    return jsonError(
+      code: 'review_not_found',
+      message: 'Review was not found.',
+      statusCode: HttpStatus.notFound,
+    );
+  }
+  if (error is ReviewNotAllowedException) {
+    return jsonError(
+      code: 'review_not_allowed',
+      message: 'This booking cannot be reviewed.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is InvalidReviewRatingException) {
+    return jsonError(
+      code: 'invalid_review_rating',
+      message: 'Rating must be an integer from 1 to 5.',
+    );
+  }
+  if (error is InvalidReviewCommentException) {
+    return jsonError(code: 'invalid_review_comment', message: error.message);
+  }
+  if (error is InvalidReviewReasonException) {
+    return jsonError(code: 'invalid_review_reason', message: error.message);
+  }
+  if (error is InvalidReviewStateException) {
+    return jsonError(
+      code: 'invalid_review_state',
+      message: 'This review action is not allowed in the current state.',
+      statusCode: HttpStatus.conflict,
     );
   }
   if (error is InvalidAccessTokenException ||
