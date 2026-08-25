@@ -49,6 +49,8 @@ No credentials or connection URI belong in this document. Backend connectivity u
 
 `ACCESS_TOKEN_SECRET` is backend-only HS256 configuration. It must never be placed in Flutter, logged, or committed. This document never records its value.
 
+`SANDBOX_PAYMENT_WEBHOOK_SECRET` is backend-only HMAC configuration for the development/test sandbox webhook. It must never be placed in Flutter, logged, or committed. This document never records its value. Production must not enable the sandbox provider.
+
 ## Android emulator + local Dart Frog
 
 Local backend (from `backend/`):

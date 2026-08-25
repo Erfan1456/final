@@ -38,6 +38,11 @@ void main() {
     );
     expect(messageForApiCode('availability_reserved'), contains('reserved'));
     expect(
+      messageForApiCode('payment_refund_failed'),
+      contains('refunded before this booking can be cancelled'),
+    );
+    expect(messageForApiCode('booking_not_payable'), contains('confirmed'));
+    expect(
       messageForApiCode('some_unknown_code'),
       equals('Something went wrong. Please try again.'),
     );

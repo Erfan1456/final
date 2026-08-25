@@ -31,3 +31,4 @@ No architecture has been chosen in TASK 001. Concrete architecture documents sho
 * [profile-address-and-cleaner-onboarding.md](profile-address-and-cleaner-onboarding.md) — persisted-role authorization, profiles, addresses, cleaner lifecycle, and Flutter role dashboards.
 * [service-availability-and-discovery.md](service-availability-and-discovery.md) — catalog, offerings, UTC availability, customer discovery, and local comparison.
 * [booking-reservation-and-lifecycle.md](booking-reservation-and-lifecycle.md) — complete-slot reservation, idempotency, conditional lifecycle, and privacy DTOs.
+* [payment-processing-and-webhooks.md](payment-processing-and-webhooks.md) — sandbox payment ledger, HMAC webhooks, refunds, and payment-aware cancellation.

@@ -5,6 +5,9 @@ import 'package:home_cleaning_marketplace_api/src/features/bookings/data/booking
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_refund_request_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_webhook_event_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/data/service_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/user_indexes.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide ServerConfig;
@@ -21,4 +24,7 @@ Future<void> ensureApprovedDatabaseIndexes(Db db) async {
   await ensureCleanerServiceIndexesOnDb(db);
   await ensureAvailabilityIndexesOnDb(db);
   await ensureBookingIndexesOnDb(db);
+  await ensurePaymentIndexesOnDb(db);
+  await ensurePaymentWebhookEventIndexesOnDb(db);
+  await ensurePaymentRefundRequestIndexesOnDb(db);
 }

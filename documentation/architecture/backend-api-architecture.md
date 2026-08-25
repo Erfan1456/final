@@ -2,7 +2,7 @@
 
 This document describes the Dart Frog backend for the Home Cleaning Service Marketplace.
 
-TASK 013 added role-scoped customer profile, address, cleaner onboarding, and admin review routes. TASK 014 added the public service catalog, cleaner offerings, availability, and customer discovery. TASK 015 added customer/cleaner booking reservation and lifecycle. Payments, chat, and reviews are not implemented.
+TASK 013 added role-scoped customer profile, address, cleaner onboarding, and admin review routes. TASK 014 added the public service catalog, cleaner offerings, availability, and customer discovery. TASK 015 added customer/cleaner booking reservation and lifecycle. TASK 016 added a sandbox-backed payment ledger, signed webhooks, refund foundation, and admin transaction inspection. There is no production payment processor, chat, or reviews.
 
 ## Current Architecture
 
@@ -130,4 +130,4 @@ Flutter will never receive the MongoDB URI. The Flutter client will call this AP
 
 Backend infrastructure, liveness health, MongoDB connectivity, ping readiness, users persistence, Argon2id password-security primitives, access-token/refresh-session primitives, public authentication HTTP routes, and protected account routes exist.
 
-There is still no payment, chat, or review product. Auth endpoints are not ready for unrestricted public internet exposure until production rate limiting is added.
+There is still no chat or review product. Auth endpoints are not ready for unrestricted public internet exposure until production rate limiting is added. TASK 016 payment is a development/test sandbox ledger only; it is not a production card processor.

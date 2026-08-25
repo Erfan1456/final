@@ -7,6 +7,9 @@ import 'package:home_cleaning_marketplace/features/addresses/presentation/addres
 import 'package:home_cleaning_marketplace/features/admin/presentation/admin_home_screen.dart';
 import 'package:home_cleaning_marketplace/features/admin/presentation/cleaner_approval_detail_screen.dart';
 import 'package:home_cleaning_marketplace/features/admin/presentation/cleaner_approval_list_screen.dart';
+import 'package:home_cleaning_marketplace/features/payments/presentation/admin_payment_detail_screen.dart';
+import 'package:home_cleaning_marketplace/features/payments/presentation/admin_payment_list_screen.dart';
+import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_screen.dart';
 import 'package:home_cleaning_marketplace/features/auth/domain/auth_session_state.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/auth_controller.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/login_screen.dart';
@@ -165,6 +168,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: AppRoutes.customerBookingPaymentPath,
+        builder: (context, state) {
+          return CustomerPaymentScreen(
+            bookingId: state.pathParameters['bookingId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
         path: AppRoutes.cleanerHomePath,
         name: AppRoutes.cleanerHomeName,
         builder: (context, state) => const CleanerHomeScreen(),
@@ -219,6 +230,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           return CleanerApprovalDetailScreen(
             userId: state.pathParameters['userId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.adminPaymentsPath,
+        builder: (context, state) => const AdminPaymentListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminPaymentDetailPath,
+        builder: (context, state) {
+          return AdminPaymentDetailScreen(
+            paymentId: state.pathParameters['paymentId'] ?? '',
           );
         },
       ),

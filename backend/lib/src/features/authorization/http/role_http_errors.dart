@@ -12,6 +12,7 @@ import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/doma
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/domain/cleaner_service_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/domain/customer_profile_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/domain/profile_validation_exception.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/domain/payment_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/domain/service_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/http/json_response.dart';
 
@@ -176,6 +177,94 @@ Response mapRoleScopedException(Exception error) {
     return jsonError(
       code: 'invalid_customer_notes',
       message: error.message,
+    );
+  }
+  if (error is PaymentNotFoundException) {
+    return jsonError(
+      code: 'payment_not_found',
+      message: 'Payment was not found.',
+      statusCode: HttpStatus.notFound,
+    );
+  }
+  if (error is BookingNotPayableException) {
+    return jsonError(
+      code: 'booking_not_payable',
+      message: 'This booking cannot be paid in its current state.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is PaymentAlreadyActiveException) {
+    return jsonError(
+      code: 'payment_already_active',
+      message: 'A payment attempt is already in progress for this booking.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is PaymentAlreadyPaidException) {
+    return jsonError(
+      code: 'payment_already_paid',
+      message: 'This booking already has a successful payment.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is PaymentProviderUnavailableException) {
+    return jsonError(
+      code: 'payment_provider_unavailable',
+      message: 'Payment is temporarily unavailable.',
+      statusCode: HttpStatus.serviceUnavailable,
+    );
+  }
+  if (error is InvalidWebhookSignatureException) {
+    return jsonError(
+      code: 'invalid_webhook_signature',
+      message: 'Webhook signature is invalid.',
+      statusCode: HttpStatus.unauthorized,
+    );
+  }
+  if (error is WebhookEventConflictException) {
+    return jsonError(
+      code: 'webhook_event_conflict',
+      message: 'Webhook event conflict.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is PaymentIntegrityMismatchException) {
+    return jsonError(
+      code: 'payment_integrity_mismatch',
+      message: 'Payment details do not match this event.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is InvalidPaymentStateException) {
+    return jsonError(
+      code: 'invalid_payment_state',
+      message: 'This payment action is not allowed in the current state.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is PaymentRefundFailedException) {
+    return jsonError(
+      code: 'payment_refund_failed',
+      message: 'The refund could not be completed.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is InvalidRefundAmountException) {
+    return jsonError(
+      code: 'invalid_refund_amount',
+      message: 'Refund amount is invalid.',
+    );
+  }
+  if (error is InvalidRefundReasonException) {
+    return jsonError(
+      code: 'invalid_refund_reason',
+      message: error.message,
+    );
+  }
+  if (error is MalformedWebhookException) {
+    return jsonError(
+      code: 'invalid_json',
+      message: 'Request body must be valid JSON.',
     );
   }
   if (error is CleanerNotFoundException) {

@@ -1,6 +1,6 @@
 # Booking Reservation and Lifecycle Architecture
 
-TASK 015 is the marketplace's first real transaction workflow. A customer books one complete availability slot. Payment, chat, reviews, maps, and TASK 016 are not implemented.
+TASK 015 is the marketplace's first real transaction workflow. A customer books one complete availability slot. TASK 016 consumes the immutable quote as payment amount authority; booking status itself still does not prove payment.
 
 ## Product flow
 

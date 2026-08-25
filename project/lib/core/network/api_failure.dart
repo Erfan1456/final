@@ -70,6 +70,29 @@ String messageForApiCode(String code) {
       return 'Please start a new booking attempt.';
     case 'invalid_customer_notes':
       return 'Notes must be plain text up to 500 characters.';
+    case 'payment_not_found':
+      return 'Payment was not found.';
+    case 'booking_not_payable':
+      return 'This booking cannot be paid until it is confirmed.';
+    case 'payment_already_active':
+      return 'A payment attempt is already in progress.';
+    case 'payment_already_paid':
+      return 'This booking has already been paid.';
+    case 'payment_provider_unavailable':
+      return 'Payment is temporarily unavailable.';
+    case 'payment_integrity_mismatch':
+      return 'Payment details could not be verified.';
+    case 'invalid_payment_state':
+      return 'This payment action is not allowed right now.';
+    case 'payment_refund_failed':
+    case 'refund_required':
+      return 'Your payment must be refunded before this booking can be cancelled.';
+    case 'invalid_refund_amount':
+      return 'Refund amount is invalid.';
+    case 'invalid_refund_reason':
+      return 'Refund reason must be between 5 and 500 characters.';
+    case 'webhook_event_conflict':
+      return 'This payment event could not be processed.';
     case 'invalid_input':
       return 'Please check your details and try again.';
     case 'invalid_access_token':

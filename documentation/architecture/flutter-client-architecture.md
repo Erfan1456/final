@@ -138,4 +138,4 @@ The domain/use-case layer is optional. Add it only when justified by complexity,
 
 ## Current State
 
-TASK 015 adds booking model/API/controller/widget/router tests. Payments, chat, and reviews are not implemented.
+TASK 015 adds booking model/API/controller/widget/router tests. TASK 016 adds customer/admin payment models, sandbox-aware UI, and transaction screens. Chat and reviews are not implemented.

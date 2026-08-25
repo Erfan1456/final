@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dart_frog/dart_frog.dart';
+import 'package:home_cleaning_marketplace_api/src/config/server_config.dart';
 import 'package:home_cleaning_marketplace_api/src/database/mongo_database.dart';
 import 'package:home_cleaning_marketplace_api/src/features/authorization/application/role_scoped_composition.dart';
 import 'package:home_cleaning_marketplace_api/src/features/authorization/authenticated_user_context.dart';
@@ -13,6 +14,8 @@ import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/appl
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/application/cleaner_service_management_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/application/customer_account_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/discovery/application/cleaner_discovery_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/application/admin_payment_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/application/customer_payment_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_role.dart';
 
 /// Shared role middleware: Bearer auth → persisted user → current role.
@@ -29,6 +32,7 @@ Handler roleScopedMiddleware(
         requiredRole: requiredRole,
       );
       final mongo = _tryRead<MongoDatabase>(context);
+      final config = _tryRead<ServerConfig>(context);
       var next = context.provide<AuthenticatedUserContext>(() => scoped);
       switch (requiredRole) {
         case UserRole.customer:
@@ -40,11 +44,21 @@ Handler roleScopedMiddleware(
               await RoleScopedComposition.discovery(mongo: mongo!);
           final bookings =
               _tryRead<CustomerBookingService>(context) ??
-              await RoleScopedComposition.customerBookings(mongo: mongo!);
+              await RoleScopedComposition.customerBookings(
+                mongo: mongo!,
+                config: config!,
+              );
+          final payments =
+              _tryRead<CustomerPaymentService>(context) ??
+              await RoleScopedComposition.customerPayments(
+                mongo: mongo!,
+                config: config!,
+              );
           next = next
               .provide<CustomerAccountService>(() => service)
               .provide<CleanerDiscoveryService>(() => discovery)
-              .provide<CustomerBookingService>(() => bookings);
+              .provide<CustomerBookingService>(() => bookings)
+              .provide<CustomerPaymentService>(() => payments);
         case UserRole.cleaner:
           final onboarding =
               _tryRead<CleanerOnboardingService>(context) ??
@@ -57,7 +71,10 @@ Handler roleScopedMiddleware(
               await RoleScopedComposition.cleanerAvailability(mongo: mongo!);
           final bookings =
               _tryRead<CleanerBookingService>(context) ??
-              await RoleScopedComposition.cleanerBookings(mongo: mongo!);
+              await RoleScopedComposition.cleanerBookings(
+                mongo: mongo!,
+                config: config!,
+              );
           next = next
               .provide<CleanerOnboardingService>(() => onboarding)
               .provide<CleanerServiceManagementService>(() => offerings)
@@ -67,7 +84,15 @@ Handler roleScopedMiddleware(
           final service =
               _tryRead<AdminCleanerReviewService>(context) ??
               await RoleScopedComposition.admin(mongo: mongo!);
-          next = next.provide<AdminCleanerReviewService>(() => service);
+          final payments =
+              _tryRead<AdminPaymentService>(context) ??
+              await RoleScopedComposition.adminPayments(
+                mongo: mongo!,
+                config: config!,
+              );
+          next = next
+              .provide<AdminCleanerReviewService>(() => service)
+              .provide<AdminPaymentService>(() => payments);
       }
       return await handler(next);
     } on Exception catch (error) {

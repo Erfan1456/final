@@ -22,6 +22,10 @@ import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/domain/cleaner_service_offering.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/domain/customer_profile.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/application/booking_cancellation_orchestrator.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/application/payment_webhook_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_webhook_event_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/data/service_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/account_status.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_role.dart';
@@ -47,6 +51,8 @@ void main() {
   late MemoryCollectionDocumentStore services;
   late MemoryCollectionDocumentStore offerings;
   late MemoryCollectionDocumentStore bookings;
+  late MemoryCollectionDocumentStore payments;
+  late MemoryCollectionDocumentStore paymentEvents;
   late MemoryCollectionDocumentStore customerProfiles;
   late MemoryUserRepository users;
   late CustomerBookingService customerBookings;
@@ -81,6 +87,8 @@ void main() {
     services = MemoryCollectionDocumentStore();
     offerings = MemoryCollectionDocumentStore();
     bookings = MemoryCollectionDocumentStore();
+    payments = MemoryCollectionDocumentStore();
+    paymentEvents = MemoryCollectionDocumentStore();
     customerProfiles = MemoryCollectionDocumentStore();
     users = MemoryUserRepository();
     final home = testHomeCleaningService();
@@ -126,6 +134,20 @@ void main() {
         updatedAt: marketplaceTestNow(),
       ).toDocument(),
     );
+    final bookingRepo = MongoBookingRepository(documents: bookings);
+    final paymentRepo = MongoPaymentRepository(documents: payments);
+    final cancellation = BookingCancellationOrchestrator(
+      bookings: bookingRepo,
+      payments: paymentRepo,
+      webhooks: PaymentWebhookService(
+        provider: null,
+        payments: paymentRepo,
+        events: MongoPaymentWebhookEventRepository(documents: paymentEvents),
+        clock: () => clock,
+      ),
+      provider: null,
+      clock: () => clock,
+    );
     customerBookings = CustomerBookingService(
       addresses: MongoAddressRepository(documents: addresses),
       slots: MongoAvailabilityRepository(documents: slots),
@@ -133,14 +155,16 @@ void main() {
       cleanerProfiles: MongoCleanerProfileRepository(documents: profiles),
       services: MongoServiceRepository(documents: services),
       offerings: MongoCleanerServiceRepository(documents: offerings),
-      bookings: MongoBookingRepository(documents: bookings),
+      bookings: bookingRepo,
+      cancellation: cancellation,
       clock: () => clock,
     );
     cleanerBookings = CleanerBookingService(
-      bookings: MongoBookingRepository(documents: bookings),
+      bookings: bookingRepo,
       customerProfiles: MongoCustomerProfileRepository(
         documents: customerProfiles,
       ),
+      cancellation: cancellation,
       clock: () => clock,
     );
     customerScoped = AuthenticatedUserContext(

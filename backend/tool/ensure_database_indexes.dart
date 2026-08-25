@@ -12,6 +12,9 @@ import 'package:home_cleaning_marketplace_api/src/features/bookings/data/booking
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_refund_request_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_webhook_event_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/data/service_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/user_indexes.dart';
 
@@ -64,6 +67,15 @@ Future<void> main() async {
         .getIndexes();
     final bookingIndexes = await db
         .collection(CollectionNames.bookings)
+        .getIndexes();
+    final paymentIndexes = await db
+        .collection(CollectionNames.payments)
+        .getIndexes();
+    final webhookIndexes = await db
+        .collection(CollectionNames.paymentWebhookEvents)
+        .getIndexes();
+    final refundIndexes = await db
+        .collection(CollectionNames.paymentRefundRequests)
         .getIndexes();
 
     if (!_hasNamedIndex(usersIndexes, usersEmailNormalizedUniqueIndexName) ||
@@ -124,6 +136,39 @@ Future<void> main() async {
         !_hasNamedIndex(
           bookingIndexes,
           bookingsCleanerActiveStartIndexName,
+        ) ||
+        !_hasPartialUniqueActivePaymentIndex(paymentIndexes) ||
+        !_hasPartialUniqueSettlementIndex(paymentIndexes) ||
+        !_hasNamedIndex(
+          paymentIndexes,
+          paymentsProviderPaymentIdUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(
+          paymentIndexes,
+          paymentsCustomerIdempotencyUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(
+          paymentIndexes,
+          paymentsBookingAttemptUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(paymentIndexes, paymentsBookingIdDescIndexName) ||
+        !_hasNamedIndex(paymentIndexes, paymentsCustomerIdDescIndexName) ||
+        !_hasNamedIndex(paymentIndexes, paymentsStatusIdDescIndexName) ||
+        !_hasNamedIndex(
+          webhookIndexes,
+          paymentWebhookEventsProviderEventUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(
+          webhookIndexes,
+          paymentWebhookEventsPaymentCreatedIndexName,
+        ) ||
+        !_hasNamedIndex(
+          refundIndexes,
+          paymentRefundAdminIdempotencyUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(
+          refundIndexes,
+          paymentRefundPaymentCreatedIndexName,
         )) {
       stderr.writeln('Database indexes could not be ensured.');
       exitCode = 1;
@@ -193,7 +238,28 @@ Future<void> main() async {
       ..writeln('unique = true')
       ..writeln('$bookingsCustomerIdDescIndexName exists')
       ..writeln('$bookingsCleanerIdDescIndexName exists')
-      ..writeln('$bookingsCleanerActiveStartIndexName exists');
+      ..writeln('$bookingsCleanerActiveStartIndexName exists')
+      ..writeln('$paymentsProviderPaymentIdUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('$paymentsCustomerIdempotencyUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('$paymentsBookingAttemptUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('$paymentsBookingIdDescIndexName exists')
+      ..writeln('$paymentsCustomerIdDescIndexName exists')
+      ..writeln('$paymentsStatusIdDescIndexName exists')
+      ..writeln('$paymentsBookingActiveUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('partialFilterExpression.payment_active = true')
+      ..writeln('$paymentsBookingSettlementUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('partialFilterExpression.settlement_recorded = true')
+      ..writeln('$paymentWebhookEventsProviderEventUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('$paymentWebhookEventsPaymentCreatedIndexName exists')
+      ..writeln('$paymentRefundAdminIdempotencyUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('$paymentRefundPaymentCreatedIndexName exists');
   } catch (_) {
     stderr.writeln('Database indexes could not be ensured.');
     exitCode = 1;
@@ -220,6 +286,48 @@ bool _hasPartialUniqueActiveSlotIndex(List<Map<String, dynamic>> indexes) {
     }
     final filter = index['partialFilterExpression'];
     if (filter is! Map || filter[bookingsReservationActiveField] != true) {
+      return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+bool _hasPartialUniqueActivePaymentIndex(List<Map<String, dynamic>> indexes) {
+  for (final index in indexes) {
+    if (index['name'] != paymentsBookingActiveUniqueIndexName) {
+      continue;
+    }
+    if (index['unique'] != true) {
+      return false;
+    }
+    final key = index['key'];
+    if (key is! Map || key[paymentsBookingIdField] != 1) {
+      return false;
+    }
+    final filter = index['partialFilterExpression'];
+    if (filter is! Map || filter[paymentsPaymentActiveField] != true) {
+      return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+bool _hasPartialUniqueSettlementIndex(List<Map<String, dynamic>> indexes) {
+  for (final index in indexes) {
+    if (index['name'] != paymentsBookingSettlementUniqueIndexName) {
+      continue;
+    }
+    if (index['unique'] != true) {
+      return false;
+    }
+    final key = index['key'];
+    if (key is! Map || key[paymentsBookingIdField] != 1) {
+      return false;
+    }
+    final filter = index['partialFilterExpression'];
+    if (filter is! Map || filter[paymentsSettlementRecordedField] != true) {
       return false;
     }
     return true;

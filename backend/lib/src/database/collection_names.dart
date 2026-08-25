@@ -28,4 +28,13 @@ abstract final class CollectionNames {
 
   /// Customer bookings of complete availability slots.
   static const String bookings = 'bookings';
+
+  /// Authoritative payment attempts. Not a production processor ledger.
+  static const String payments = 'payments';
+
+  /// Idempotent provider webhook event receipts.
+  static const String paymentWebhookEvents = 'payment_webhook_events';
+
+  /// Idempotent admin/system refund commands.
+  static const String paymentRefundRequests = 'payment_refund_requests';
 }

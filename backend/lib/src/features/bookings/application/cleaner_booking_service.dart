@@ -3,6 +3,7 @@ import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booki
 import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_validation.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/application/booking_cancellation_orchestrator.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_account.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide ServerConfig;
 
@@ -14,13 +15,16 @@ class CleanerBookingService {
   CleanerBookingService({
     required BookingRepository bookings,
     required CustomerProfileRepository customerProfiles,
+    required BookingCancellationOrchestrator cancellation,
     DateTime Function()? clock,
   }) : _bookings = bookings,
        _customerProfiles = customerProfiles,
+       _cancellation = cancellation,
        _clock = clock ?? DateTime.now;
 
   final BookingRepository _bookings;
   final CustomerProfileRepository _customerProfiles;
+  final BookingCancellationOrchestrator _cancellation;
   final DateTime Function() _clock;
 
   /// Lists assigned bookings with keyset pagination.
@@ -110,17 +114,12 @@ class CleanerBookingService {
     required Object? reasonRaw,
   }) async {
     final reason = BookingValidation.requireReason(reasonRaw);
-    final updated = await _bookings.cancelByCleaner(
-      id: bookingId,
-      cleanerUserId: user.id,
-      now: _clock().toUtc(),
-      reason: reason,
-    );
-    return _requireTransitionResult(
+    final updated = await _cancellation.cancelByCleaner(
       user: user,
       bookingId: bookingId,
-      updated: updated,
+      reason: reason,
     );
+    return _toJson(updated);
   }
 
   /// Starts a confirmed booking inside the slot window.

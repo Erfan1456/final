@@ -26,6 +26,11 @@ class AdminHomeScreen extends ConsumerWidget {
                 onPressed: () => context.push(AppRoutes.adminCleanersPath),
                 child: const Text('Cleaner Approvals'),
               ),
+              const SizedBox(height: 12),
+              FilledButton(
+                onPressed: () => context.push(AppRoutes.adminPaymentsPath),
+                child: const Text('Payments'),
+              ),
               const Spacer(),
               const LogoutActions(),
             ],

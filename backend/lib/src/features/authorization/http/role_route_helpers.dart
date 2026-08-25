@@ -93,3 +93,12 @@ Response bookingNotFoundResponse() {
     statusCode: HttpStatus.notFound,
   );
 }
+
+/// 404 used when a payment path id is malformed or unknown.
+Response paymentNotFoundResponse() {
+  return jsonError(
+    code: 'payment_not_found',
+    message: 'Payment was not found.',
+    statusCode: HttpStatus.notFound,
+  );
+}

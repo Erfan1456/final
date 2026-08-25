@@ -1,6 +1,6 @@
 # Booking API
 
-TASK 015 adds customer booking creation/list/detail/cancel and cleaner accept/decline/cancel/start/complete. Payment collection, authorization, payout, refund, chat, notifications, reviews, ratings, disputes, rescheduling, and recurring bookings are not implemented.
+TASK 015 adds customer booking creation/list/detail/cancel and cleaner accept/decline/cancel/start/complete. Confirmed-booking cancellation is payment-aware (TASK 016): pending attempts are cancelled first; paid bookings require refund before cancel. See [payment-api.md](payment-api.md). Chat, reviews, ratings, disputes, rescheduling, payouts, and recurring bookings are not implemented.
 
 Feature routes require Bearer access JWT verification, persisted user resolution, `account_status == active`, and the **current persisted** `users.role`. JWT `role` is authentication evidence only.
 

@@ -193,6 +193,11 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Booking details'), findsOneWidget);
+    router.go(
+      AppRoutes.customerBookingPaymentLocation('507f1f77bcf86cd799439091'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Payment'), findsWidgets);
   });
 
   testWidgets('cleaner can open booking list and detail', (tester) async {
@@ -285,6 +290,48 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Admin Dashboard'), findsOneWidget);
     router.go(AppRoutes.cleanerAvailabilityPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Admin Dashboard'), findsOneWidget);
+  });
+
+  testWidgets('admin can open payment list and detail', (tester) async {
+    await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
+    final context = tester.element(find.text('Admin Dashboard'));
+    final router = GoRouter.of(context);
+    router.go(AppRoutes.adminPaymentsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Payments'), findsWidgets);
+    router.go(AppRoutes.adminPaymentDetailLocation('507f1f77bcf86cd7994390d1'));
+    await tester.pumpAndSettle();
+    expect(find.text('Payment transaction'), findsOneWidget);
+  });
+
+  testWidgets('customer cannot remain on admin payment routes', (tester) async {
+    await pumpApp(tester, AuthState.authenticated(testUser()));
+    final context = tester.element(find.byType(CustomerHomeScreen));
+    GoRouter.of(context).go(AppRoutes.adminPaymentsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Manage Profile'), findsOneWidget);
+  });
+
+  testWidgets('cleaner cannot remain on customer payment routes', (
+    tester,
+  ) async {
+    await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
+    final cleanerContext = tester.element(find.text('Cleaner home'));
+    GoRouter.of(
+      cleanerContext,
+    ).go(AppRoutes.customerBookingPaymentLocation('507f1f77bcf86cd799439091'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cleaner home'), findsOneWidget);
+  });
+
+  testWidgets('admin cannot remain on customer payment routes', (tester) async {
+    await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
+    final adminContext = tester.element(find.text('Admin Dashboard'));
+    GoRouter.of(
+      adminContext,
+    ).go(AppRoutes.customerBookingPaymentLocation('507f1f77bcf86cd799439091'));
     await tester.pumpAndSettle();
     expect(find.text('Admin Dashboard'), findsOneWidget);
   });

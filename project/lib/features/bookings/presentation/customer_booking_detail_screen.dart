@@ -5,6 +5,8 @@ import 'package:home_cleaning_marketplace/features/bookings/data/booking_models.
 import 'package:home_cleaning_marketplace/features/bookings/presentation/booking_widgets.dart';
 import 'package:home_cleaning_marketplace/features/bookings/presentation/customer_booking_controller.dart';
 import 'package:home_cleaning_marketplace/features/catalog/data/marketplace_service.dart';
+import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_controller.dart';
+import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_section.dart';
 
 class CustomerBookingDetailScreen extends ConsumerStatefulWidget {
   const CustomerBookingDetailScreen({super.key, required this.bookingId});
@@ -28,6 +30,9 @@ class _CustomerBookingDetailScreenState
       ref
           .read(customerBookingControllerProvider.notifier)
           .loadDetail(widget.bookingId);
+      ref
+          .read(customerPaymentControllerProvider.notifier)
+          .load(widget.bookingId);
     });
   }
 
@@ -74,6 +79,8 @@ class _CustomerBookingDetailScreenState
                       const SizedBox(height: 12),
                       Text('Notes: ${booking.customerNotes}'),
                     ],
+                    const SizedBox(height: 16),
+                    BookingPaymentSection(booking: booking),
                     const SizedBox(height: 16),
                     BookingStatusHistoryList(history: booking.statusHistory),
                     if (state.errorMessage != null) Text(state.errorMessage!),

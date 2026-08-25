@@ -21,6 +21,17 @@ import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/application/customer_account_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/discovery/application/cleaner_discovery_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/application/admin_payment_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/application/booking_cancellation_orchestrator.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/application/customer_payment_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/application/payment_webhook_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/application/sandbox_payment_simulation_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_refund_request_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_webhook_event_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/provider/payment_provider.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/provider/payment_provider_resolver.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/provider/sandbox_payment_provider.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/data/service_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/mongo_user_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/user_repository.dart';
@@ -41,6 +52,11 @@ class RoleScopedComposition {
   static CleanerDiscoveryService? _discovery;
   static CustomerBookingService? _customerBookings;
   static CleanerBookingService? _cleanerBookings;
+  static CustomerPaymentService? _customerPayments;
+  static AdminPaymentService? _adminPayments;
+  static PaymentWebhookService? _paymentWebhooks;
+  static SandboxPaymentSimulationService? _sandboxSimulation;
+  static BookingCancellationOrchestrator? _bookingCancellation;
 
   /// Builds a [RoleRequestAuthorizer] from request providers.
   ///
@@ -177,12 +193,14 @@ class RoleScopedComposition {
   /// Shared customer booking service.
   static Future<CustomerBookingService> customerBookings({
     required MongoDatabase mongo,
+    required ServerConfig config,
   }) async {
     final cached = _customerBookings;
     if (cached != null) {
       return cached;
     }
     final db = await _requireDb(mongo);
+    final bookings = MongoBookingRepository.fromDb(db);
     return _customerBookings = CustomerBookingService(
       addresses: MongoAddressRepository.fromDb(db),
       slots: MongoAvailabilityRepository.fromDb(db),
@@ -190,13 +208,15 @@ class RoleScopedComposition {
       cleanerProfiles: MongoCleanerProfileRepository.fromDb(db),
       services: await services(mongo: mongo),
       offerings: MongoCleanerServiceRepository.fromDb(db),
-      bookings: MongoBookingRepository.fromDb(db),
+      bookings: bookings,
+      cancellation: await bookingCancellation(mongo: mongo, config: config),
     );
   }
 
   /// Shared cleaner booking/job service.
   static Future<CleanerBookingService> cleanerBookings({
     required MongoDatabase mongo,
+    required ServerConfig config,
   }) async {
     final cached = _cleanerBookings;
     if (cached != null) {
@@ -206,6 +226,127 @@ class RoleScopedComposition {
     return _cleanerBookings = CleanerBookingService(
       bookings: MongoBookingRepository.fromDb(db),
       customerProfiles: MongoCustomerProfileRepository.fromDb(db),
+      cancellation: await bookingCancellation(mongo: mongo, config: config),
+    );
+  }
+
+  /// Shared customer payment service.
+  static Future<CustomerPaymentService> customerPayments({
+    required MongoDatabase mongo,
+    required ServerConfig config,
+  }) async {
+    final cached = _customerPayments;
+    if (cached != null) {
+      return cached;
+    }
+    final wired = await _paymentStack(mongo: mongo, config: config);
+    return _customerPayments = CustomerPaymentService(
+      bookings: wired.bookings,
+      payments: wired.payments,
+      provider: wired.provider,
+      config: config,
+    );
+  }
+
+  /// Shared admin payment service.
+  static Future<AdminPaymentService> adminPayments({
+    required MongoDatabase mongo,
+    required ServerConfig config,
+  }) async {
+    final cached = _adminPayments;
+    if (cached != null) {
+      return cached;
+    }
+    final wired = await _paymentStack(mongo: mongo, config: config);
+    return _adminPayments = AdminPaymentService(
+      payments: wired.payments,
+      events: wired.events,
+      refundRequests: wired.refundRequests,
+      bookings: wired.bookings,
+      webhooks: wired.webhooks,
+      provider: wired.provider,
+    );
+  }
+
+  /// Shared webhook processor. Used by HMAC webhook routes.
+  static Future<PaymentWebhookService> paymentWebhooks({
+    required MongoDatabase mongo,
+    required ServerConfig config,
+  }) async {
+    final cached = _paymentWebhooks;
+    if (cached != null) {
+      return cached;
+    }
+    final wired = await _paymentStack(mongo: mongo, config: config);
+    return _paymentWebhooks = wired.webhooks;
+  }
+
+  /// Development-only sandbox simulator.
+  static Future<SandboxPaymentSimulationService> sandboxSimulation({
+    required MongoDatabase mongo,
+    required ServerConfig config,
+  }) async {
+    final cached = _sandboxSimulation;
+    if (cached != null) {
+      return cached;
+    }
+    final wired = await _paymentStack(mongo: mongo, config: config);
+    return _sandboxSimulation = SandboxPaymentSimulationService(
+      config: config,
+      payments: wired.payments,
+      webhooks: wired.webhooks,
+      sandbox: wired.provider is SandboxPaymentProvider
+          ? wired.provider! as SandboxPaymentProvider
+          : null,
+    );
+  }
+
+  /// Payment-aware booking cancellation.
+  static Future<BookingCancellationOrchestrator> bookingCancellation({
+    required MongoDatabase mongo,
+    required ServerConfig config,
+  }) async {
+    final cached = _bookingCancellation;
+    if (cached != null) {
+      return cached;
+    }
+    final wired = await _paymentStack(mongo: mongo, config: config);
+    return _bookingCancellation = BookingCancellationOrchestrator(
+      bookings: wired.bookings,
+      payments: wired.payments,
+      webhooks: wired.webhooks,
+      provider: wired.provider,
+    );
+  }
+
+  static _PaymentStack? _paymentStackCache;
+
+  static Future<_PaymentStack> _paymentStack({
+    required MongoDatabase mongo,
+    required ServerConfig config,
+  }) async {
+    final cached = _paymentStackCache;
+    if (cached != null) {
+      return cached;
+    }
+    final db = await _requireDb(mongo);
+    final payments = MongoPaymentRepository.fromDb(db);
+    final events = MongoPaymentWebhookEventRepository.fromDb(db);
+    final refundRequests = MongoPaymentRefundRequestRepository.fromDb(db);
+    final bookings = MongoBookingRepository.fromDb(db);
+    final provider = const PaymentProviderResolver().resolve(config);
+    final webhooks = PaymentWebhookService(
+      provider: provider,
+      payments: payments,
+      events: events,
+    );
+    return _paymentStackCache = _PaymentStack(
+      payments: payments,
+      events: events,
+      refundRequests: refundRequests,
+      bookings: bookings,
+      provider: provider,
+      webhooks: webhooks,
     );
   }
 
@@ -245,4 +386,22 @@ class RoleScopedComposition {
       return null;
     }
   }
+}
+
+class _PaymentStack {
+  const _PaymentStack({
+    required this.payments,
+    required this.events,
+    required this.refundRequests,
+    required this.bookings,
+    required this.provider,
+    required this.webhooks,
+  });
+
+  final PaymentRepository payments;
+  final PaymentWebhookEventRepository events;
+  final PaymentRefundRequestRepository refundRequests;
+  final BookingRepository bookings;
+  final PaymentProvider? provider;
+  final PaymentWebhookService webhooks;
 }

@@ -95,6 +95,42 @@ void main() {
       expect('$config', isNot(contains(fakeSecret)));
     });
 
+    test('hasSandboxPaymentWebhookSecret is false when absent', () {
+      final config = ServerConfig.fromEnvironment(const <String, String>{
+        'APP_ENV': 'development',
+      });
+      expect(config.hasSandboxPaymentWebhookSecret, isFalse);
+      expect(config.hasValidSandboxWebhookSecret, isFalse);
+      expect(config.allowsSandboxPayments, isTrue);
+      expect(
+        config.toString(),
+        contains('hasSandboxPaymentWebhookSecret: false'),
+      );
+    });
+
+    test('sandbox secret is omitted from toString', () {
+      const fakeSecret = 'test-sandbox-webhook-secret-32b!!';
+      final config = ServerConfig.fromEnvironment(const <String, String>{
+        'SANDBOX_PAYMENT_WEBHOOK_SECRET': fakeSecret,
+      });
+      expect(config.hasSandboxPaymentWebhookSecret, isTrue);
+      expect(config.hasValidSandboxWebhookSecret, isTrue);
+      expect(config.toString(), isNot(contains(fakeSecret)));
+      expect(config.isProduction, isFalse);
+      expect(config.isTest, isFalse);
+    });
+
+    test('production never allows sandbox payments', () {
+      const fakeSecret = 'test-sandbox-webhook-secret-32b!!';
+      final config = ServerConfig.fromEnvironment(const <String, String>{
+        'APP_ENV': 'production',
+        'SANDBOX_PAYMENT_WEBHOOK_SECRET': fakeSecret,
+      });
+      expect(config.allowsSandboxPayments, isFalse);
+      expect(config.isProduction, isTrue);
+      expect(config.toString(), isNot(contains(fakeSecret)));
+    });
+
     test('parses comma-separated ALLOWED_ORIGINS', () {
       final config = ServerConfig.fromEnvironment(const <String, String>{
         'ALLOWED_ORIGINS':

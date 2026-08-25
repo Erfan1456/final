@@ -10,6 +10,9 @@ import 'package:mongo_dart/mongo_dart.dart' hide ServerConfig;
 
 /// Persistence contract for marketplace bookings.
 abstract class BookingRepository {
+  /// Finds a booking by id without an ownership filter.
+  Future<Booking?> findById(ObjectId id);
+
   /// Finds [id] only when owned by [customerUserId].
   Future<Booking?> findCustomerBookingById({
     required ObjectId id,
@@ -124,6 +127,11 @@ class MongoBookingRepository implements BookingRepository {
   }
 
   final CollectionDocumentStore _documents;
+
+  @override
+  Future<Booking?> findById(ObjectId id) {
+    return _find(<String, dynamic>{'_id': id});
+  }
 
   @override
   Future<Booking?> findCustomerBookingById({

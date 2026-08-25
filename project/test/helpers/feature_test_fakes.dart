@@ -18,6 +18,9 @@ import 'package:home_cleaning_marketplace/features/customer/presentation/custome
 import 'package:home_cleaning_marketplace/features/discovery/data/cleaner_discovery_models.dart';
 import 'package:home_cleaning_marketplace/features/discovery/presentation/comparison_controller.dart';
 import 'package:home_cleaning_marketplace/features/discovery/presentation/discovery_controller.dart';
+import 'package:home_cleaning_marketplace/features/payments/data/payment_models.dart';
+import 'package:home_cleaning_marketplace/features/payments/presentation/admin_payment_controller.dart';
+import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_controller.dart';
 
 class SeededCustomerProfileController extends CustomerProfileController {
   SeededCustomerProfileController(this._seed);
@@ -373,6 +376,140 @@ class SeededCustomerBookingController extends CustomerBookingController {
   }
 }
 
+class SeededCustomerPaymentController extends CustomerPaymentController {
+  SeededCustomerPaymentController(this._seed);
+
+  final CustomerPaymentState _seed;
+  int loadCalls = 0;
+  int startCalls = 0;
+  int retryCalls = 0;
+  int cancelCalls = 0;
+  int simulateSuccessCalls = 0;
+  int simulateFailureCalls = 0;
+  int beginAttemptCalls = 0;
+
+  @override
+  CustomerPaymentState build() => _seed;
+
+  @override
+  void beginAttempt({String Function()? keyFactory}) {
+    beginAttemptCalls += 1;
+    super.beginAttempt(
+      keyFactory: keyFactory ?? () => 'test-payment-idem-key1',
+    );
+  }
+
+  @override
+  Future<void> load(String bookingId) async {
+    loadCalls += 1;
+  }
+
+  @override
+  Future<PaymentAttempt?> startPayment(
+    String bookingId, {
+    String Function()? keyFactory,
+  }) async {
+    if (state.submitting) {
+      return state.current;
+    }
+    startCalls += 1;
+    state = state.copyWith(submitting: true);
+    return state.current;
+  }
+
+  @override
+  Future<PaymentAttempt?> retryPayment(String bookingId) async {
+    retryCalls += 1;
+    beginAttempt();
+    return startPayment(bookingId);
+  }
+
+  @override
+  Future<bool> cancelPayment(String bookingId) async {
+    cancelCalls += 1;
+    return true;
+  }
+
+  @override
+  Future<bool> simulateSuccess(String bookingId, String paymentId) async {
+    simulateSuccessCalls += 1;
+    return true;
+  }
+
+  @override
+  Future<bool> simulateFailure(String bookingId, String paymentId) async {
+    simulateFailureCalls += 1;
+    return true;
+  }
+}
+
+class SeededAdminPaymentController extends AdminPaymentController {
+  SeededAdminPaymentController(this._seed);
+
+  final AdminPaymentState _seed;
+  int loadCalls = 0;
+  int loadMoreCalls = 0;
+  int loadDetailCalls = 0;
+  int refundCalls = 0;
+  int beginRefundCalls = 0;
+  AdminPaymentFilters? lastFilters;
+  String? lastRefundReason;
+  int? lastRefundAmount;
+  String? lastRefundKey;
+
+  @override
+  AdminPaymentState build() => _seed;
+
+  @override
+  void beginRefundAttempt({String Function()? keyFactory}) {
+    beginRefundCalls += 1;
+    super.beginRefundAttempt(
+      keyFactory: keyFactory ?? () => 'test-refund-idem-key1',
+    );
+  }
+
+  @override
+  Future<void> load({AdminPaymentFilters? filters}) async {
+    loadCalls += 1;
+    lastFilters = filters ?? state.filters;
+    if (filters != null) {
+      state = state.copyWith(filters: filters, loading: false);
+    }
+  }
+
+  @override
+  Future<void> applyFilters(AdminPaymentFilters filters) {
+    return load(filters: filters);
+  }
+
+  @override
+  Future<void> loadMore() async {
+    loadMoreCalls += 1;
+  }
+
+  @override
+  Future<void> loadDetail(String paymentId) async {
+    loadDetailCalls += 1;
+  }
+
+  @override
+  Future<bool> refund({
+    required String paymentId,
+    required String reason,
+    int? amountMinor,
+    String Function()? keyFactory,
+  }) async {
+    if (state.saving) {
+      return false;
+    }
+    refundCalls += 1;
+    lastRefundReason = reason;
+    lastRefundAmount = amountMinor;
+    lastRefundKey = state.refundIdempotencyKey;
+    return true;
+  }
+}
+
 class SeededCleanerBookingController extends CleanerBookingController {
   SeededCleanerBookingController(this._seed);
 
@@ -552,6 +689,15 @@ List<dynamic> featureControllerOverrides() {
       () => SeededCleanerBookingController(
         const CleanerBookingState(loading: false),
       ),
+    ),
+    customerPaymentControllerProvider.overrideWith(
+      () => SeededCustomerPaymentController(
+        const CustomerPaymentState(loading: false),
+      ),
+    ),
+    adminPaymentControllerProvider.overrideWith(
+      () =>
+          SeededAdminPaymentController(const AdminPaymentState(loading: false)),
     ),
   ];
 }
@@ -900,4 +1046,103 @@ Map<String, dynamic> cleanerBookingJson({
     'created_at': '2026-08-25T12:00:00.000Z',
     'updated_at': '2026-08-25T12:00:00.000Z',
   };
+}
+
+Map<String, dynamic> paymentAttemptJson({
+  String id = '507f1f77bcf86cd7994390d1',
+  String bookingId = '507f1f77bcf86cd799439091',
+  String status = 'pending',
+  String provider = 'sandbox',
+  int attemptNumber = 1,
+  int refundedAmountMinor = 0,
+  bool simulationAvailable = false,
+  String? paidAt,
+  String? failedAt,
+  String? cancelledAt,
+  String? refundedAt,
+}) {
+  return <String, dynamic>{
+    'id': id,
+    'booking_id': bookingId,
+    'provider': provider,
+    'status': status,
+    'amount_minor': 500000,
+    'currency_code': 'BDT',
+    'attempt_number': attemptNumber,
+    'created_at': '2026-08-25T12:00:00.000Z',
+    'updated_at': '2026-08-25T12:00:00.000Z',
+    'paid_at': paidAt,
+    'failed_at': failedAt,
+    'cancelled_at': cancelledAt,
+    'refunded_at': refundedAt,
+    'refunded_amount_minor': refundedAmountMinor,
+    if (simulationAvailable)
+      'sandbox_session': <String, dynamic>{
+        'payment_id': id,
+        'simulation_available': true,
+      },
+  };
+}
+
+PaymentAttempt testPaymentAttempt({
+  String status = 'pending',
+  bool simulationAvailable = false,
+  int refundedAmountMinor = 0,
+  String? paidAt,
+}) {
+  return PaymentAttempt.fromJson(
+    paymentAttemptJson(
+      status: status,
+      simulationAvailable: simulationAvailable,
+      refundedAmountMinor: refundedAmountMinor,
+      paidAt: paidAt,
+    ),
+  );
+}
+
+Map<String, dynamic> adminPaymentJson({
+  String id = '507f1f77bcf86cd7994390d1',
+  String status = 'paid',
+}) {
+  return <String, dynamic>{
+    ...paymentAttemptJson(
+      id: id,
+      status: status,
+      paidAt: '2026-08-25T12:05:00.000Z',
+    ),
+    'customer_user_id': '507f1f77bcf86cd799439011',
+    'cleaner_user_id': '507f1f77bcf86cd799439081',
+    'provider_payment_id': 'sandbox_abc',
+    'provider_reference': null,
+    'failure_code': null,
+    'failure_message': null,
+    'authorized_at': null,
+    'booking_status': 'confirmed',
+    'service_snapshot_name': 'Home Cleaning',
+  };
+}
+
+Map<String, dynamic> webhookEventJson({
+  String eventId = 'evt_1',
+  String eventType = 'payment.succeeded',
+  String processingStatus = 'processed',
+}) {
+  return <String, dynamic>{
+    'provider_event_id': eventId,
+    'event_type': eventType,
+    'processing_status': processingStatus,
+    'processed_at': '2026-08-25T12:05:00.000Z',
+    'created_at': '2026-08-25T12:05:00.000Z',
+  };
+}
+
+AdminPaymentSummary testAdminPaymentSummary({String status = 'paid'}) {
+  return AdminPaymentSummary.fromJson(adminPaymentJson(status: status));
+}
+
+AdminPaymentDetail testAdminPaymentDetail({String status = 'paid'}) {
+  return AdminPaymentDetail.fromJson(<String, dynamic>{
+    'payment': adminPaymentJson(status: status),
+    'events': [webhookEventJson()],
+  });
 }

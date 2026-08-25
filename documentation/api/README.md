@@ -46,8 +46,11 @@ The Dart Frog backend currently implements:
 * cleaner availability routes
 * customer discovery list/detail
 * customer booking create/list/detail/cancel
+* customer booking payment get/start/cancel
+* sandbox webhook and development simulate (dev/test only)
+* admin payment list/detail/events/refund
 * cleaner booking list/detail/accept/decline/cancel/start/complete
 
-See [authentication-api.md](authentication-api.md), [profile-address-onboarding-admin-api.md](profile-address-onboarding-admin-api.md), [services-availability-discovery-api.md](services-availability-discovery-api.md), and [booking-api.md](booking-api.md). `/api/v1/health` remains available even when MongoDB is unconfigured or unreachable. `/api/v1/ready` returns HTTP 200 when ping succeeds and HTTP 503 when the database is unconfigured or unavailable.
+See [authentication-api.md](authentication-api.md), [profile-address-onboarding-admin-api.md](profile-address-onboarding-admin-api.md), [services-availability-discovery-api.md](services-availability-discovery-api.md), [booking-api.md](booking-api.md), and [payment-api.md](payment-api.md). `/api/v1/health` remains available even when MongoDB is unconfigured or unreachable. `/api/v1/ready` returns HTTP 200 when ping succeeds and HTTP 503 when the database is unconfigured or unavailable.
 
-Payments, chat, reviews, earnings, maps, and geocoding are not implemented. The auth routes are not ready for unrestricted public internet exposure until production rate limiting exists.
+Chat, reviews, earnings, maps, geocoding, and a production payment processor are not implemented. The sandbox payment provider is development/test only. The auth routes are not ready for unrestricted public internet exposure until production rate limiting exists.

@@ -13,6 +13,7 @@ import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booki
 import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_validation.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payments/application/booking_cancellation_orchestrator.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/data/service_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/user_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/account_status.dart';
@@ -31,6 +32,7 @@ class CustomerBookingService {
     required ServiceRepository services,
     required CleanerServiceRepository offerings,
     required BookingRepository bookings,
+    required BookingCancellationOrchestrator cancellation,
     DateTime Function()? clock,
   }) : _addresses = addresses,
        _slots = slots,
@@ -39,6 +41,7 @@ class CustomerBookingService {
        _services = services,
        _offerings = offerings,
        _bookings = bookings,
+       _cancellation = cancellation,
        _clock = clock ?? DateTime.now;
 
   final AddressRepository _addresses;
@@ -48,6 +51,7 @@ class CustomerBookingService {
   final ServiceRepository _services;
   final CleanerServiceRepository _offerings;
   final BookingRepository _bookings;
+  final BookingCancellationOrchestrator _cancellation;
   final DateTime Function() _clock;
 
   /// Creates a booking or returns an identical idempotent replay.
@@ -257,27 +261,15 @@ class CustomerBookingService {
     Object? reasonRaw,
   }) async {
     final reason = BookingValidation.optionalReason(reasonRaw);
-    final now = _clock().toUtc();
-    final updated = await _bookings.cancelByCustomer(
-      id: bookingId,
-      customerUserId: user.id,
-      now: now,
+    final updated = await _cancellation.cancelByCustomer(
+      user: user,
+      bookingId: bookingId,
       reason: reason,
     );
-    if (updated != null) {
-      final names = await _cleanerNames([updated.cleanerUserId]);
-      return updated.toCustomerJson(
-        cleanerPublicName: names[updated.cleanerUserId.oid] ?? 'Cleaner',
-      );
-    }
-    final existing = await _bookings.findCustomerBookingById(
-      id: bookingId,
-      customerUserId: user.id,
+    final names = await _cleanerNames([updated.cleanerUserId]);
+    return updated.toCustomerJson(
+      cleanerPublicName: names[updated.cleanerUserId.oid] ?? 'Cleaner',
     );
-    if (existing == null) {
-      throw const BookingNotFoundException();
-    }
-    throw const InvalidBookingStateException();
   }
 
   Future<({Map<String, Object?> booking, bool created})> _replayOrConflict({

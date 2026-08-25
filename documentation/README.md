@@ -31,6 +31,7 @@ Current documents:
 * [profile-address-and-cleaner-onboarding.md](architecture/profile-address-and-cleaner-onboarding.md)
 * [service-availability-and-discovery.md](architecture/service-availability-and-discovery.md)
 * [booking-reservation-and-lifecycle.md](architecture/booking-reservation-and-lifecycle.md)
+* [payment-processing-and-webhooks.md](architecture/payment-processing-and-webhooks.md)
 
 ### `setup/`
 
@@ -56,6 +57,9 @@ Current documents:
 * [cleaner-services-collection.md](database/cleaner-services-collection.md)
 * [availability-slots-collection.md](database/availability-slots-collection.md)
 * [bookings-collection.md](database/bookings-collection.md)
+* [payments-collection.md](database/payments-collection.md)
+* [payment-webhook-events-collection.md](database/payment-webhook-events-collection.md)
+* [payment-refund-requests-collection.md](database/payment-refund-requests-collection.md)
 
 ### `api/`
 
@@ -67,6 +71,7 @@ Current documents:
 * [profile-address-onboarding-admin-api.md](api/profile-address-onboarding-admin-api.md)
 * [services-availability-discovery-api.md](api/services-availability-discovery-api.md)
 * [booking-api.md](api/booking-api.md)
+* [payment-api.md](api/payment-api.md)
 
 ### `features/`
 
@@ -90,6 +95,7 @@ Current documents:
 * [ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md](decisions/ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md)
 * [ADR-012-service-offerings-availability-and-discovery.md](decisions/ADR-012-service-offerings-availability-and-discovery.md)
 * [ADR-013-booking-reservation-idempotency-and-lifecycle.md](decisions/ADR-013-booking-reservation-idempotency-and-lifecycle.md)
+* [ADR-014-payment-provider-webhooks-and-refunds.md](decisions/ADR-014-payment-provider-webhooks-and-refunds.md)
 
 ### `workflows/`
 
