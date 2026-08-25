@@ -7,8 +7,11 @@ class FakeAuthenticationService implements AuthenticationService {
   /// Creates a fake with optional canned results or errors.
   FakeAuthenticationService();
 
-  /// Result returned by signup/login when [nextError] is null.
+  /// Result returned by login when [nextError] is null.
   AuthenticationResult? nextAuthResult;
+
+  /// Result returned by signup when [nextError] is null.
+  SignupResult? nextSignupResult;
 
   /// Result returned by refresh when [nextError] is null.
   RefreshedTokens? nextRefreshResult;
@@ -26,7 +29,7 @@ class FakeAuthenticationService implements AuthenticationService {
   String? lastRefreshToken;
 
   @override
-  Future<AuthenticationResult> signUp({
+  Future<SignupResult> signUp({
     required String email,
     required String password,
     required UserRole role,
@@ -36,7 +39,7 @@ class FakeAuthenticationService implements AuthenticationService {
     lastPassword = password;
     lastRole = role;
     _throwIfNeeded();
-    return nextAuthResult!;
+    return nextSignupResult!;
   }
 
   @override

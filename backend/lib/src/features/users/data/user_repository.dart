@@ -36,6 +36,12 @@ abstract class UserRepository {
     required DateTime updatedAt,
   });
 
+  /// Sets `email_verified` to true for [userId]. Idempotent.
+  Future<UserAccount> markEmailVerified({
+    required ObjectId userId,
+    required DateTime updatedAt,
+  });
+
   /// Admin user list, `_id` descending, optional exact-email filter.
   Future<UserAccountPage> adminPage({
     required int limit,

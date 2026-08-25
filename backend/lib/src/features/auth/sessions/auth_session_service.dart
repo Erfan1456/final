@@ -1,3 +1,4 @@
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/domain/account_action_policy.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/create_user_session_data.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/user_session.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/user_session_exceptions.dart';
@@ -115,5 +116,32 @@ class AuthSessionService {
   /// Revokes every non-revoked session for [userId].
   Future<int> revokeAllForUser(ObjectId userId) {
     return _sessions.revokeAllForUser(userId, now: _clock().toUtc());
+  }
+
+  /// Lists active sessions for [userId], newest first, capped at 50.
+  Future<List<UserSession>> listActiveForUser(ObjectId userId) {
+    return _sessions.findActiveForUser(
+      userId: userId,
+      now: _clock().toUtc(),
+      limit: AccountActionPolicy.maxListedSessions,
+    );
+  }
+
+  /// Revokes [sessionId] when it belongs to [userId].
+  ///
+  /// Returns the session when owned (including already-revoked). Returns
+  /// `null` for unknown or foreign sessions.
+  Future<UserSession?> revokeOwnedSession({
+    required ObjectId userId,
+    required ObjectId sessionId,
+  }) async {
+    final session = await _sessions.findById(sessionId);
+    if (session == null || session.userId != userId) {
+      return null;
+    }
+    if (session.isRevoked) {
+      return session;
+    }
+    return _sessions.revokeById(sessionId, now: _clock().toUtc());
   }
 }

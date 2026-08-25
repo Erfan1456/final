@@ -9,6 +9,25 @@ abstract final class AppRoutes {
   static const String signupPath = '/signup';
   static const String signupName = 'signup';
 
+  static const String verifyEmailPendingPath = '/verify-email-pending';
+  static const String verifyEmailPendingName = 'verifyEmailPending';
+
+  static const String forgotPasswordPath = '/forgot-password';
+  static const String forgotPasswordName = 'forgotPassword';
+
+  static const String resetPasswordPath = '/reset-password';
+  static const String resetPasswordName = 'resetPassword';
+
+  static const String accountSecurityPath = '/account/security';
+  static const String accountSecurityName = 'accountSecurity';
+
+  static const String accountChangePasswordPath =
+      '/account/security/change-password';
+  static const String accountChangePasswordName = 'accountChangePassword';
+
+  static const String accountSessionsPath = '/account/security/sessions';
+  static const String accountSessionsName = 'accountSessions';
+
   static const String homePath = '/home';
   static const String homeName = 'home';
 
@@ -186,5 +205,48 @@ abstract final class AppRoutes {
 
   static String adminUserFinanceLocation(String userId) {
     return '/admin/users/$userId/finance';
+  }
+
+  static String verifyEmailPendingLocation({
+    required String email,
+    String? token,
+  }) {
+    final query = <String, String>{'email': email};
+    if (token != null && token.isNotEmpty) {
+      query['token'] = token;
+    }
+    return Uri(
+      path: verifyEmailPendingPath,
+      queryParameters: query,
+    ).toString();
+  }
+
+  static String forgotPasswordLocation({String? email}) {
+    if (email == null || email.isEmpty) {
+      return forgotPasswordPath;
+    }
+    return Uri(
+      path: forgotPasswordPath,
+      queryParameters: <String, String>{'email': email},
+    ).toString();
+  }
+
+  static String resetPasswordLocation({String? token}) {
+    if (token == null || token.isEmpty) {
+      return resetPasswordPath;
+    }
+    return Uri(
+      path: resetPasswordPath,
+      queryParameters: <String, String>{'token': token},
+    ).toString();
+  }
+
+  /// Public auth routes reachable while signed out.
+  static bool isPublicAuthPath(String location) {
+    return location == loginPath ||
+        location == signupPath ||
+        location == verifyEmailPendingPath ||
+        location == forgotPasswordPath ||
+        location == resetPasswordPath;
   }
 }

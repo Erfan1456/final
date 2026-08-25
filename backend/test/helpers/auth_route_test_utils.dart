@@ -43,6 +43,26 @@ RefreshedTokens fakeRefreshedTokens() {
   );
 }
 
+SignupResult fakeSignupResult({
+  UserRole role = UserRole.customer,
+}) {
+  final createdAt = DateTime.utc(2026, 8, 25, 12);
+  return SignupResult(
+    user: UserAccount(
+      id: ObjectId.fromHexString('507f1f77bcf86cd799439011'),
+      role: role,
+      email: 'Person@example.com',
+      emailNormalized: 'person@example.com',
+      passwordHash: 'hashed-password-must-not-appear',
+      accountStatus: AccountStatus.active,
+      emailVerified: false,
+      createdAt: createdAt,
+      updatedAt: createdAt,
+    ),
+    verificationRequired: true,
+  );
+}
+
 RequestContext authContext({
   required FakeAuthenticationService auth,
   required Request request,

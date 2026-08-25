@@ -48,6 +48,13 @@ abstract class SessionDocumentStore {
     required Map<String, dynamic> query,
     required Map<String, dynamic> update,
   });
+
+  /// Finds documents matching [selector], optionally sorted and limited.
+  Future<List<Map<String, dynamic>>> findMany({
+    required Map<String, dynamic> selector,
+    Map<String, int>? sort,
+    int? limit,
+  });
 }
 
 /// mongo_dart-backed [SessionDocumentStore].
@@ -98,5 +105,20 @@ class MongoSessionDocumentStore implements SessionDocumentStore {
   }) async {
     final result = await _collection.updateMany(query, update);
     return result.nModified;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> findMany({
+    required Map<String, dynamic> selector,
+    Map<String, int>? sort,
+    int? limit,
+  }) {
+    return _collection
+        .modernFind(
+          filter: selector,
+          sort: sort == null ? null : Map<String, Object>.from(sort),
+          limit: limit,
+        )
+        .toList();
   }
 }

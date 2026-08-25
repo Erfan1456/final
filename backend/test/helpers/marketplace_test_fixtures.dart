@@ -7,6 +7,7 @@ import 'package:home_cleaning_marketplace_api/src/features/users/data/user_repos
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/account_status.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/create_user_account_data.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_account.dart';
+import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_account_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_role.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide ServerConfig;
 
@@ -64,6 +65,7 @@ UserAccount testUserAccount({
   UserRole role = UserRole.cleaner,
   AccountStatus status = AccountStatus.active,
   String email = 'cleaner@example.com',
+  bool emailVerified = true,
 }) {
   final created = DateTime.utc(2026, 8, 20, 12);
   final userId = id ?? ObjectId.fromHexString('507f1f77bcf86cd799439011');
@@ -74,7 +76,7 @@ UserAccount testUserAccount({
     emailNormalized: email.toLowerCase(),
     passwordHash: 'hashed-password-must-not-appear',
     accountStatus: status,
-    emailVerified: false,
+    emailVerified: emailVerified,
     createdAt: created,
     updatedAt: created,
   );
@@ -152,6 +154,33 @@ class MemoryUserRepository implements UserRepository {
     required DateTime updatedAt,
   }) {
     throw UnimplementedError();
+  }
+
+  @override
+  Future<UserAccount> markEmailVerified({
+    required ObjectId userId,
+    required DateTime updatedAt,
+  }) async {
+    for (var i = 0; i < users.length; i++) {
+      final user = users[i];
+      if (user.id != userId) {
+        continue;
+      }
+      final updated = UserAccount(
+        id: user.id,
+        role: user.role,
+        email: user.email,
+        emailNormalized: user.emailNormalized,
+        passwordHash: user.passwordHash,
+        accountStatus: user.accountStatus,
+        emailVerified: true,
+        createdAt: user.createdAt,
+        updatedAt: updatedAt.toUtc(),
+      );
+      users[i] = updated;
+      return updated;
+    }
+    throw const UserAccountWriteException();
   }
 
   @override

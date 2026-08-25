@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_cleaning_marketplace/core/network/dio_provider.dart';
+import 'package:home_cleaning_marketplace/features/auth/data/account_session.dart';
 import 'package:home_cleaning_marketplace/features/auth/data/auth_api.dart';
 import 'package:home_cleaning_marketplace/features/auth/data/auth_failure.dart';
 import 'package:home_cleaning_marketplace/features/auth/data/auth_token_storage.dart';
 import 'package:home_cleaning_marketplace/features/auth/data/flutter_secure_auth_token_storage.dart';
+import 'package:home_cleaning_marketplace/features/auth/data/signup_result.dart';
 import 'package:home_cleaning_marketplace/features/auth/domain/auth_user.dart';
 
 /// Authentication use cases over [AuthApi] and secure token storage.
@@ -14,19 +16,13 @@ class AuthRepository {
   final AuthApi api;
   final AuthTokenStorage storage;
 
-  /// Registers a customer or cleaner and stores the returned token pair.
-  Future<AuthUser> signUp({
+  /// Registers a customer or cleaner without storing tokens.
+  Future<SignupResult> signUp({
     required String email,
     required String password,
     required String role,
-  }) async {
-    final result = await api.signUp(
-      email: email,
-      password: password,
-      role: role,
-    );
-    await storage.write(result.tokens);
-    return result.user;
+  }) {
+    return api.signUp(email: email, password: password, role: role);
   }
 
   /// Authenticates and stores the returned token pair.
@@ -89,6 +85,56 @@ class AuthRepository {
     } finally {
       await storage.clear();
     }
+  }
+
+  /// Public verification resend.
+  Future<AccountActionRequestResult> requestEmailVerification(String email) {
+    return api.requestEmailVerification(email);
+  }
+
+  /// Public verification consume.
+  Future<void> verifyEmail(String token) {
+    return api.verifyEmail(token);
+  }
+
+  /// Public password-reset request.
+  Future<AccountActionRequestResult> requestPasswordReset(String email) {
+    return api.requestPasswordReset(email);
+  }
+
+  /// Public password-reset confirmation.
+  Future<void> confirmPasswordReset({
+    required String token,
+    required String newPassword,
+  }) {
+    return api.confirmPasswordReset(token: token, newPassword: newPassword);
+  }
+
+  /// Authenticated password change. Clears local tokens afterward.
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await api.changePassword(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+    );
+    await storage.clear();
+  }
+
+  /// Lists active sessions for the signed-in account.
+  Future<List<AccountSession>> listSessions() {
+    return api.listSessions();
+  }
+
+  /// Revokes one owned session. Returns whether the current session was revoked.
+  Future<bool> revokeSession(String sessionId) {
+    return api.revokeSession(sessionId);
+  }
+
+  /// Revokes every session except when clearing locally via [logoutAll].
+  Future<void> revokeAllSessions() {
+    return api.revokeAllSessions();
   }
 }
 

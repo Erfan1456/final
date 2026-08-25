@@ -19,7 +19,7 @@ Database: MongoDB Atlas — backend connectivity foundation implemented
 Primary Android development environment: Android Studio / Android Emulator
 ```
 
-The Dart Frog backend lives in `backend/`. MongoDB Atlas connectivity is implemented in the backend only. Flutter authentication, role-scoped profiles, addresses, cleaner onboarding, admin approval, service catalog, offerings, availability, customer discovery, booking reservation/lifecycle, sandbox payments, booking chat, in-app notifications, verified reviews, booking disputes, admin user/booking operations, an append-only audit trail, cleaner earnings, payout requests, and read-only financial reconciliation now exist. WebSockets, push notifications, password recovery, MFA, AI moderation, a production payment processor, and a real payout provider are not implemented.
+The Dart Frog backend lives in `backend/`. MongoDB Atlas connectivity is implemented in the backend only. Flutter authentication, email verification, password recovery (dev-only delivery), role-scoped profiles, addresses, cleaner onboarding, admin approval, service catalog, offerings, availability, customer discovery, booking reservation/lifecycle, sandbox payments, booking chat, in-app notifications, verified reviews, booking disputes, admin user/booking operations, an append-only audit trail, cleaner earnings, payout requests, and read-only financial reconciliation now exist. WebSockets, push notifications, production email delivery, MFA, AI moderation, a production payment processor, and a real payout provider are not implemented.
 
 ## Intended High-Level Architecture
 
@@ -33,7 +33,7 @@ MongoDB Atlas
 
 The Flutter client must not contain the MongoDB database URI. Database credentials belong only to backend environment configuration.
 
-Flutter authentication, role-scoped profiles, addresses, cleaner onboarding, admin approval, service catalog, offerings, availability, customer discovery, booking reservation/lifecycle, sandbox payments, booking chat, in-app notifications, verified reviews, booking disputes, admin user/booking operations, an append-only audit trail, cleaner earnings, payout requests, and read-only financial reconciliation now exist. WebSockets, push notifications, password recovery, MFA, AI moderation, a production payment processor, and a real payout provider are not implemented. The sandbox payout adapter is development/test only and does not transfer real money.
+Flutter authentication, email verification, password recovery (dev-only delivery), role-scoped profiles, addresses, cleaner onboarding, admin approval, service catalog, offerings, availability, customer discovery, booking reservation/lifecycle, sandbox payments, booking chat, in-app notifications, verified reviews, booking disputes, admin user/booking operations, an append-only audit trail, cleaner earnings, payout requests, and read-only financial reconciliation now exist. WebSockets, push notifications, production email delivery, MFA, AI moderation, a production payment processor, and a real payout provider are not implemented. The sandbox payout adapter is development/test only and does not transfer real money.
 
 ## Repository Layout
 

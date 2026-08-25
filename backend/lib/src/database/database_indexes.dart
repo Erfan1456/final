@@ -1,3 +1,4 @@
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/data/account_action_token_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/addresses/data/address_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/audit/data/audit_log_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/session_indexes.dart';
@@ -27,6 +28,7 @@ import 'package:mongo_dart/mongo_dart.dart' hide ServerConfig;
 Future<void> ensureApprovedDatabaseIndexes(Db db) async {
   await ensureUserIndexesOnDb(db);
   await ensureUserSessionIndexesOnDb(db);
+  await ensureAccountActionTokenIndexesOnDb(db);
   await ensureCustomerProfileIndexesOnDb(db);
   await ensureCleanerProfileIndexesOnDb(db);
   await ensureAddressIndexesOnDb(db);

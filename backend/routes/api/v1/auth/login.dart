@@ -11,6 +11,9 @@ Future<Response> onRequest(RequestContext context) {
       email: request.email,
       password: request.password,
     );
-    return jsonSuccess(authenticationDataJson(result));
+    return jsonSuccess(
+      authenticationDataJson(result),
+      headers: sensitiveNoStoreHeaders,
+    );
   });
 }

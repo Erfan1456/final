@@ -74,6 +74,46 @@ void main() {
     expect(find.text('Invalid email or password.'), findsOneWidget);
   });
 
+  testWidgets('login shows verify email action for email_not_verified', (
+    tester,
+  ) async {
+    final controller = SeededAuthController(const AuthState.unauthenticated())
+      ..nextError = 'Verify your email before signing in.'
+      ..nextErrorCode = 'email_not_verified';
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [authControllerProvider.overrideWith(() => controller)],
+        child: const MaterialApp(home: LoginScreen()),
+      ),
+    );
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Email'),
+      'person@example.com',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Password'),
+      'password',
+    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Sign in'));
+    await tester.pump();
+    expect(find.text('Verify your email'), findsOneWidget);
+  });
+
+  testWidgets('login shows forgot password link', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authControllerProvider.overrideWith(
+            () => SeededAuthController(const AuthState.unauthenticated()),
+          ),
+        ],
+        child: const MaterialApp(home: LoginScreen()),
+      ),
+    );
+    expect(find.text('Forgot password?'), findsOneWidget);
+  });
+
   testWidgets('login shows loading while submitting', (tester) async {
     final controller = SeededAuthController(const AuthState.unauthenticated())
       ..submitGate = Completer<void>();

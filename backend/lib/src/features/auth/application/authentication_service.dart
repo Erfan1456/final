@@ -1,3 +1,7 @@
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/application/account_action_delivery_provider.dart';
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/application/account_action_token_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/domain/account_action_exceptions.dart';
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/domain/account_action_purpose.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/application/auth_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/application/authentication_result.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/application/email_input.dart';
@@ -17,14 +21,14 @@ import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_rol
 ///
 /// Implementations must not depend on Dart Frog request or response types.
 abstract interface class AuthenticationService {
-  /// Creates a customer or cleaner account and issues tokens.
-  Future<AuthenticationResult> signUp({
+  /// Creates a customer or cleaner account without issuing a session.
+  Future<SignupResult> signUp({
     required String email,
     required String password,
     required UserRole role,
   });
 
-  /// Authenticates an existing account and issues tokens.
+  /// Authenticates an existing verified account and issues tokens.
   Future<AuthenticationResult> login({
     required String email,
     required String password,
@@ -49,14 +53,20 @@ class AuthenticationServiceImpl implements AuthenticationService {
     required PasswordHasher passwordHasher,
     required AccessTokenService accessTokens,
     required AuthSessionService sessions,
+    required AccountActionTokenService accountActions,
+    required AccountActionDeliveryProvider delivery,
     required String dummyPasswordHash,
+    required bool exposeDevelopmentAction,
     DateTime Function()? clock,
   }) : _users = users,
        _passwordPolicy = passwordPolicy,
        _passwordHasher = passwordHasher,
        _accessTokens = accessTokens,
        _sessions = sessions,
+       _accountActions = accountActions,
+       _delivery = delivery,
        _dummyPasswordHash = dummyPasswordHash,
+       _exposeDevelopmentAction = exposeDevelopmentAction,
        _clock = clock ?? _utcNow;
 
   final UserRepository _users;
@@ -64,18 +74,20 @@ class AuthenticationServiceImpl implements AuthenticationService {
   final PasswordHasher _passwordHasher;
   final AccessTokenService _accessTokens;
   final AuthSessionService _sessions;
+  final AccountActionTokenService _accountActions;
+  final AccountActionDeliveryProvider _delivery;
   final String _dummyPasswordHash;
+  final bool _exposeDevelopmentAction;
   final DateTime Function() _clock;
 
   static DateTime _utcNow() => DateTime.now().toUtc();
 
   @override
-  Future<AuthenticationResult> signUp({
+  Future<SignupResult> signUp({
     required String email,
     required String password,
     required UserRole role,
   }) async {
-    _ensureTokensConfigured();
     if (role != UserRole.customer && role != UserRole.cleaner) {
       throw const InvalidAuthInputException(
         code: 'invalid_role',
@@ -100,7 +112,23 @@ class AuthenticationServiceImpl implements AuthenticationService {
         passwordHash: passwordHash,
       ),
     );
-    return _issueFor(user);
+    final issued = await _accountActions.issue(
+      userId: user.id,
+      purpose: AccountActionPurpose.emailVerification,
+    );
+    if (!_delivery.isAvailable) {
+      throw const AccountActionDeliveryUnavailableException();
+    }
+    final delivered = await _delivery.deliverEmailVerification(
+      recipientEmail: user.email,
+      rawToken: issued.rawToken,
+      expiresAt: issued.token.expiresAt,
+    );
+    return SignupResult(
+      user: user,
+      verificationRequired: true,
+      developmentAction: _exposeDevelopmentAction ? delivered : null,
+    );
   }
 
   @override
@@ -131,6 +159,10 @@ class AuthenticationServiceImpl implements AuthenticationService {
 
     if (user.accountStatus != AccountStatus.active) {
       throw const AccountUnavailableException();
+    }
+
+    if (!user.emailVerified) {
+      throw const EmailNotVerifiedException();
     }
 
     if (_passwordHasher.needsRehash(user.passwordHash)) {
@@ -246,7 +278,7 @@ class UnconfiguredAuthenticationService implements AuthenticationService {
   const UnconfiguredAuthenticationService();
 
   @override
-  Future<AuthenticationResult> signUp({
+  Future<SignupResult> signUp({
     required String email,
     required String password,
     required UserRole role,

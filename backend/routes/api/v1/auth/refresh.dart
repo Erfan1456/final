@@ -10,6 +10,7 @@ Future<Response> onRequest(RequestContext context) {
     final tokens = await auth.refresh(request.refreshToken);
     return jsonSuccess(
       refreshedTokensDataJson(tokens),
+      headers: sensitiveNoStoreHeaders,
     );
   });
 }

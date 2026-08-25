@@ -5,6 +5,7 @@ import 'package:home_cleaning_marketplace_api/src/config/server_config.dart';
 import 'package:home_cleaning_marketplace_api/src/database/collection_names.dart';
 import 'package:home_cleaning_marketplace_api/src/database/database_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/database/mongo_database.dart';
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/data/account_action_token_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/addresses/data/address_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/audit/data/audit_log_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/session_indexes.dart';
@@ -56,6 +57,9 @@ Future<void> main() async {
         .getIndexes();
     final sessionIndexes = await db
         .collection(CollectionNames.userSessions)
+        .getIndexes();
+    final accountActionIndexes = await db
+        .collection(CollectionNames.accountActionTokens)
         .getIndexes();
     final customerIndexes = await db
         .collection(CollectionNames.customerProfiles)
@@ -130,6 +134,18 @@ Future<void> main() async {
         ) ||
         !_hasNamedIndex(sessionIndexes, userSessionsUserIdIndexName) ||
         !_hasNamedIndex(sessionIndexes, userSessionsExpiresAtTtlIndexName) ||
+        !_hasNamedIndex(
+          accountActionIndexes,
+          accountActionTokensTokenHashUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(
+          accountActionIndexes,
+          accountActionTokensUserPurposeCreatedIndexName,
+        ) ||
+        !_hasNamedIndex(
+          accountActionIndexes,
+          accountActionTokensExpiresTtlIndexName,
+        ) ||
         !_hasNamedIndex(
           customerIndexes,
           customerProfilesUserIdUniqueIndexName,
@@ -314,6 +330,11 @@ Future<void> main() async {
       ..writeln('key = $userSessionsUserIdField ascending')
       ..writeln('$userSessionsExpiresAtTtlIndexName exists')
       ..writeln('key = $userSessionsExpiresAtField ascending')
+      ..writeln('expireAfterSeconds = 0')
+      ..writeln('$accountActionTokensTokenHashUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('$accountActionTokensUserPurposeCreatedIndexName exists')
+      ..writeln('$accountActionTokensExpiresTtlIndexName exists')
       ..writeln('expireAfterSeconds = 0')
       ..writeln('$customerProfilesUserIdUniqueIndexName exists')
       ..writeln('unique = true')

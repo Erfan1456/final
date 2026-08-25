@@ -1,7 +1,27 @@
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/application/account_action_delivery_provider.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/tokens/access_token_claims.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_account.dart';
 
-/// Successful signup or login credentials returned to the application layer.
+/// Successful signup without an authenticated session.
+class SignupResult {
+  /// Creates a pending-verification signup result.
+  const SignupResult({
+    required this.user,
+    this.verificationRequired = true,
+    this.developmentAction,
+  });
+
+  /// Newly created unverified account.
+  final UserAccount user;
+
+  /// Always true after TASK 020 signup.
+  final bool verificationRequired;
+
+  /// Development/test delivery payload. Null in production.
+  final DevelopmentAccountAction? developmentAction;
+}
+
+/// Successful login credentials returned to the application layer.
 ///
 /// Does not include password hashes, refresh-token hashes, or signing secrets.
 class AuthenticationResult {

@@ -6,14 +6,21 @@ This directory is the Dart Frog backend API for the Home Cleaning Service Market
 
 Current API version: `/api/v1`
 
-MongoDB Atlas is the persistence provider. `mongo_dart` is the backend driver. Users persistence, Argon2id password hashing, access-token/refresh-session primitives, public authentication HTTP routes, and protected account routes now exist:
+MongoDB Atlas is the persistence provider. `mongo_dart` is the backend driver. Users persistence, Argon2id password hashing, access-token/refresh-session primitives, public authentication HTTP routes, account recovery/verification routes, and protected account routes now exist:
 
-* `POST /api/v1/auth/signup`
+* `POST /api/v1/auth/signup` — creates account and issues verification; does not return tokens
 * `POST /api/v1/auth/login`
 * `POST /api/v1/auth/refresh`
 * `POST /api/v1/auth/logout`
+* `POST /api/v1/auth/email-verification/request`
+* `POST /api/v1/auth/email-verification/verify`
+* `POST /api/v1/auth/password-reset/request`
+* `POST /api/v1/auth/password-reset/confirm`
 * `GET /api/v1/account/me`
+* `GET /api/v1/account/sessions`
 * `DELETE /api/v1/account/sessions`
+* `DELETE /api/v1/account/sessions/{sessionId}`
+* `POST /api/v1/account/password/change`
 * `GET`/`PUT /api/v1/customer/profile`
 * customer address CRUD and default-address pointer
 * `GET`/`PUT /api/v1/cleaner/profile`
@@ -30,12 +37,19 @@ Do not place a real MongoDB URI, passwords, or other secrets in this package. Fl
 * `GET /` — service descriptor
 * `GET /api/v1/health` — liveness; database-independent
 * `GET /api/v1/ready` — readiness; MongoDB ping
-* `POST /api/v1/auth/signup` — public customer/cleaner registration
-* `POST /api/v1/auth/login` — password authentication
+* `POST /api/v1/auth/signup` — public customer/cleaner registration (verification required; no tokens returned)
+* `POST /api/v1/auth/login` — password authentication (requires verified email)
 * `POST /api/v1/auth/refresh` — refresh-token rotation
 * `POST /api/v1/auth/logout` — idempotent session revocation
+* `POST /api/v1/auth/email-verification/request` — enumeration-resistant verification re-request
+* `POST /api/v1/auth/email-verification/verify` — consume verification token
+* `POST /api/v1/auth/password-reset/request` — enumeration-resistant reset request
+* `POST /api/v1/auth/password-reset/confirm` — consume reset token
 * `GET /api/v1/account/me` — protected current account
+* `GET /api/v1/account/sessions` — list owned active sessions
 * `DELETE /api/v1/account/sessions` — revoke all refresh sessions
+* `DELETE /api/v1/account/sessions/{sessionId}` — revoke one owned session
+* `POST /api/v1/account/password/change` — authenticated password change
 * `GET`/`PUT /api/v1/customer/profile`
 * `GET`/`POST /api/v1/customer/addresses`
 * `GET`/`PUT`/`DELETE /api/v1/customer/addresses/{addressId}`
@@ -141,6 +155,8 @@ When the Flutter Android emulator calls this API, use `http://10.0.2.2:8080` ins
 * `lib/src/features/chat/` — booking-scoped conversations and messages
 * `lib/src/features/notifications/` — in-app notification feed
 * `lib/src/features/reviews/` — verified reviews and admin moderation
+* `lib/src/features/account/` — account security use cases
+* `lib/src/features/account_actions/` — hashed one-time verification/reset tokens and delivery boundary
 * `lib/src/features/auth/application/` — authentication use cases
 * `lib/src/features/auth/http/` — auth JSON parsing, Bearer verification, and error mapping
 * `lib/src/features/auth/security/` — password policy and Argon2id hashing
@@ -157,15 +173,16 @@ Business logic should not accumulate in route handlers. Future features should a
 * Unique `users.email_normalized` index
 * Argon2id password hashing
 * Access JWT and refresh-session primitives
-* Approved `user_sessions` indexes
-* Public authentication HTTP routes (signup, login, refresh, logout)
-* Protected account routes (`GET /account/me`, `DELETE /account/sessions`)
+* Approved `user_sessions` and `account_action_tokens` indexes
+* Public authentication HTTP routes (signup without tokens, login, refresh, logout)
+* Account recovery/verification routes and protected account security routes
+* Protected account routes (`GET /account/me`, session list/revoke, password change)
 * Role-scoped customer profile and address routes
 * Cleaner onboarding and admin review routes
 * Platform service catalog, cleaner offerings, availability, customer discovery, and booking reservation/lifecycle
 * Sandbox payment ledger, signed webhooks, and refund foundation
 * Booking-scoped chat, in-app notifications, verified reviews, and admin moderation
 * Approved indexes for profiles, catalog, bookings, payments, conversations, messages, notifications, reviews, disputes, audit, earnings, and payouts
-* No production payment or payout processor, WebSockets, or push notifications
+* No production email delivery, payment or payout processor, WebSockets, or push notifications
 * No production rate limiting yet
 * CORS is a small development-oriented foundation, not a complete production security policy

@@ -62,8 +62,15 @@ POST /api/v1/auth/signup
 POST /api/v1/auth/login
 POST /api/v1/auth/refresh
 POST /api/v1/auth/logout
+POST /api/v1/auth/email-verification/request
+POST /api/v1/auth/email-verification/verify
+POST /api/v1/auth/password-reset/request
+POST /api/v1/auth/password-reset/confirm
 GET /api/v1/account/me
+GET /api/v1/account/sessions
 DELETE /api/v1/account/sessions
+DELETE /api/v1/account/sessions/<sessionId>
+POST /api/v1/account/password/change
 GET /api/v1/customer/profile
 PUT /api/v1/customer/profile
 GET /api/v1/customer/addresses
@@ -120,7 +127,7 @@ POST /api/v1/admin/reviews/<reviewId>/hide
 POST /api/v1/admin/reviews/<reviewId>/unhide
 ```
 
-`GET /api/v1/health` is liveness and does not depend on MongoDB. `GET /api/v1/ready` is readiness and performs a MongoDB ping. Authentication routes are documented in [../api/authentication-api.md](../api/authentication-api.md). Role-scoped profile, address, onboarding, and admin review routes are documented in [../api/profile-address-onboarding-admin-api.md](../api/profile-address-onboarding-admin-api.md). Catalog, offering, availability, and discovery routes are documented in [../api/services-availability-discovery-api.md](../api/services-availability-discovery-api.md). Booking routes are documented in [../api/booking-api.md](../api/booking-api.md). Payment routes are documented in [../api/payment-api.md](../api/payment-api.md). Chat, notification, and review routes are documented in [../api/chat-api.md](../api/chat-api.md), [../api/notification-api.md](../api/notification-api.md), and [../api/review-api.md](../api/review-api.md). See also [authentication-application-flow.md](authentication-application-flow.md), [protected-api-authentication.md](protected-api-authentication.md), [profile-address-and-cleaner-onboarding.md](profile-address-and-cleaner-onboarding.md), [service-availability-and-discovery.md](service-availability-and-discovery.md), [booking-reservation-and-lifecycle.md](booking-reservation-and-lifecycle.md), [payment-processing-and-webhooks.md](payment-processing-and-webhooks.md), [chat-notifications-and-reviews.md](chat-notifications-and-reviews.md), and [../decisions/ADR-009-authentication-application-flow.md](../decisions/ADR-009-authentication-application-flow.md).
+`GET /api/v1/health` is liveness and does not depend on MongoDB. `GET /api/v1/ready` is readiness and performs a MongoDB ping. Authentication routes are documented in [../api/authentication-api.md](../api/authentication-api.md) and [../api/account-security-api.md](../api/account-security-api.md). Role-scoped profile, address, onboarding, and admin review routes are documented in [../api/profile-address-onboarding-admin-api.md](../api/profile-address-onboarding-admin-api.md). Catalog, offering, availability, and discovery routes are documented in [../api/services-availability-discovery-api.md](../api/services-availability-discovery-api.md). Booking routes are documented in [../api/booking-api.md](../api/booking-api.md). Payment routes are documented in [../api/payment-api.md](../api/payment-api.md). Chat, notification, and review routes are documented in [../api/chat-api.md](../api/chat-api.md), [../api/notification-api.md](../api/notification-api.md), and [../api/review-api.md](../api/review-api.md). See also [authentication-application-flow.md](authentication-application-flow.md), [protected-api-authentication.md](protected-api-authentication.md), [profile-address-and-cleaner-onboarding.md](profile-address-and-cleaner-onboarding.md), [service-availability-and-discovery.md](service-availability-and-discovery.md), [booking-reservation-and-lifecycle.md](booking-reservation-and-lifecycle.md), [payment-processing-and-webhooks.md](payment-processing-and-webhooks.md), [chat-notifications-and-reviews.md](chat-notifications-and-reviews.md), and [../decisions/ADR-009-authentication-application-flow.md](../decisions/ADR-009-authentication-application-flow.md).
 
 ## Configuration
 
@@ -145,6 +152,6 @@ Flutter will never receive the MongoDB URI. The Flutter client will call this AP
 
 ## Current State
 
-Backend infrastructure, liveness health, MongoDB connectivity, ping readiness, users persistence, Argon2id password-security primitives, access-token/refresh-session primitives, public authentication HTTP routes, and protected account routes exist.
+Backend infrastructure, liveness health, MongoDB connectivity, ping readiness, users persistence, Argon2id password-security primitives, access-token/refresh-session primitives, public authentication HTTP routes, account recovery/verification routes, and protected account routes exist. Signup creates an account and issues verification delivery but does not return tokens.
 
 There is no WebSocket, push, or production payment processor. Auth endpoints are not ready for unrestricted public internet exposure until production rate limiting is added. TASK 016 payment is a development/test sandbox ledger only; it is not a production card processor.

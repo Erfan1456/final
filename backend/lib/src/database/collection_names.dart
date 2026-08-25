@@ -67,4 +67,7 @@ abstract final class CollectionNames {
 
   /// Idempotent payout provider webhook event receipts.
   static const String payoutProviderEvents = 'payout_provider_events';
+
+  /// One-time hashed email-verification and password-reset tokens.
+  static const String accountActionTokens = 'account_action_tokens';
 }

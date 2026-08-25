@@ -65,17 +65,6 @@ class AuthController extends Notifier<AuthState> {
     return _submit(() => _repository.login(email: email, password: password));
   }
 
-  /// Creates an account and signs in.
-  Future<void> signup({
-    required String email,
-    required String password,
-    required String role,
-  }) {
-    return _submit(
-      () => _repository.signUp(email: email, password: password, role: role),
-    );
-  }
-
   /// Logs out this device.
   Future<void> logout() async {
     state = state.copyWith(isSubmitting: true, clearError: true);
@@ -100,6 +89,11 @@ class AuthController extends Notifier<AuthState> {
     }
   }
 
+  /// Clears local auth after a password change or remote session revocation.
+  void clearAuthenticatedSession() {
+    state = const AuthState.unauthenticated();
+  }
+
   Future<void> _submit(Future<AuthUser> Function() action) async {
     state = state.copyWith(isSubmitting: true, clearError: true);
     try {
@@ -114,6 +108,7 @@ class AuthController extends Notifier<AuthState> {
       }
       state = AuthState.unauthenticated(
         errorMessage: error.message,
+        errorCode: error.code,
         isSubmitting: false,
       );
     } catch (_) {

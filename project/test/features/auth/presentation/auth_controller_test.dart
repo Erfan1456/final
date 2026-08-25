@@ -43,16 +43,6 @@ class _FakeApi extends AuthApi {
   }
 
   @override
-  Future<({AuthUser user, AuthTokenPair tokens})> signUp({
-    required String email,
-    required String password,
-    required String role,
-  }) async {
-    _throwIfNeeded();
-    return nextAuth!;
-  }
-
-  @override
   Future<AuthUser> me() async {
     _throwIfNeeded();
     return nextUser!;
@@ -156,21 +146,21 @@ void main() {
     expect(state.errorMessage, 'Invalid email or password.');
   });
 
-  test('signup success becomes authenticated', () async {
+  test('login email_not_verified exposes error code', () async {
+    api.nextError = const AuthFailure(
+      code: 'email_not_verified',
+      message: 'Verify your email before signing in.',
+    );
     final container = createContainer();
     addTearDown(container.dispose);
     await container.read(authControllerProvider.notifier).restoreSession();
     await container
         .read(authControllerProvider.notifier)
-        .signup(
-          email: 'person@example.com',
-          password: 'fifteenCharsPass',
-          role: 'customer',
-        );
-    expect(
-      container.read(authControllerProvider).status,
-      AuthStatus.authenticated,
-    );
+        .login(email: 'person@example.com', password: 'password');
+    final state = container.read(authControllerProvider);
+    expect(state.status, AuthStatus.unauthenticated);
+    expect(state.errorCode, 'email_not_verified');
+    expect(state.errorMessage, 'Verify your email before signing in.');
   });
 
   test('logout becomes unauthenticated', () async {

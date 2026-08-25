@@ -134,3 +134,81 @@ String _requireNonEmptyString(Map<String, dynamic> json, String key) {
   }
   return value;
 }
+
+/// Parsed email-only public account-action request.
+class EmailActionRequest {
+  /// Creates a parsed email request.
+  const EmailActionRequest({required this.email});
+
+  /// Reads required fields from [json].
+  factory EmailActionRequest.fromJson(Map<String, dynamic> json) {
+    return EmailActionRequest(
+      email: EmailInput.parse(_requireString(json, 'email')),
+    );
+  }
+
+  /// Trimmed display email.
+  final String email;
+}
+
+/// Parsed verification consume request.
+class VerifyEmailRequest {
+  /// Creates a parsed verify request.
+  const VerifyEmailRequest({required this.token});
+
+  /// Reads required fields from [json].
+  factory VerifyEmailRequest.fromJson(Map<String, dynamic> json) {
+    return VerifyEmailRequest(
+      token: _requireNonEmptyString(json, 'token'),
+    );
+  }
+
+  /// Raw one-time verification token.
+  final String token;
+}
+
+/// Parsed password-reset confirmation request.
+class ConfirmPasswordResetRequest {
+  /// Creates a parsed confirm request.
+  const ConfirmPasswordResetRequest({
+    required this.token,
+    required this.newPassword,
+  });
+
+  /// Reads required fields from [json].
+  factory ConfirmPasswordResetRequest.fromJson(Map<String, dynamic> json) {
+    return ConfirmPasswordResetRequest(
+      token: _requireNonEmptyString(json, 'token'),
+      newPassword: _requireString(json, 'new_password'),
+    );
+  }
+
+  /// Raw one-time reset token.
+  final String token;
+
+  /// Replacement password as supplied.
+  final String newPassword;
+}
+
+/// Parsed authenticated password-change request.
+class ChangePasswordRequest {
+  /// Creates a parsed change-password request.
+  const ChangePasswordRequest({
+    required this.currentPassword,
+    required this.newPassword,
+  });
+
+  /// Reads required fields from [json].
+  factory ChangePasswordRequest.fromJson(Map<String, dynamic> json) {
+    return ChangePasswordRequest(
+      currentPassword: _requireString(json, 'current_password'),
+      newPassword: _requireString(json, 'new_password'),
+    );
+  }
+
+  /// Current password as supplied.
+  final String currentPassword;
+
+  /// Replacement password as supplied.
+  final String newPassword;
+}

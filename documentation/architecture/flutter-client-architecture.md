@@ -79,13 +79,13 @@ Future feature view models may use `Notifier` or `AsyncNotifier` when they have 
 
 `go_router` provides declarative navigation, a route hierarchy, and a boundary for later deep linking and authentication/role redirects.
 
-TASK 012 registers `/splash`, `/login`, `/signup`, and a compatibility `/home` redirect. TASK 013 adds role destinations `/customer/home`, `/cleaner/home`, and `/admin/home` plus profile, address, onboarding, and admin approval screens. TASK 014 adds cleaner service/availability management and customer discovery, detail, and comparison routes. TASK 015 adds `/customer/book/:cleanerUserId/:slotId`, `/customer/bookings`, `/customer/bookings/:bookingId`, `/cleaner/bookings`, and `/cleaner/bookings/:bookingId`. TASK 016 adds customer payment and admin transaction routes. TASK 017 adds `/customer/bookings/:bookingId/chat`, `/customer/bookings/:bookingId/review`, `/cleaner/bookings/:bookingId/chat`, `/cleaner/reviews`, `/notifications`, `/admin/reviews`, and `/admin/reviews/:reviewId`. Router guards are UX only; backend authorization remains authoritative. WebSockets and push notifications remain unimplemented.
+TASK 012 registers `/splash`, `/login`, `/signup`, and a compatibility `/home` redirect. TASK 013 adds role destinations `/customer/home`, `/cleaner/home`, and `/admin/home` plus profile, address, onboarding, and admin approval screens. TASK 014 adds cleaner service/availability management and customer discovery, detail, and comparison routes. TASK 015 adds `/customer/book/:cleanerUserId/:slotId`, `/customer/bookings`, `/customer/bookings/:bookingId`, `/cleaner/bookings`, and `/cleaner/bookings/:bookingId`. TASK 016 adds customer payment and admin transaction routes. TASK 017 adds `/customer/bookings/:bookingId/chat`, `/customer/bookings/:bookingId/review`, `/cleaner/bookings/:bookingId/chat`, `/cleaner/reviews`, `/notifications`, `/admin/reviews`, and `/admin/reviews/:reviewId`. TASK 020 adds verification-pending, forgot/reset password, account security, change-password, and session-management routes. Signup no longer stores tokens; users verify email before login. Router guards are UX only; backend authorization remains authoritative. WebSockets and push notifications remain unimplemented.
 
 ## Networking
 
 Dio is the HTTP transport for communication with the Dart backend. It is configured from public `AppConfig` values such as `API_BASE_URL`.
 
-Plain Dio is used for public auth calls. Authenticated Dio attaches Bearer tokens and performs single-flight refresh. See [flutter-authentication.md](flutter-authentication.md).
+Plain Dio is used for public auth calls and account-action routes (signup, login, refresh, logout, verification, password reset). Authenticated Dio attaches Bearer tokens and performs single-flight refresh. See [flutter-authentication.md](flutter-authentication.md) and [account-recovery-verification-and-session-security.md](account-recovery-verification-and-session-security.md).
 
 `API_BASE_URL` is public runtime configuration, not a secret. MongoDB URIs, passwords, tokens, and private credentials must never be placed in the Flutter client.
 

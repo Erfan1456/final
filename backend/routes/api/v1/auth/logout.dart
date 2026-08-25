@@ -9,6 +9,7 @@ Future<Response> onRequest(RequestContext context) {
     await auth.logout(request.refreshToken);
     return jsonSuccess(
       const <String, bool>{'logged_out': true},
+      headers: sensitiveNoStoreHeaders,
     );
   });
 }

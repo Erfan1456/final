@@ -5,7 +5,7 @@ import 'package:dart_frog/dart_frog.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/tokens/access_token_exceptions.dart';
 import 'package:test/test.dart';
 
-import '../../../../../routes/api/v1/account/sessions.dart' as route;
+import '../../../../../routes/api/v1/account/sessions/index.dart' as route;
 import '../../../../helpers/account_route_test_utils.dart';
 import '../../../../helpers/auth_route_test_utils.dart';
 import '../../../../helpers/fake_current_account_service.dart';
@@ -59,12 +59,12 @@ void main() {
       expectNoSensitiveAuthLeak(encoded);
     });
 
-    test('non-DELETE methods return 405', () async {
+    test('unsupported methods return 405', () async {
       final response = await route.onRequest(
         accountContext(
           account: account,
           request: accountRequest(
-            method: 'GET',
+            method: 'POST',
             path: '/api/v1/account/sessions',
           ),
         ),

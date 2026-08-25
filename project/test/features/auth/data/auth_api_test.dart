@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_cleaning_marketplace/features/auth/data/auth_api.dart';
 import 'package:home_cleaning_marketplace/features/auth/data/auth_failure.dart';
+import 'package:home_cleaning_marketplace/features/auth/data/development_account_action.dart';
 
 import '../../../helpers/auth_test_fakes.dart';
 
@@ -64,16 +65,21 @@ void main() {
   }
 
   group('AuthApi success parsing', () {
-    test('signup success', () async {
-      final user = testUser();
+    test('signup success without tokens', () async {
+      final user = testUser(emailVerified: false);
       useHandler((options) async {
         expect(options.path, equals('/api/v1/auth/signup'));
         expect(options.data['password'], equals('fifteenCharsPass'));
         return jsonBody(
-          successEnvelope(<String, dynamic>{
-            'user': userJson(user),
-            'tokens': tokensJson(),
-          }),
+          successEnvelope(
+            signupDataJson(
+              user,
+              developmentAction: const DevelopmentAccountAction(
+                purpose: 'email_verification',
+                token: 'verify-token',
+              ),
+            ),
+          ),
           201,
         );
       });
@@ -84,7 +90,8 @@ void main() {
         role: 'customer',
       );
       expect(result.user.email, equals('person@example.com'));
-      expect(result.tokens.accessToken, equals('access-token'));
+      expect(result.verificationRequired, isTrue);
+      expect(result.developmentAction?.token, equals('verify-token'));
     });
 
     test('login success', () async {
@@ -103,6 +110,124 @@ void main() {
         password: 'password',
       );
       expect(result.user.id, equals('507f1f77bcf86cd799439011'));
+    });
+
+    test('request email verification success', () async {
+      useHandler((options) async {
+        expect(options.path, equals('/api/v1/auth/email-verification/request'));
+        return jsonBody(
+          successEnvelope(<String, dynamic>{
+            'message': 'If an account exists, a verification email was sent.',
+            'development_action': <String, String>{
+              'purpose': 'email_verification',
+              'token': 'verify-token',
+            },
+          }),
+          200,
+        );
+      });
+      final result = await api.requestEmailVerification('person@example.com');
+      expect(result.message, contains('verification'));
+      expect(result.developmentAction?.token, equals('verify-token'));
+    });
+
+    test('verify email success', () async {
+      useHandler((options) async {
+        expect(options.path, equals('/api/v1/auth/email-verification/verify'));
+        expect(options.data['token'], equals('verify-token'));
+        return jsonBody(
+          successEnvelope(<String, bool>{'email_verified': true}),
+          200,
+        );
+      });
+      await api.verifyEmail('verify-token');
+    });
+
+    test('request password reset success', () async {
+      useHandler((options) async {
+        expect(options.path, equals('/api/v1/auth/password-reset/request'));
+        return jsonBody(
+          successEnvelope(<String, dynamic>{
+            'message': 'If an account exists, reset instructions were sent.',
+            'development_action': <String, String>{
+              'purpose': 'password_reset',
+              'token': 'reset-token',
+            },
+          }),
+          200,
+        );
+      });
+      final result = await api.requestPasswordReset('person@example.com');
+      expect(result.developmentAction?.purpose, equals('password_reset'));
+    });
+
+    test('confirm password reset success', () async {
+      useHandler((options) async {
+        expect(options.path, equals('/api/v1/auth/password-reset/confirm'));
+        return jsonBody(
+          successEnvelope(<String, bool>{'password_reset': true}),
+          200,
+        );
+      });
+      await api.confirmPasswordReset(
+        token: 'reset-token',
+        newPassword: 'fifteenCharsPass',
+      );
+    });
+
+    test('change password success', () async {
+      useHandler((options) async {
+        expect(options.path, equals('/api/v1/account/password/change'));
+        return jsonBody(
+          successEnvelope(<String, bool>{'reauthentication_required': true}),
+          200,
+        );
+      });
+      await api.changePassword(
+        currentPassword: 'old-password',
+        newPassword: 'fifteenCharsPass',
+      );
+    });
+
+    test('list sessions success', () async {
+      useHandler((options) async {
+        expect(options.path, equals('/api/v1/account/sessions'));
+        return jsonBody(
+          successEnvelope(<String, dynamic>{
+            'sessions': [
+              <String, dynamic>{
+                'id': '507f1f77bcf86cd799439012',
+                'created_at': '2026-08-25T12:00:00.000Z',
+                'expires_at': '2026-09-25T12:00:00.000Z',
+                'last_rotated_at': '2026-08-25T12:00:00.000Z',
+                'is_current': true,
+              },
+            ],
+          }),
+          200,
+        );
+      });
+      final sessions = await api.listSessions();
+      expect(sessions, hasLength(1));
+      expect(sessions.first.isCurrent, isTrue);
+    });
+
+    test('revoke session success', () async {
+      useHandler((options) async {
+        expect(options.method, equals('DELETE'));
+        expect(
+          options.path,
+          equals('/api/v1/account/sessions/507f1f77bcf86cd799439012'),
+        );
+        return jsonBody(
+          successEnvelope(<String, bool>{'current_session_revoked': false}),
+          200,
+        );
+      });
+      final revokedCurrent = await api.revokeSession(
+        '507f1f77bcf86cd799439012',
+      );
+      expect(revokedCurrent, isFalse);
     });
 
     test('refresh success', () async {
@@ -190,6 +315,24 @@ void main() {
       'maps 403 account_unavailable',
       () => expectCode(403, 'account_unavailable'),
     );
+    test('maps 403 email_not_verified', () => expectCode(403, 'email_not_verified'));
+    test(
+      'maps invalid_or_expired_account_action_token',
+      () => expectCode(400, 'invalid_or_expired_account_action_token'),
+    );
+    test(
+      'maps account_action_delivery_unavailable',
+      () => expectCode(503, 'account_action_delivery_unavailable'),
+    );
+    test(
+      'maps invalid_current_password',
+      () => expectCode(401, 'invalid_current_password'),
+    );
+    test(
+      'maps password_reuse_not_allowed',
+      () => expectCode(409, 'password_reuse_not_allowed'),
+    );
+    test('maps session_not_found', () => expectCode(404, 'session_not_found'));
     test('maps 409 duplicate_email', () => expectCode(409, 'duplicate_email'));
     test(
       'maps 503 authentication_unavailable',

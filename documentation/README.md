@@ -35,6 +35,7 @@ Current documents:
 * [chat-notifications-and-reviews.md](architecture/chat-notifications-and-reviews.md)
 * [disputes-admin-operations-and-audit.md](architecture/disputes-admin-operations-and-audit.md)
 * [earnings-payouts-and-reconciliation.md](architecture/earnings-payouts-and-reconciliation.md)
+* [account-recovery-verification-and-session-security.md](architecture/account-recovery-verification-and-session-security.md)
 
 ### `setup/`
 
@@ -73,6 +74,7 @@ Current documents:
 * [earnings-ledger-collection.md](database/earnings-ledger-collection.md)
 * [payout-requests-collection.md](database/payout-requests-collection.md)
 * [payout-provider-events-collection.md](database/payout-provider-events-collection.md)
+* [account-action-tokens-collection.md](database/account-action-tokens-collection.md)
 
 ### `api/`
 
@@ -91,6 +93,7 @@ Current documents:
 * [dispute-api.md](api/dispute-api.md)
 * [admin-operations-api.md](api/admin-operations-api.md)
 * [earnings-and-payout-api.md](api/earnings-and-payout-api.md)
+* [account-security-api.md](api/account-security-api.md)
 
 ### `features/`
 
@@ -118,6 +121,7 @@ Current documents:
 * [ADR-015-chat-notifications-and-verified-reviews.md](decisions/ADR-015-chat-notifications-and-verified-reviews.md)
 * [ADR-016-disputes-admin-operations-and-audit.md](decisions/ADR-016-disputes-admin-operations-and-audit.md)
 * [ADR-017-cleaner-earnings-payouts-and-reconciliation.md](decisions/ADR-017-cleaner-earnings-payouts-and-reconciliation.md)
+* [ADR-018-account-recovery-verification-and-session-security.md](decisions/ADR-018-account-recovery-verification-and-session-security.md)
 
 ### `workflows/`
 

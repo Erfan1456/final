@@ -48,6 +48,42 @@ class InvalidRefreshCredentialsException implements Exception {
   String toString() => 'InvalidRefreshCredentialsException';
 }
 
+/// Thrown when a correct password belongs to an unverified account.
+class EmailNotVerifiedException implements Exception {
+  /// Creates a sanitized unverified-email failure.
+  const EmailNotVerifiedException();
+
+  @override
+  String toString() => 'EmailNotVerifiedException';
+}
+
+/// Thrown when the supplied current password does not match.
+class InvalidCurrentPasswordException implements Exception {
+  /// Creates a sanitized current-password failure.
+  const InvalidCurrentPasswordException();
+
+  @override
+  String toString() => 'InvalidCurrentPasswordException';
+}
+
+/// Thrown when a new password matches the current password hash.
+class PasswordReuseNotAllowedException implements Exception {
+  /// Creates a sanitized password-reuse failure.
+  const PasswordReuseNotAllowedException();
+
+  @override
+  String toString() => 'PasswordReuseNotAllowedException';
+}
+
+/// Thrown when an owned session cannot be found for the caller.
+class SessionNotFoundException implements Exception {
+  /// Creates a sanitized missing-session failure.
+  const SessionNotFoundException();
+
+  @override
+  String toString() => 'SessionNotFoundException';
+}
+
 /// Thrown when authentication cannot run because configuration is missing.
 class AuthenticationConfigurationException implements Exception {
   /// Creates a sanitized configuration failure. Must not include the reason.

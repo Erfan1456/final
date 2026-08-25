@@ -1,3 +1,5 @@
+import 'package:home_cleaning_marketplace_api/src/features/account/application/account_security_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/application/account_action_delivery_provider.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/application/authentication_result.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_account.dart';
 
@@ -40,6 +42,44 @@ Map<String, Object> authenticationDataJson(AuthenticationResult result) {
       refreshToken: result.refreshToken,
       expiresInSeconds: result.expiresInSeconds,
     ),
+  };
+}
+
+/// Signup pending-verification `data` payload. Never includes tokens.
+Map<String, Object> signupDataJson(SignupResult result) {
+  final data = <String, Object>{
+    'user': authUserJson(result.user),
+    'verification_required': result.verificationRequired,
+  };
+  final action = result.developmentAction;
+  if (action != null) {
+    data['development_action'] = action.toJson();
+  }
+  return data;
+}
+
+/// Generic account-action request `data` payload.
+Map<String, Object> accountActionRequestDataJson({
+  required String message,
+  DevelopmentAccountAction? developmentAction,
+}) {
+  final data = <String, Object>{
+    'message': message,
+  };
+  if (developmentAction != null) {
+    data['development_action'] = developmentAction.toJson();
+  }
+  return data;
+}
+
+/// Safe listed-session JSON. Never includes refresh-token hashes.
+Map<String, Object> accountSessionJson(AccountSessionSummary session) {
+  return <String, Object>{
+    'id': session.id.oid,
+    'created_at': session.createdAt.toUtc().toIso8601String(),
+    'expires_at': session.expiresAt.toUtc().toIso8601String(),
+    'last_rotated_at': session.lastRotatedAt.toUtc().toIso8601String(),
+    'is_current': session.isCurrent,
   };
 }
 

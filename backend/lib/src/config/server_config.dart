@@ -179,6 +179,11 @@ class ServerConfig {
   /// Whether [environment] is production.
   bool get isProduction => environment == 'production';
 
+  /// Whether development/test account-action delivery may be constructed.
+  ///
+  /// Production never falls back to returning raw action tokens.
+  bool get allowsDevelopmentAccountActions => isDevelopment || isTest;
+
   /// Whether the development sandbox provider may be constructed.
   ///
   /// Production never falls back to sandbox, even if a secret is present.

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:home_cleaning_marketplace/app/router/app_routes.dart';
-import 'package:home_cleaning_marketplace/features/auth/presentation/auth_controller.dart';
+import 'package:home_cleaning_marketplace/features/auth/data/auth_failure.dart';
+import 'package:home_cleaning_marketplace/features/auth/data/auth_repository.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/auth_validation.dart';
 
 /// Customer/cleaner registration.
@@ -18,6 +19,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   String _role = 'customer';
+  bool _submitting = false;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -30,20 +33,48 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
-    await ref
-        .read(authControllerProvider.notifier)
-        .signup(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-          role: _role,
-        );
+    setState(() {
+      _submitting = true;
+      _errorMessage = null;
+    });
+    try {
+      final result = await ref
+          .read(authRepositoryProvider)
+          .signUp(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+            role: _role,
+          );
+      if (!mounted) {
+        return;
+      }
+      context.go(
+        AppRoutes.verifyEmailPendingLocation(
+          email: result.user.email,
+          token: result.developmentAction?.token,
+        ),
+      );
+    } on AuthFailure catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _submitting = false;
+        _errorMessage = error.message;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _submitting = false;
+        _errorMessage = 'Something went wrong. Please try again.';
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final auth = ref.watch(authControllerProvider);
-    final submitting = auth.isSubmitting;
-
     return Scaffold(
       appBar: AppBar(title: const Text('Create account')),
       body: SafeArea(
@@ -62,7 +93,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 children: [
                   TextFormField(
                     controller: _emailController,
-                    enabled: !submitting,
+                    enabled: !_submitting,
                     keyboardType: TextInputType.emailAddress,
                     autofillHints: const [AutofillHints.email],
                     decoration: const InputDecoration(
@@ -75,7 +106,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _passwordController,
-                    enabled: !submitting,
+                    enabled: !_submitting,
                     obscureText: true,
                     autofillHints: const [AutofillHints.newPassword],
                     decoration: const InputDecoration(
@@ -101,7 +132,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       ),
                     ],
                     selected: {_role},
-                    onSelectionChanged: submitting
+                    onSelectionChanged: _submitting
                         ? null
                         : (selection) {
                             setState(() {
@@ -109,10 +140,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                             });
                           },
                   ),
-                  if (auth.errorMessage != null) ...[
+                  if (_errorMessage != null) ...[
                     const SizedBox(height: 16),
                     Text(
-                      auth.errorMessage!,
+                      _errorMessage!,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.error,
                       ),
@@ -120,8 +151,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   ],
                   const SizedBox(height: 24),
                   FilledButton(
-                    onPressed: submitting ? null : _submit,
-                    child: submitting
+                    onPressed: _submitting ? null : _submit,
+                    child: _submitting
                         ? const SizedBox(
                             height: 16,
                             width: 16,
@@ -130,7 +161,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                         : const Text('Create account'),
                   ),
                   TextButton(
-                    onPressed: submitting
+                    onPressed: _submitting
                         ? null
                         : () => context.go(AppRoutes.loginPath),
                     child: const Text('Already have an account? Sign in'),

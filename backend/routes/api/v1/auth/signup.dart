@@ -15,8 +15,9 @@ Future<Response> onRequest(RequestContext context) {
       role: request.role,
     );
     return jsonSuccess(
-      authenticationDataJson(result),
+      signupDataJson(result),
       statusCode: HttpStatus.created,
+      headers: sensitiveNoStoreHeaders,
     );
   });
 }

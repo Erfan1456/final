@@ -20,6 +20,7 @@ class AuthState {
     this.user,
     this.isSubmitting = false,
     this.errorMessage,
+    this.errorCode,
   });
 
   /// Startup restoration.
@@ -27,11 +28,13 @@ class AuthState {
     : status = AuthStatus.restoring,
       user = null,
       isSubmitting = false,
-      errorMessage = null;
+      errorMessage = null,
+      errorCode = null;
 
   /// Logged out or unrestorable.
   const AuthState.unauthenticated({
     this.errorMessage,
+    this.errorCode,
     this.isSubmitting = false,
   }) : status = AuthStatus.unauthenticated,
        user = null;
@@ -41,12 +44,14 @@ class AuthState {
     AuthUser this.user, {
     this.isSubmitting = false,
     this.errorMessage,
-  }) : status = AuthStatus.authenticated;
+  }) : status = AuthStatus.authenticated,
+       errorCode = null;
 
   final AuthStatus status;
   final AuthUser? user;
   final bool isSubmitting;
   final String? errorMessage;
+  final String? errorCode;
 
   bool get isAuthenticated =>
       status == AuthStatus.authenticated && user != null;
@@ -56,6 +61,7 @@ class AuthState {
     AuthUser? user,
     bool? isSubmitting,
     String? errorMessage,
+    String? errorCode,
     bool clearError = false,
     bool clearUser = false,
   }) {
@@ -64,6 +70,7 @@ class AuthState {
       user: clearUser ? null : (user ?? this.user),
       isSubmitting: isSubmitting ?? this.isSubmitting,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      errorCode: clearError ? null : (errorCode ?? this.errorCode),
     );
   }
 }

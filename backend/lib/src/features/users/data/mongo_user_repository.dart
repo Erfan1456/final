@@ -99,6 +99,30 @@ class MongoUserRepository implements UserRepository {
   }
 
   @override
+  Future<UserAccount> markEmailVerified({
+    required ObjectId userId,
+    required DateTime updatedAt,
+  }) async {
+    final result = await _documents.updateOne(
+      selector: <String, dynamic>{'_id': userId},
+      update: <String, dynamic>{
+        r'$set': <String, dynamic>{
+          'email_verified': true,
+          'updated_at': updatedAt.toUtc(),
+        },
+      },
+    );
+    if (!result.isSuccess) {
+      throw const UserAccountWriteException();
+    }
+    final account = await findById(userId);
+    if (account == null) {
+      throw const UserAccountWriteException();
+    }
+    return account;
+  }
+
+  @override
   Future<UserAccountPage> adminPage({
     required int limit,
     UserRole? role,

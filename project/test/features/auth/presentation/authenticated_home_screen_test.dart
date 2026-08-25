@@ -24,7 +24,7 @@ void main() {
 
     expect(find.text('Email: person@example.com'), findsOneWidget);
     expect(find.text('Role: customer'), findsOneWidget);
-    expect(find.text('Email not verified'), findsOneWidget);
+    expect(find.text('Email verified'), findsOneWidget);
     expect(find.text('Log out'), findsOneWidget);
     expect(find.text('Log out all devices'), findsOneWidget);
   });

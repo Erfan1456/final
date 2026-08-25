@@ -4,6 +4,8 @@ import 'package:home_cleaning_marketplace/features/auth/data/auth_api.dart';
 import 'package:home_cleaning_marketplace/features/auth/data/auth_failure.dart';
 import 'package:home_cleaning_marketplace/features/auth/data/auth_repository.dart';
 import 'package:home_cleaning_marketplace/features/auth/data/auth_token_pair.dart';
+import 'package:home_cleaning_marketplace/features/auth/data/account_session.dart';
+import 'package:home_cleaning_marketplace/features/auth/data/signup_result.dart';
 import 'package:home_cleaning_marketplace/features/auth/domain/auth_user.dart';
 
 import '../../../helpers/auth_test_fakes.dart';
@@ -11,14 +13,18 @@ import '../../../helpers/auth_test_fakes.dart';
 class _FakeApi extends AuthApi {
   _FakeApi() : super(plain: Dio(), authenticated: Dio());
 
+  SignupResult? nextSignup;
   ({AuthUser user, AuthTokenPair tokens})? nextAuth;
   AuthUser? nextUser;
+  List<AccountSession>? nextSessions;
+  bool nextCurrentSessionRevoked = false;
   Exception? nextError;
   int signupCalls = 0;
   int loginCalls = 0;
   int meCalls = 0;
   int logoutCalls = 0;
   int revokeCalls = 0;
+  int changePasswordCalls = 0;
   String? lastRefreshToken;
 
   void _throwIfNeeded() {
@@ -29,14 +35,14 @@ class _FakeApi extends AuthApi {
   }
 
   @override
-  Future<({AuthUser user, AuthTokenPair tokens})> signUp({
+  Future<SignupResult> signUp({
     required String email,
     required String password,
     required String role,
   }) async {
     signupCalls += 1;
     _throwIfNeeded();
-    return nextAuth!;
+    return nextSignup!;
   }
 
   @override
@@ -68,6 +74,27 @@ class _FakeApi extends AuthApi {
     revokeCalls += 1;
     _throwIfNeeded();
   }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    changePasswordCalls += 1;
+    _throwIfNeeded();
+  }
+
+  @override
+  Future<List<AccountSession>> listSessions() async {
+    _throwIfNeeded();
+    return nextSessions ?? const [];
+  }
+
+  @override
+  Future<bool> revokeSession(String sessionId) async {
+    _throwIfNeeded();
+    return nextCurrentSessionRevoked;
+  }
 }
 
 void main() {
@@ -81,20 +108,23 @@ void main() {
 
   setUp(() {
     api = _FakeApi()
+      ..nextSignup = testSignupResult()
       ..nextAuth = (user: testUser(), tokens: pair)
       ..nextUser = testUser();
     storage = InMemoryAuthTokenStorage();
     repository = AuthRepository(api: api, storage: storage);
   });
 
-  test('signup stores the returned pair and returns the user', () async {
-    final user = await repository.signUp(
+  test('signup returns result without storing tokens', () async {
+    final result = await repository.signUp(
       email: 'person@example.com',
       password: 'fifteenCharsPass',
       role: 'customer',
     );
-    expect(user.email, equals('person@example.com'));
-    expect(storage.value?.accessToken, equals('access-token'));
+    expect(result.user.email, equals('person@example.com'));
+    expect(result.verificationRequired, isTrue);
+    expect(storage.value, isNull);
+    expect(storage.writeCount, equals(0));
     expect(api.signupCalls, equals(1));
   });
 
@@ -154,6 +184,16 @@ void main() {
     storage.value = pair;
     await repository.logoutAll();
     expect(api.revokeCalls, equals(1));
+    expect(storage.value, isNull);
+  });
+
+  test('changePassword clears local storage', () async {
+    storage.value = pair;
+    await repository.changePassword(
+      currentPassword: 'old-password',
+      newPassword: 'fifteenCharsPass',
+    );
+    expect(api.changePasswordCalls, equals(1));
     expect(storage.value, isNull);
   });
 }

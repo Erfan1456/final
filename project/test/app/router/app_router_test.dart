@@ -5,6 +5,7 @@ import 'package:home_cleaning_marketplace/app/app.dart';
 import 'package:home_cleaning_marketplace/app/router/app_routes.dart';
 import 'package:home_cleaning_marketplace/features/auth/domain/auth_session_state.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/auth_controller.dart';
+import 'package:home_cleaning_marketplace/features/auth/presentation/login_screen.dart';
 import 'package:home_cleaning_marketplace/features/customer/presentation/customer_home_screen.dart';
 
 import '../../helpers/auth_test_fakes.dart';
@@ -58,6 +59,7 @@ void main() {
     expect(find.text('Home Cleaning Service Marketplace'), findsOneWidget);
     expect(find.text('person@example.com'), findsOneWidget);
     expect(find.text('Manage Profile'), findsOneWidget);
+    expect(find.text('Security'), findsOneWidget);
   });
 
   testWidgets('authenticated customer cannot remain on login', (tester) async {
@@ -129,10 +131,17 @@ void main() {
   });
 
   testWidgets('logout redirects to login', (tester) async {
-    await pumpApp(tester, AuthState.authenticated(testUser()));
-    await tester.tap(find.text('Log out'));
+    final controller = SeededAuthController(
+      AuthState.authenticated(testUser()),
+    );
+    await pumpApp(
+      tester,
+      AuthState.authenticated(testUser()),
+      controller: controller,
+    );
+    await controller.logout();
     await tester.pumpAndSettle();
-    expect(find.text('Sign in'), findsWidgets);
+    expect(find.byType(LoginScreen), findsOneWidget);
   });
 
   testWidgets('session expiry redirects to login', (tester) async {
@@ -554,6 +563,27 @@ void main() {
     GoRouter.of(cleanerContext).go(AppRoutes.adminPayoutsPath);
     await tester.pumpAndSettle();
     expect(find.text('Cleaner home'), findsOneWidget);
+  });
+
+  testWidgets('unauthenticated can open forgot password', (tester) async {
+    await pumpApp(tester, const AuthState.unauthenticated());
+    final context = tester.element(find.byType(LoginScreen));
+    GoRouter.of(context).go(AppRoutes.forgotPasswordPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Reset your password'), findsOneWidget);
+  });
+
+  testWidgets('authenticated customer can open account security', (tester) async {
+    await pumpApp(tester, AuthState.authenticated(testUser()));
+    final context = tester.element(find.byType(CustomerHomeScreen));
+    final router = GoRouter.of(context);
+    router.go(AppRoutes.accountSecurityPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Account security'), findsOneWidget);
+    expect(find.text('Change password'), findsOneWidget);
+    router.go(AppRoutes.accountChangePasswordPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Change password'), findsWidgets);
   });
 
   testWidgets('admin is redirected from cleaner payout-request routes', (

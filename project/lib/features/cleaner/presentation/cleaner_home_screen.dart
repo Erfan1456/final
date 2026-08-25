@@ -71,6 +71,11 @@ class CleanerHomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             const NotificationHomeLink(),
+            const SizedBox(height: 16),
+            OutlinedButton(
+              onPressed: () => context.push(AppRoutes.accountSecurityPath),
+              child: const Text('Security'),
+            ),
             if (status == OnboardingStatus.approved) ...[
               const SizedBox(height: 16),
               FilledButton(

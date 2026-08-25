@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:home_cleaning_marketplace/features/auth/data/auth_token_pair.dart';
 import 'package:home_cleaning_marketplace/features/auth/data/auth_token_storage.dart';
+import 'package:home_cleaning_marketplace/features/auth/data/development_account_action.dart';
+import 'package:home_cleaning_marketplace/features/auth/data/signup_result.dart';
 import 'package:home_cleaning_marketplace/features/auth/domain/auth_session_state.dart';
 import 'package:home_cleaning_marketplace/features/auth/domain/auth_user.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/auth_controller.dart';
@@ -11,11 +13,11 @@ class SeededAuthController extends AuthController {
 
   final AuthState _seed;
   int loginCalls = 0;
-  int signupCalls = 0;
   int logoutCalls = 0;
   int logoutAllCalls = 0;
   Completer<void>? submitGate;
   String? nextError;
+  String? nextErrorCode;
 
   @override
   AuthState build() => _seed;
@@ -28,28 +30,13 @@ class SeededAuthController extends AuthController {
       await submitGate!.future;
     }
     if (nextError != null) {
-      state = AuthState.unauthenticated(errorMessage: nextError);
+      state = AuthState.unauthenticated(
+        errorMessage: nextError,
+        errorCode: nextErrorCode,
+      );
       return;
     }
     state = AuthState.authenticated(testUser());
-  }
-
-  @override
-  Future<void> signup({
-    required String email,
-    required String password,
-    required String role,
-  }) async {
-    signupCalls += 1;
-    state = state.copyWith(isSubmitting: true, clearError: true);
-    if (submitGate != null) {
-      await submitGate!.future;
-    }
-    if (nextError != null) {
-      state = AuthState.unauthenticated(errorMessage: nextError);
-      return;
-    }
-    state = AuthState.authenticated(testUser(role: role));
   }
 
   @override
@@ -72,6 +59,7 @@ class SeededAuthController extends AuthController {
 AuthUser testUser({
   String role = 'customer',
   String email = 'person@example.com',
+  bool emailVerified = true,
 }) {
   final created = DateTime.utc(2026, 8, 25, 12);
   return AuthUser(
@@ -79,9 +67,26 @@ AuthUser testUser({
     role: role,
     email: email,
     accountStatus: 'active',
-    emailVerified: false,
+    emailVerified: emailVerified,
     createdAt: created,
     updatedAt: created,
+  );
+}
+
+SignupResult testSignupResult({
+  String role = 'customer',
+  String email = 'person@example.com',
+  String? developmentToken,
+}) {
+  return SignupResult(
+    user: testUser(role: role, email: email, emailVerified: false),
+    verificationRequired: true,
+    developmentAction: developmentToken == null
+        ? null
+        : DevelopmentAccountAction(
+            purpose: 'email_verification',
+            token: developmentToken,
+          ),
   );
 }
 
@@ -95,6 +100,24 @@ Map<String, dynamic> userJson(AuthUser user) {
     'created_at': user.createdAt.toIso8601String(),
     'updated_at': user.updatedAt.toIso8601String(),
   };
+}
+
+Map<String, dynamic> signupDataJson(
+  AuthUser user, {
+  bool verificationRequired = true,
+  DevelopmentAccountAction? developmentAction,
+}) {
+  final data = <String, dynamic>{
+    'user': userJson(user),
+    'verification_required': verificationRequired,
+  };
+  if (developmentAction != null) {
+    data['development_action'] = <String, String>{
+      'purpose': developmentAction.purpose,
+      'token': developmentAction.token,
+    };
+  }
+  return data;
 }
 
 Map<String, dynamic> successEnvelope(Object data) {

@@ -15,7 +15,7 @@ Planned coverage includes:
 * database security
 * development vs production considerations
 
-The first implemented collections are `users` and `user_sessions`. TASK 013 added `customer_profiles`, `cleaner_profiles`, and `addresses`. TASK 014 added `services`, `cleaner_services`, and `availability_slots`. TASK 015 added `bookings`. TASK 016 added `payments`, `payment_webhook_events`, and `payment_refund_requests`. TASK 017 added `conversations`, `conversation_members`, `messages`, `notifications`, and `reviews`. TASK 018 added `disputes` and `audit_logs`. TASK 019 added `earnings_ledger`, `payout_requests`, and `payout_provider_events`.
+The first implemented collections are `users` and `user_sessions`. TASK 013 added `customer_profiles`, `cleaner_profiles`, and `addresses`. TASK 014 added `services`, `cleaner_services`, and `availability_slots`. TASK 015 added `bookings`. TASK 016 added `payments`, `payment_webhook_events`, and `payment_refund_requests`. TASK 017 added `conversations`, `conversation_members`, `messages`, `notifications`, and `reviews`. TASK 018 added `disputes` and `audit_logs`. TASK 019 added `earnings_ledger`, `payout_requests`, and `payout_provider_events`. TASK 020 added `account_action_tokens`.
 
 ## Current documents
 
@@ -42,6 +42,7 @@ The first implemented collections are `users` and `user_sessions`. TASK 013 adde
 * [earnings-ledger-collection.md](earnings-ledger-collection.md) — append-only cleaner earnings and refund adjustments.
 * [payout-requests-collection.md](payout-requests-collection.md) — cleaner payout requests, reservation, and sandbox settlement state.
 * [payout-provider-events-collection.md](payout-provider-events-collection.md) — signed payout webhook receipts and event idempotency.
+* [account-action-tokens-collection.md](account-action-tokens-collection.md) — hashed one-time verification and password-reset tokens, atomic claim, replacement, and TTL cleanup.
 * [../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md](../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md) — accepted driver and connection-lifecycle decision.
 * [../decisions/ADR-006-user-account-persistence-model.md](../decisions/ADR-006-user-account-persistence-model.md) — accepted user account persistence model.
 * [../decisions/ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md](../decisions/ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md) — accepted profile/address/onboarding collections and authorization.

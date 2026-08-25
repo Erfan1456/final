@@ -37,10 +37,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         );
   }
 
+  void _openVerificationPending() {
+    context.go(
+      AppRoutes.verifyEmailPendingLocation(
+        email: _emailController.text.trim(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authControllerProvider);
     final submitting = auth.isSubmitting;
+    final emailNotVerified = auth.errorCode == 'email_not_verified';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Sign in')),
@@ -91,6 +100,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
                   ],
+                  if (emailNotVerified) ...[
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: submitting ? null : _openVerificationPending,
+                      child: const Text('Verify your email'),
+                    ),
+                  ],
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: submitting
+                          ? null
+                          : () => context.push(
+                              AppRoutes.forgotPasswordLocation(
+                                email: _emailController.text.trim(),
+                              ),
+                            ),
+                      child: const Text('Forgot password?'),
+                    ),
+                  ),
                   const SizedBox(height: 24),
                   FilledButton(
                     onPressed: submitting ? null : _submit,

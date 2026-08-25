@@ -66,6 +66,11 @@ class CustomerHomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             const NotificationHomeLink(),
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: () => context.push(AppRoutes.accountSecurityPath),
+              child: const Text('Security'),
+            ),
             const SizedBox(height: 24),
             const LogoutActions(),
           ],

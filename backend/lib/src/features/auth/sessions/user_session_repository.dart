@@ -32,4 +32,11 @@ abstract class UserSessionRepository {
 
   /// Sets `revoked_at` on all non-revoked sessions for [userId].
   Future<int> revokeAllForUser(ObjectId userId, {required DateTime now});
+
+  /// Returns active (non-revoked, unexpired) sessions for [userId].
+  Future<List<UserSession>> findActiveForUser({
+    required ObjectId userId,
+    required DateTime now,
+    required int limit,
+  });
 }

@@ -113,6 +113,26 @@ class MongoUserSessionRepository implements UserSessionRepository {
     );
   }
 
+  @override
+  Future<List<UserSession>> findActiveForUser({
+    required ObjectId userId,
+    required DateTime now,
+    required int limit,
+  }) async {
+    final documents = await _documents.findMany(
+      selector: <String, dynamic>{
+        'user_id': userId,
+        'revoked_at': null,
+        'expires_at': <String, dynamic>{r'$gt': now.toUtc()},
+      },
+      sort: const <String, int>{'created_at': -1},
+      limit: limit,
+    );
+    return [
+      for (final document in documents) UserSession.fromDocument(document),
+    ];
+  }
+
   Future<UserSession?> _find(Map<String, dynamic> selector) async {
     final document = await _documents.findOne(selector);
     if (document == null) {

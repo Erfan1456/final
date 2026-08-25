@@ -1,3 +1,9 @@
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/domain/account_action_exceptions.dart';
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/application/account_action_delivery_provider.dart';
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/application/account_action_token_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/application/development_account_action_delivery_provider.dart';
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/domain/account_action_purpose.dart';
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/domain/account_action_token.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/application/auth_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/application/authentication_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/security/password_hasher.dart';
@@ -22,6 +28,8 @@ class _MockUsers extends Mock implements UserRepository {}
 class _MockSessions extends Mock implements AuthSessionService {}
 
 class _MockTokens extends Mock implements AccessTokenService {}
+
+class _MockAccountActions extends Mock implements AccountActionTokenService {}
 
 class _RecordingHasher implements PasswordHasher {
   _RecordingHasher();
@@ -71,7 +79,7 @@ void main() {
     AccountStatus status = AccountStatus.active,
     String passwordHash = 'hashed:correct-password',
     String email = 'Person@example.com',
-    bool emailVerified = false,
+    bool emailVerified = true,
   }) {
     return UserAccount(
       id: userId,
@@ -105,8 +113,28 @@ void main() {
   late _MockUsers users;
   late _MockSessions sessions;
   late _MockTokens tokens;
+  late _MockAccountActions accountActions;
+  late AccountActionDeliveryProvider delivery;
   late _RecordingHasher hasher;
   late AuthenticationServiceImpl service;
+
+  AccountActionToken verificationToken() {
+    return AccountActionToken(
+      id: ObjectId.fromHexString('507f1f77bcf86cd799439099'),
+      userId: userId,
+      purpose: AccountActionPurpose.emailVerification,
+      tokenHash: 'fake-hash',
+      expiresAt: DateTime.utc(2026, 8, 26, 16),
+      createdAt: DateTime.utc(2026, 8, 25, 16),
+    );
+  }
+
+  IssuedAccountAction issuedVerification() {
+    return IssuedAccountAction(
+      rawToken: 'dev-verification-token',
+      token: verificationToken(),
+    );
+  }
 
   setUpAll(() {
     registerFallbackValue(ObjectId());
@@ -118,13 +146,15 @@ void main() {
         passwordHash: 'fallback-hash',
       ),
     );
-    registerFallbackValue(DateTime.utc(2026));
+    registerFallbackValue(AccountActionPurpose.emailVerification);
   });
 
   setUp(() {
     users = _MockUsers();
     sessions = _MockSessions();
     tokens = _MockTokens();
+    accountActions = _MockAccountActions();
+    delivery = const DevelopmentAccountActionDeliveryProvider();
     hasher = _RecordingHasher();
     service = AuthenticationServiceImpl(
       users: users,
@@ -132,9 +162,19 @@ void main() {
       passwordHasher: hasher,
       accessTokens: tokens,
       sessions: sessions,
+      accountActions: accountActions,
+      delivery: delivery,
       dummyPasswordHash: dummyHash,
+      exposeDevelopmentAction: true,
       clock: () => DateTime.utc(2026, 8, 25, 16),
     );
+
+    when(
+      () => accountActions.issue(
+        userId: any(named: 'userId'),
+        purpose: any(named: 'purpose'),
+      ),
+    ).thenAnswer((_) async => issuedVerification());
 
     when(tokens.ensureConfigured).thenReturn(null);
     when(
@@ -171,7 +211,7 @@ void main() {
   });
 
   group('AuthenticationService.signUp', () {
-    test('creates an active unverified customer and issues tokens', () async {
+    test('creates an active unverified customer without issuing tokens', () async {
       final result = await service.signUp(
         email: '  Person@example.com  ',
         password: signupPassword,
@@ -187,21 +227,26 @@ void main() {
       expect(data.accountStatus, equals(AccountStatus.active));
       expect(data.emailVerified, isFalse);
       expect(hasher.hashCalls, equals(<String>[signupPassword]));
-      verify(() => sessions.createSession(userId)).called(1);
-      verify(
+      verifyNever(() => sessions.createSession(any()));
+      verifyNever(
         () => tokens.issue(
+          userId: any(named: 'userId'),
+          sessionId: any(named: 'sessionId'),
+          role: any(named: 'role'),
+        ),
+      );
+      verify(
+        () => accountActions.issue(
           userId: userId,
-          sessionId: sessionId,
-          role: UserRole.customer,
+          purpose: AccountActionPurpose.emailVerification,
         ),
       ).called(1);
       expect(result.user.role, equals(UserRole.customer));
-      expect(result.accessToken, equals('fake-access-token'));
-      expect(result.refreshToken, equals('new-refresh-token'));
-      expect(result.expiresInSeconds, equals(900));
+      expect(result.verificationRequired, isTrue);
+      expect(result.developmentAction, isNotNull);
     });
 
-    test('creates a cleaner account', () async {
+    test('creates a cleaner account pending verification', () async {
       final result = await service.signUp(
         email: 'cleaner@example.com',
         password: signupPassword,
@@ -209,13 +254,7 @@ void main() {
       );
 
       expect(result.user.role, equals(UserRole.cleaner));
-      verify(
-        () => tokens.issue(
-          userId: userId,
-          sessionId: sessionId,
-          role: UserRole.cleaner,
-        ),
-      ).called(1);
+      verifyNever(() => sessions.createSession(any()));
     });
 
     test('rejects admin signup before persistence', () async {
@@ -270,10 +309,25 @@ void main() {
       verifyNever(() => sessions.createSession(any()));
     });
 
-    test('fails configuration before user persistence', () async {
-      when(tokens.ensureConfigured).thenThrow(
-        const AccessTokenConfigurationException(),
+    test('returns delivery unavailable when provider is unavailable', () async {
+      service = AuthenticationServiceImpl(
+        users: users,
+        passwordPolicy: const PasswordPolicy(),
+        passwordHasher: hasher,
+        accessTokens: tokens,
+        sessions: sessions,
+        accountActions: accountActions,
+        delivery: const _UnavailableDelivery(),
+        dummyPasswordHash: dummyHash,
+        exposeDevelopmentAction: false,
+        clock: () => DateTime.utc(2026, 8, 25, 16),
       );
+      when(
+        () => accountActions.issue(
+          userId: any(named: 'userId'),
+          purpose: any(named: 'purpose'),
+        ),
+      ).thenAnswer((_) async => issuedVerification());
 
       await expectLater(
         service.signUp(
@@ -281,10 +335,10 @@ void main() {
           password: signupPassword,
           role: UserRole.customer,
         ),
-        throwsA(isA<AuthenticationConfigurationException>()),
+        throwsA(isA<AccountActionDeliveryUnavailableException>()),
       );
-      verifyNever(() => users.create(any()));
-      expect(hasher.hashCalls, isEmpty);
+      verify(() => users.create(any())).called(1);
+      verifyNever(() => sessions.createSession(any()));
     });
   });
 
@@ -401,6 +455,21 @@ void main() {
         verifyNever(() => sessions.createSession(any()));
       },
     );
+
+    test('rejects unverified accounts after a valid password', () async {
+      when(() => users.findByEmail(any())).thenAnswer(
+        (_) async => account(emailVerified: false),
+      );
+
+      await expectLater(
+        service.login(
+          email: 'person@example.com',
+          password: loginPassword,
+        ),
+        throwsA(isA<EmailNotVerifiedException>()),
+      );
+      verifyNever(() => sessions.createSession(any()));
+    });
 
     test('rehashes an outdated hash after successful authentication', () async {
       hasher.needsRehashImpl = (_) => true;
@@ -556,4 +625,29 @@ void main() {
       );
     });
   });
+}
+
+class _UnavailableDelivery implements AccountActionDeliveryProvider {
+  const _UnavailableDelivery();
+
+  @override
+  bool get isAvailable => false;
+
+  @override
+  Future<DevelopmentAccountAction?> deliverEmailVerification({
+    required String recipientEmail,
+    required String rawToken,
+    required DateTime expiresAt,
+  }) async {
+    return null;
+  }
+
+  @override
+  Future<DevelopmentAccountAction?> deliverPasswordReset({
+    required String recipientEmail,
+    required String rawToken,
+    required DateTime expiresAt,
+  }) async {
+    return null;
+  }
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dart_frog/dart_frog.dart';
+import 'package:home_cleaning_marketplace_api/src/features/account/application/account_security_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/application/auth_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/application/authentication_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/http/auth_http_errors.dart';
@@ -40,6 +41,28 @@ Future<Response> handleAuthPost(
     return mapAuthException(error);
   } on AuthenticationConfigurationException catch (error) {
     return mapAuthException(error);
+  } on Exception catch (error) {
+    return mapAuthException(error);
+  }
+}
+
+/// Runs a POST-only public account-action route.
+Future<Response> handleAccountActionPost(
+  RequestContext context,
+  Future<Response> Function(
+    AccountSecurityService security,
+    Map<String, dynamic> json,
+  )
+  action,
+) async {
+  if (context.request.method != HttpMethod.post) {
+    return Response(statusCode: HttpStatus.methodNotAllowed);
+  }
+
+  try {
+    final json = await parseJsonObject(context.request);
+    final security = context.read<AccountSecurityService>();
+    return await action(security, json);
   } on Exception catch (error) {
     return mapAuthException(error);
   }

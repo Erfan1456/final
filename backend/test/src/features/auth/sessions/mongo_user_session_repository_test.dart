@@ -61,6 +61,34 @@ class _MemorySessionDocuments implements SessionDocumentStore {
     return count;
   }
 
+  @override
+  Future<List<Map<String, dynamic>>> findMany({
+    required Map<String, dynamic> selector,
+    Map<String, int>? sort,
+    int? limit,
+  }) async {
+    var matches = [
+      for (final document in documents)
+        if (_matches(document, selector)) Map<String, dynamic>.from(document),
+    ];
+    if (sort != null && sort.isNotEmpty) {
+      final field = sort.keys.first;
+      final direction = sort[field] ?? 1;
+      matches.sort((left, right) {
+        final a = left[field];
+        final b = right[field];
+        if (a is DateTime && b is DateTime) {
+          return direction < 0 ? b.compareTo(a) : a.compareTo(b);
+        }
+        return 0;
+      });
+    }
+    if (limit != null && matches.length > limit) {
+      matches = matches.sublist(0, limit);
+    }
+    return matches;
+  }
+
   bool _matches(Map<String, dynamic> document, Map<String, dynamic> selector) {
     for (final entry in selector.entries) {
       final value = entry.value;

@@ -15,7 +15,7 @@ void main() {
   late FakeAuthenticationService auth;
 
   setUp(() {
-    auth = FakeAuthenticationService()..nextAuthResult = fakeAuthResult();
+    auth = FakeAuthenticationService()..nextSignupResult = fakeSignupResult();
   });
 
   Future<Response> post(
@@ -36,7 +36,7 @@ void main() {
   }
 
   group('POST /api/v1/auth/signup', () {
-    test('returns 201 for a valid customer', () async {
+    test('returns 201 pending verification without tokens', () async {
       final response = await post(<String, String>{
         'email': '  Person@example.com  ',
         'password': 'fifteenCharsPass',
@@ -45,7 +45,6 @@ void main() {
       final encoded = await response.body();
       final body = jsonDecode(encoded) as Map<String, dynamic>;
       final data = body['data'] as Map<String, dynamic>;
-      final tokens = data['tokens'] as Map<String, dynamic>;
       final user = data['user'] as Map<String, dynamic>;
 
       expect(response.statusCode, equals(HttpStatus.created));
@@ -57,15 +56,13 @@ void main() {
       expect(user['email'], equals('Person@example.com'));
       expect(user['account_status'], equals('active'));
       expect(user['email_verified'], isFalse);
-      expect(tokens['token_type'], equals('Bearer'));
-      expect(tokens['expires_in'], equals(900));
-      expect(tokens.containsKey('access_token'), isTrue);
-      expect(tokens.containsKey('refresh_token'), isTrue);
+      expect(data['verification_required'], isTrue);
+      expect(data.containsKey('tokens'), isFalse);
       expectNoSensitiveAuthLeak(encoded);
     });
 
     test('returns 201 for a valid cleaner', () async {
-      auth.nextAuthResult = fakeAuthResult(role: UserRole.cleaner);
+      auth.nextSignupResult = fakeSignupResult(role: UserRole.cleaner);
       final response = await post(<String, String>{
         'email': 'cleaner@example.com',
         'password': 'fifteenCharsPass',

@@ -4,7 +4,9 @@ import 'package:dart_frog/dart_frog.dart';
 import 'package:home_cleaning_marketplace_api/src/config/server_config.dart';
 import 'package:home_cleaning_marketplace_api/src/database/mongo_database.dart';
 import 'package:home_cleaning_marketplace_api/src/features/account/application/account_composition.dart';
+import 'package:home_cleaning_marketplace_api/src/features/account/application/account_security_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/account/application/current_account_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/auth/application/auth_composition.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/http/access_authenticator.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/http/auth_http_errors.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/http/authenticated_principal.dart';
@@ -30,11 +32,16 @@ Handler middleware(Handler handler) {
     final account = await AccountComposition.resolve(
       mongo: context.read<MongoDatabase>(),
     );
+    final security = await AuthComposition.resolveSecurity(
+      config: config,
+      mongo: context.read<MongoDatabase>(),
+    );
 
     return handler(
       context
           .provide<AuthenticatedPrincipal>(() => principal)
-          .provide<CurrentAccountService>(() => account),
+          .provide<CurrentAccountService>(() => account)
+          .provide<AccountSecurityService>(() => security),
     );
   };
 }

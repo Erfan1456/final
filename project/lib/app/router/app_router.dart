@@ -21,6 +21,12 @@ import 'package:home_cleaning_marketplace/features/auth/presentation/auth_contro
 import 'package:home_cleaning_marketplace/features/auth/presentation/login_screen.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/signup_screen.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/splash_screen.dart';
+import 'package:home_cleaning_marketplace/features/auth/presentation/verification_pending_screen.dart';
+import 'package:home_cleaning_marketplace/features/auth/presentation/forgot_password_screen.dart';
+import 'package:home_cleaning_marketplace/features/auth/presentation/reset_password_screen.dart';
+import 'package:home_cleaning_marketplace/features/auth/presentation/account_security_screen.dart';
+import 'package:home_cleaning_marketplace/features/auth/presentation/change_password_screen.dart';
+import 'package:home_cleaning_marketplace/features/auth/presentation/session_management_screen.dart';
 import 'package:home_cleaning_marketplace/features/availability/presentation/cleaner_availability_form_screen.dart';
 import 'package:home_cleaning_marketplace/features/availability/presentation/cleaner_availability_screen.dart';
 import 'package:home_cleaning_marketplace/features/bookings/presentation/booking_confirmation_screen.dart';
@@ -70,22 +76,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final auth = ref.read(authControllerProvider);
       final location = state.matchedLocation;
       final isSplash = location == AppRoutes.splashPath;
-      final isAuthRoute =
-          location == AppRoutes.loginPath || location == AppRoutes.signupPath;
+      final isPublicAuthRoute = AppRoutes.isPublicAuthPath(location);
       final isRoot = location == '/';
 
       switch (auth.status) {
         case AuthStatus.restoring:
           return isSplash ? null : AppRoutes.splashPath;
         case AuthStatus.unauthenticated:
-          if (isAuthRoute) {
+          if (isPublicAuthRoute) {
             return null;
           }
           return AppRoutes.loginPath;
         case AuthStatus.authenticated:
           final role = auth.user?.role ?? 'customer';
           final home = AppRoutes.homeForRole(role);
-          if (isAuthRoute ||
+          if (isPublicAuthRoute ||
               isSplash ||
               isRoot ||
               location == AppRoutes.homePath) {
@@ -113,6 +118,50 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.signupPath,
         name: AppRoutes.signupName,
         builder: (context, state) => const SignupScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.verifyEmailPendingPath,
+        name: AppRoutes.verifyEmailPendingName,
+        builder: (context, state) {
+          final email = state.uri.queryParameters['email'] ?? '';
+          return VerificationPendingScreen(
+            email: email,
+            initialToken: state.uri.queryParameters['token'],
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.forgotPasswordPath,
+        name: AppRoutes.forgotPasswordName,
+        builder: (context, state) {
+          return ForgotPasswordScreen(
+            initialEmail: state.uri.queryParameters['email'],
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.resetPasswordPath,
+        name: AppRoutes.resetPasswordName,
+        builder: (context, state) {
+          return ResetPasswordScreen(
+            initialToken: state.uri.queryParameters['token'],
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.accountSecurityPath,
+        name: AppRoutes.accountSecurityName,
+        builder: (context, state) => const AccountSecurityScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.accountChangePasswordPath,
+        name: AppRoutes.accountChangePasswordName,
+        builder: (context, state) => const ChangePasswordScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.accountSessionsPath,
+        name: AppRoutes.accountSessionsName,
+        builder: (context, state) => const SessionManagementScreen(),
       ),
       GoRoute(
         path: AppRoutes.homePath,

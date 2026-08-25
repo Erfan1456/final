@@ -29,6 +29,13 @@ The Dart Frog backend currently implements:
 * `POST /api/v1/auth/login` — password authentication
 * `POST /api/v1/auth/refresh` — refresh-token rotation
 * `POST /api/v1/auth/logout` — idempotent session revocation
+* `POST /api/v1/auth/email-verification/request` — enumeration-resistant verification re-request
+* `POST /api/v1/auth/email-verification/verify` — consume verification token
+* `POST /api/v1/auth/password-reset/request` — enumeration-resistant reset request
+* `POST /api/v1/auth/password-reset/confirm` — consume reset token and update password
+* `POST /api/v1/account/password/change` — authenticated password change
+* `GET /api/v1/account/sessions` — list owned active sessions
+* `DELETE /api/v1/account/sessions/{sessionId}` — revoke one owned session
 * `GET /api/v1/account/me` — protected current account
 * `DELETE /api/v1/account/sessions` — revoke all refresh sessions
 * `GET`/`PUT /api/v1/customer/profile` — customer profile
@@ -62,6 +69,6 @@ The Dart Frog backend currently implements:
 * sandbox payout webhook and development payout simulate (dev only)
 * discovery rating_average, review_count, and latest published reviews
 
-See [authentication-api.md](authentication-api.md), [profile-address-onboarding-admin-api.md](profile-address-onboarding-admin-api.md), [services-availability-discovery-api.md](services-availability-discovery-api.md), [booking-api.md](booking-api.md), [payment-api.md](payment-api.md), [chat-api.md](chat-api.md), [notification-api.md](notification-api.md), [review-api.md](review-api.md), [dispute-api.md](dispute-api.md), [admin-operations-api.md](admin-operations-api.md), and [earnings-and-payout-api.md](earnings-and-payout-api.md). `/api/v1/health` remains available even when MongoDB is unconfigured or unreachable. `/api/v1/ready` returns HTTP 200 when ping succeeds and HTTP 503 when the database is unconfigured or unavailable.
+See [authentication-api.md](authentication-api.md), [account-security-api.md](account-security-api.md), [profile-address-onboarding-admin-api.md](profile-address-onboarding-admin-api.md), [services-availability-discovery-api.md](services-availability-discovery-api.md), [booking-api.md](booking-api.md), [payment-api.md](payment-api.md), [chat-api.md](chat-api.md), [notification-api.md](notification-api.md), [review-api.md](review-api.md), [dispute-api.md](dispute-api.md), [admin-operations-api.md](admin-operations-api.md), and [earnings-and-payout-api.md](earnings-and-payout-api.md). `/api/v1/health` remains available even when MongoDB is unconfigured or unreachable. `/api/v1/ready` returns HTTP 200 when ping succeeds and HTTP 503 when the database is unconfigured or unavailable.
 
 WebSockets, push notifications, maps, geocoding, and a production payment or payout processor are not implemented. Sandbox payment and payout providers are development/test only. The auth routes are not ready for unrestricted public internet exposure until production rate limiting exists.

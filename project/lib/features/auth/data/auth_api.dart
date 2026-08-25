@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:home_cleaning_marketplace/features/auth/data/account_session.dart';
 import 'package:home_cleaning_marketplace/features/auth/data/auth_failure.dart';
 import 'package:home_cleaning_marketplace/features/auth/data/auth_token_pair.dart';
+import 'package:home_cleaning_marketplace/features/auth/data/development_account_action.dart';
+import 'package:home_cleaning_marketplace/features/auth/data/signup_result.dart';
 import 'package:home_cleaning_marketplace/features/auth/domain/auth_user.dart';
 
 /// HTTP client for public and protected authentication endpoints.
@@ -14,14 +17,14 @@ class AuthApi {
   /// Dio client with Bearer attachment and single-flight refresh.
   final Dio authenticated;
 
-  /// Public signup. Returns the user and issued token pair.
-  Future<({AuthUser user, AuthTokenPair tokens})> signUp({
+  /// Public signup. Returns the user without tokens.
+  Future<SignupResult> signUp({
     required String email,
     required String password,
     required String role,
   }) {
     _ensureBaseUrl(plain);
-    return _sendAuthForm(
+    return _sendSignup(
       plain.post<dynamic>(
         '/api/v1/auth/signup',
         data: <String, String>{
@@ -83,6 +86,60 @@ class AuthApi {
     }
   }
 
+  /// Public verification resend. Enumeration-resistant.
+  Future<AccountActionRequestResult> requestEmailVerification(String email) {
+    _ensureBaseUrl(plain);
+    return _sendAccountActionRequest(
+      plain.post<dynamic>(
+        '/api/v1/auth/email-verification/request',
+        data: <String, String>{'email': email},
+      ),
+    );
+  }
+
+  /// Public verification consume.
+  Future<void> verifyEmail(String token) async {
+    _ensureBaseUrl(plain);
+    try {
+      await plain.post<dynamic>(
+        '/api/v1/auth/email-verification/verify',
+        data: <String, String>{'token': token},
+      );
+    } on DioException catch (error) {
+      throw mapDioException(error);
+    }
+  }
+
+  /// Public password-reset request. Enumeration-resistant.
+  Future<AccountActionRequestResult> requestPasswordReset(String email) {
+    _ensureBaseUrl(plain);
+    return _sendAccountActionRequest(
+      plain.post<dynamic>(
+        '/api/v1/auth/password-reset/request',
+        data: <String, String>{'email': email},
+      ),
+    );
+  }
+
+  /// Public password-reset confirmation.
+  Future<void> confirmPasswordReset({
+    required String token,
+    required String newPassword,
+  }) async {
+    _ensureBaseUrl(plain);
+    try {
+      await plain.post<dynamic>(
+        '/api/v1/auth/password-reset/confirm',
+        data: <String, String>{
+          'token': token,
+          'new_password': newPassword,
+        },
+      );
+    } on DioException catch (error) {
+      throw mapDioException(error);
+    }
+  }
+
   /// Protected current-account lookup.
   Future<AuthUser> me() async {
     _ensureBaseUrl(authenticated);
@@ -90,6 +147,73 @@ class AuthApi {
       final response = await authenticated.get<dynamic>('/api/v1/account/me');
       final user = _requireMap(_requireData(response.data)['user']);
       return AuthUser.fromJson(user);
+    } on DioException catch (error) {
+      throw mapDioException(error);
+    }
+  }
+
+  /// Protected password change. Revokes all sessions server-side.
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    _ensureBaseUrl(authenticated);
+    try {
+      await authenticated.post<dynamic>(
+        '/api/v1/account/password/change',
+        data: <String, String>{
+          'current_password': currentPassword,
+          'new_password': newPassword,
+        },
+      );
+    } on DioException catch (error) {
+      throw mapDioException(error);
+    }
+  }
+
+  /// Protected session listing, newest first.
+  Future<List<AccountSession>> listSessions() async {
+    _ensureBaseUrl(authenticated);
+    try {
+      final response = await authenticated.get<dynamic>(
+        '/api/v1/account/sessions',
+      );
+      final data = _requireData(response.data);
+      final sessions = data['sessions'];
+      if (sessions is! List) {
+        throw const AuthFailure(
+          code: 'invalid_response',
+          message: 'The server returned an unexpected response.',
+        );
+      }
+      return sessions
+          .map(
+            (session) => AccountSession.fromJson(
+              _requireMap(session),
+            ),
+          )
+          .toList(growable: false);
+    } on DioException catch (error) {
+      throw mapDioException(error);
+    }
+  }
+
+  /// Protected revoke-one-session.
+  Future<bool> revokeSession(String sessionId) async {
+    _ensureBaseUrl(authenticated);
+    try {
+      final response = await authenticated.delete<dynamic>(
+        '/api/v1/account/sessions/$sessionId',
+      );
+      final data = _requireData(response.data);
+      final currentSessionRevoked = data['current_session_revoked'];
+      if (currentSessionRevoked is! bool) {
+        throw const AuthFailure(
+          code: 'invalid_response',
+          message: 'The server returned an unexpected response.',
+        );
+      }
+      return currentSessionRevoked;
     } on DioException catch (error) {
       throw mapDioException(error);
     }
@@ -105,6 +229,16 @@ class AuthApi {
     }
   }
 
+  Future<SignupResult> _sendSignup(Future<Response<dynamic>> request) async {
+    _ensureBaseUrl(plain);
+    try {
+      final response = await request;
+      return SignupResult.fromJson(_requireData(response.data));
+    } on DioException catch (error) {
+      throw mapDioException(error);
+    }
+  }
+
   Future<({AuthUser user, AuthTokenPair tokens})> _sendAuthForm(
     Future<Response<dynamic>> request,
   ) async {
@@ -115,6 +249,36 @@ class AuthApi {
       return (
         user: AuthUser.fromJson(_requireMap(data['user'])),
         tokens: AuthTokenPair.fromJson(_requireMap(data['tokens'])),
+      );
+    } on DioException catch (error) {
+      throw mapDioException(error);
+    }
+  }
+
+  Future<AccountActionRequestResult> _sendAccountActionRequest(
+    Future<Response<dynamic>> request,
+  ) async {
+    _ensureBaseUrl(plain);
+    try {
+      final response = await request;
+      final data = _requireData(response.data);
+      final message = data['message'];
+      if (message is! String || message.isEmpty) {
+        throw const AuthFailure(
+          code: 'invalid_response',
+          message: 'The server returned an unexpected response.',
+        );
+      }
+      DevelopmentAccountAction? developmentAction;
+      final actionJson = data['development_action'];
+      if (actionJson is Map) {
+        developmentAction = DevelopmentAccountAction.fromJson(
+          Map<String, dynamic>.from(actionJson),
+        );
+      }
+      return AccountActionRequestResult(
+        message: message,
+        developmentAction: developmentAction,
       );
     } on DioException catch (error) {
       throw mapDioException(error);
@@ -228,6 +392,18 @@ class AuthApi {
         return 'An account with this email already exists.';
       case 'account_unavailable':
         return 'This account is currently unavailable.';
+      case 'email_not_verified':
+        return 'Verify your email before signing in.';
+      case 'invalid_or_expired_account_action_token':
+        return 'This link has expired or is invalid. Request a new one.';
+      case 'account_action_delivery_unavailable':
+        return 'Email delivery is unavailable. Try again later.';
+      case 'invalid_current_password':
+        return 'Your current password is incorrect.';
+      case 'password_reuse_not_allowed':
+        return 'Choose a password you have not used recently.';
+      case 'session_not_found':
+        return 'That session is no longer active.';
       case 'invalid_refresh_token':
         return 'Your session has expired. Please sign in again.';
       case 'invalid_access_token':
@@ -250,4 +426,19 @@ class AuthApi {
         return 'Something went wrong. Please try again.';
     }
   }
+}
+
+/// Generic public account-action request result.
+class AccountActionRequestResult {
+  /// Creates a request result.
+  const AccountActionRequestResult({
+    required this.message,
+    this.developmentAction,
+  });
+
+  /// Enumeration-resistant user message.
+  final String message;
+
+  /// Development/test delivery payload. Null in production.
+  final DevelopmentAccountAction? developmentAction;
 }
