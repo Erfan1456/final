@@ -28,6 +28,7 @@ Current documents:
 * [authentication-application-flow.md](architecture/authentication-application-flow.md)
 * [protected-api-authentication.md](architecture/protected-api-authentication.md)
 * [flutter-authentication.md](architecture/flutter-authentication.md)
+* [profile-address-and-cleaner-onboarding.md](architecture/profile-address-and-cleaner-onboarding.md)
 
 ### `setup/`
 
@@ -46,6 +47,9 @@ Current documents:
 * [mongodb-atlas-integration.md](database/mongodb-atlas-integration.md)
 * [users-collection.md](database/users-collection.md)
 * [user-sessions-collection.md](database/user-sessions-collection.md)
+* [customer-profiles-collection.md](database/customer-profiles-collection.md)
+* [cleaner-profiles-collection.md](database/cleaner-profiles-collection.md)
+* [addresses-collection.md](database/addresses-collection.md)
 
 ### `api/`
 
@@ -54,6 +58,7 @@ Stores backend API documentation including endpoints, requests, responses, valid
 Current documents:
 
 * [authentication-api.md](api/authentication-api.md)
+* [profile-address-onboarding-admin-api.md](api/profile-address-onboarding-admin-api.md)
 
 ### `features/`
 
@@ -74,6 +79,7 @@ Current documents:
 * [ADR-008-access-and-refresh-token-strategy.md](decisions/ADR-008-access-and-refresh-token-strategy.md)
 * [ADR-009-authentication-application-flow.md](decisions/ADR-009-authentication-application-flow.md)
 * [ADR-010-flutter-authentication-and-secure-session-storage.md](decisions/ADR-010-flutter-authentication-and-secure-session-storage.md)
+* [ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md](decisions/ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md)
 
 ### `workflows/`
 

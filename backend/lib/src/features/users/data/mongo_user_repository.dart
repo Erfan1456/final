@@ -40,6 +40,18 @@ class MongoUserRepository implements UserRepository {
   }
 
   @override
+  Future<List<UserAccount>> findByIds(Iterable<ObjectId> ids) async {
+    final unique = ids.toSet().toList();
+    if (unique.isEmpty) {
+      return const <UserAccount>[];
+    }
+    final documents = await _documents.findMany(<String, dynamic>{
+      '_id': <String, dynamic>{r'$in': unique},
+    });
+    return documents.map(UserAccount.fromDocument).toList();
+  }
+
+  @override
   Future<UserAccount> create(CreateUserAccountData data) async {
     final now = DateTime.now().toUtc();
     final account = UserAccount(

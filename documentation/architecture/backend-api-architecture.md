@@ -2,7 +2,7 @@
 
 This document describes the Dart Frog backend for the Home Cleaning Service Marketplace.
 
-TASK 011 added public authentication HTTP routes. TASK 012 added Bearer access-token authentication and protected account routes. Product resources are not implemented.
+TASK 011 added public authentication HTTP routes. TASK 012 added Bearer access-token authentication and protected account routes. TASK 013 added role-scoped customer profile, address, cleaner onboarding, and admin review routes. Bookings, payments, chat, reviews, cleaner services, availability, and discovery are not implemented.
 
 ## Current Architecture
 
@@ -20,7 +20,7 @@ MongoDB Atlas
 
 MongoDB credentials exist only on the backend/server environment. Flutter will never receive the MongoDB URI.
 
-See [../database/mongodb-atlas-integration.md](../database/mongodb-atlas-integration.md), [../database/users-collection.md](../database/users-collection.md), [../database/user-sessions-collection.md](../database/user-sessions-collection.md), [password-security.md](password-security.md), [auth-token-and-session-security.md](auth-token-and-session-security.md), [authentication-application-flow.md](authentication-application-flow.md), [protected-api-authentication.md](protected-api-authentication.md), [flutter-authentication.md](flutter-authentication.md), [../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md](../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md), [../decisions/ADR-006-user-account-persistence-model.md](../decisions/ADR-006-user-account-persistence-model.md), [../decisions/ADR-007-password-hashing-and-policy.md](../decisions/ADR-007-password-hashing-and-policy.md), [../decisions/ADR-008-access-and-refresh-token-strategy.md](../decisions/ADR-008-access-and-refresh-token-strategy.md), [../decisions/ADR-009-authentication-application-flow.md](../decisions/ADR-009-authentication-application-flow.md), and [../decisions/ADR-010-flutter-authentication-and-secure-session-storage.md](../decisions/ADR-010-flutter-authentication-and-secure-session-storage.md).
+See [../database/mongodb-atlas-integration.md](../database/mongodb-atlas-integration.md), [../database/users-collection.md](../database/users-collection.md), [../database/user-sessions-collection.md](../database/user-sessions-collection.md), [../database/customer-profiles-collection.md](../database/customer-profiles-collection.md), [../database/cleaner-profiles-collection.md](../database/cleaner-profiles-collection.md), [../database/addresses-collection.md](../database/addresses-collection.md), [password-security.md](password-security.md), [auth-token-and-session-security.md](auth-token-and-session-security.md), [authentication-application-flow.md](authentication-application-flow.md), [protected-api-authentication.md](protected-api-authentication.md), [flutter-authentication.md](flutter-authentication.md), [profile-address-and-cleaner-onboarding.md](profile-address-and-cleaner-onboarding.md), [../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md](../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md), [../decisions/ADR-006-user-account-persistence-model.md](../decisions/ADR-006-user-account-persistence-model.md), [../decisions/ADR-007-password-hashing-and-policy.md](../decisions/ADR-007-password-hashing-and-policy.md), [../decisions/ADR-008-access-and-refresh-token-strategy.md](../decisions/ADR-008-access-and-refresh-token-strategy.md), [../decisions/ADR-009-authentication-application-flow.md](../decisions/ADR-009-authentication-application-flow.md), [../decisions/ADR-010-flutter-authentication-and-secure-session-storage.md](../decisions/ADR-010-flutter-authentication-and-secure-session-storage.md), and [../decisions/ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md](../decisions/ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md).
 
 ## Dart Frog Responsibilities
 
@@ -64,9 +64,24 @@ POST /api/v1/auth/refresh
 POST /api/v1/auth/logout
 GET /api/v1/account/me
 DELETE /api/v1/account/sessions
+GET /api/v1/customer/profile
+PUT /api/v1/customer/profile
+GET /api/v1/customer/addresses
+POST /api/v1/customer/addresses
+GET /api/v1/customer/addresses/<addressId>
+PUT /api/v1/customer/addresses/<addressId>
+DELETE /api/v1/customer/addresses/<addressId>
+PUT /api/v1/customer/addresses/<addressId>/default
+GET /api/v1/cleaner/profile
+PUT /api/v1/cleaner/profile
+POST /api/v1/cleaner/onboarding/submit
+GET /api/v1/admin/cleaners
+GET /api/v1/admin/cleaners/<userId>
+POST /api/v1/admin/cleaners/<userId>/approve
+POST /api/v1/admin/cleaners/<userId>/reject
 ```
 
-`GET /api/v1/health` is liveness and does not depend on MongoDB. `GET /api/v1/ready` is readiness and performs a MongoDB ping. Authentication routes are documented in [../api/authentication-api.md](../api/authentication-api.md). See also [authentication-application-flow.md](authentication-application-flow.md), [protected-api-authentication.md](protected-api-authentication.md), and [../decisions/ADR-009-authentication-application-flow.md](../decisions/ADR-009-authentication-application-flow.md).
+`GET /api/v1/health` is liveness and does not depend on MongoDB. `GET /api/v1/ready` is readiness and performs a MongoDB ping. Authentication routes are documented in [../api/authentication-api.md](../api/authentication-api.md). Role-scoped profile, address, onboarding, and admin review routes are documented in [../api/profile-address-onboarding-admin-api.md](../api/profile-address-onboarding-admin-api.md). See also [authentication-application-flow.md](authentication-application-flow.md), [protected-api-authentication.md](protected-api-authentication.md), [profile-address-and-cleaner-onboarding.md](profile-address-and-cleaner-onboarding.md), and [../decisions/ADR-009-authentication-application-flow.md](../decisions/ADR-009-authentication-application-flow.md).
 
 ## Configuration
 

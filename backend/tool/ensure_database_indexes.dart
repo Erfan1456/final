@@ -5,7 +5,10 @@ import 'package:home_cleaning_marketplace_api/src/config/server_config.dart';
 import 'package:home_cleaning_marketplace_api/src/database/collection_names.dart';
 import 'package:home_cleaning_marketplace_api/src/database/database_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/database/mongo_database.dart';
+import 'package:home_cleaning_marketplace_api/src/features/addresses/data/address_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/session_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data/cleaner_profile_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/user_indexes.dart';
 
 /// Ensures approved MongoDB indexes. Prints only sanitized operational status.
@@ -37,6 +40,15 @@ Future<void> main() async {
     final sessionIndexes = await db
         .collection(CollectionNames.userSessions)
         .getIndexes();
+    final customerIndexes = await db
+        .collection(CollectionNames.customerProfiles)
+        .getIndexes();
+    final cleanerIndexes = await db
+        .collection(CollectionNames.cleanerProfiles)
+        .getIndexes();
+    final addressIndexes = await db
+        .collection(CollectionNames.addresses)
+        .getIndexes();
 
     if (!_hasNamedIndex(usersIndexes, usersEmailNormalizedUniqueIndexName) ||
         !_hasNamedIndex(
@@ -48,7 +60,21 @@ Future<void> main() async {
           userSessionsUsedRefreshTokenHashesIndexName,
         ) ||
         !_hasNamedIndex(sessionIndexes, userSessionsUserIdIndexName) ||
-        !_hasNamedIndex(sessionIndexes, userSessionsExpiresAtTtlIndexName)) {
+        !_hasNamedIndex(sessionIndexes, userSessionsExpiresAtTtlIndexName) ||
+        !_hasNamedIndex(
+          customerIndexes,
+          customerProfilesUserIdUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(
+          cleanerIndexes,
+          cleanerProfilesUserIdUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(cleanerIndexes, cleanerProfilesStatusIdIndexName) ||
+        !_hasNamedIndex(addressIndexes, addressesUserIdIndexName) ||
+        !_hasNamedIndex(
+          addressIndexes,
+          addressesUserIdCreatedAtIndexName,
+        )) {
       stderr.writeln('Database indexes could not be ensured.');
       exitCode = 1;
       return;
@@ -68,7 +94,24 @@ Future<void> main() async {
       ..writeln('key = $userSessionsUserIdField ascending')
       ..writeln('$userSessionsExpiresAtTtlIndexName exists')
       ..writeln('key = $userSessionsExpiresAtField ascending')
-      ..writeln('expireAfterSeconds = 0');
+      ..writeln('expireAfterSeconds = 0')
+      ..writeln('$customerProfilesUserIdUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('key = $customerProfilesUserIdField ascending')
+      ..writeln('$cleanerProfilesUserIdUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('key = $cleanerProfilesUserIdField ascending')
+      ..writeln('$cleanerProfilesStatusIdIndexName exists')
+      ..writeln(
+        'key = $cleanerProfilesOnboardingStatusField ascending, _id ascending',
+      )
+      ..writeln('$addressesUserIdIndexName exists')
+      ..writeln('key = $addressesUserIdField ascending')
+      ..writeln('$addressesUserIdCreatedAtIndexName exists')
+      ..writeln(
+        'key = $addressesUserIdField ascending, '
+        '$addressesCreatedAtField descending',
+      );
   } catch (_) {
     stderr.writeln('Database indexes could not be ensured.');
     exitCode = 1;

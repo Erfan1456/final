@@ -7,4 +7,13 @@ abstract final class CollectionNames {
 
   /// Logical login/device refresh sessions.
   static const String userSessions = 'user_sessions';
+
+  /// One customer marketplace profile per customer user.
+  static const String customerProfiles = 'customer_profiles';
+
+  /// Customer service addresses owned by a user.
+  static const String addresses = 'addresses';
+
+  /// One cleaner marketplace profile and current onboarding lifecycle.
+  static const String cleanerProfiles = 'cleaner_profiles';
 }

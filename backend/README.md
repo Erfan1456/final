@@ -14,8 +14,13 @@ MongoDB Atlas is the persistence provider. `mongo_dart` is the backend driver. U
 * `POST /api/v1/auth/logout`
 * `GET /api/v1/account/me`
 * `DELETE /api/v1/account/sessions`
+* `GET`/`PUT /api/v1/customer/profile`
+* customer address CRUD and default-address pointer
+* `GET`/`PUT /api/v1/cleaner/profile`
+* `POST /api/v1/cleaner/onboarding/submit`
+* admin cleaner list, detail, approve, and reject
 
-TASK 012 did not create real user or session documents in Atlas. Product CRUD is still absent.
+TASK 013 did not create live profile, address, or onboarding documents in Atlas. Bookings, payments, chat, reviews, cleaner services, availability, and discovery are still absent.
 
 Do not place a real MongoDB URI, passwords, or other secrets in this package. Flutter never receives the MongoDB connection URI.
 
@@ -30,8 +35,18 @@ Do not place a real MongoDB URI, passwords, or other secrets in this package. Fl
 * `POST /api/v1/auth/logout` — idempotent session revocation
 * `GET /api/v1/account/me` — protected current account
 * `DELETE /api/v1/account/sessions` — revoke all refresh sessions
+* `GET`/`PUT /api/v1/customer/profile`
+* `GET`/`POST /api/v1/customer/addresses`
+* `GET`/`PUT`/`DELETE /api/v1/customer/addresses/{addressId}`
+* `PUT /api/v1/customer/addresses/{addressId}/default`
+* `GET`/`PUT /api/v1/cleaner/profile`
+* `POST /api/v1/cleaner/onboarding/submit`
+* `GET /api/v1/admin/cleaners`
+* `GET /api/v1/admin/cleaners/{userId}`
+* `POST /api/v1/admin/cleaners/{userId}/approve`
+* `POST /api/v1/admin/cleaners/{userId}/reject`
 
-See [../documentation/api/authentication-api.md](../documentation/api/authentication-api.md) and [../documentation/architecture/protected-api-authentication.md](../documentation/architecture/protected-api-authentication.md). These auth endpoints require production rate limiting before unrestricted internet exposure. Product CRUD is still absent.
+See [../documentation/api/authentication-api.md](../documentation/api/authentication-api.md), [../documentation/api/profile-address-onboarding-admin-api.md](../documentation/api/profile-address-onboarding-admin-api.md), and [../documentation/architecture/protected-api-authentication.md](../documentation/architecture/protected-api-authentication.md). These auth endpoints require production rate limiting before unrestricted internet exposure. Bookings, payments, chat, and cleaner services are still absent.
 
 ## Configuration
 
@@ -84,6 +99,10 @@ When the Flutter Android emulator calls this API, use `http://10.0.2.2:8080` ins
 * `lib/src/database/` — MongoDB connection lifecycle and collection names
 * `lib/src/features/users/` — user account persistence model and repository
 * `lib/src/features/account/` — current-account use cases for protected routes
+* `lib/src/features/authorization/` — persisted-user role authorization
+* `lib/src/features/customer_profiles/` — customer profile application/repository
+* `lib/src/features/addresses/` — owned service addresses
+* `lib/src/features/cleaner_profiles/` — cleaner onboarding and admin review
 * `lib/src/features/auth/application/` — authentication use cases
 * `lib/src/features/auth/http/` — auth JSON parsing, Bearer verification, and error mapping
 * `lib/src/features/auth/security/` — password policy and Argon2id hashing
@@ -103,6 +122,9 @@ Business logic should not accumulate in route handlers. Future features should a
 * Approved `user_sessions` indexes
 * Public authentication HTTP routes (signup, login, refresh, logout)
 * Protected account routes (`GET /account/me`, `DELETE /account/sessions`)
-* No product resources
+* Role-scoped customer profile and address routes
+* Cleaner onboarding and admin review routes
+* Approved `customer_profiles`, `cleaner_profiles`, and `addresses` indexes
+* No bookings, payments, chat, or cleaner service catalog
 * No production rate limiting yet
 * CORS is a small development-oriented foundation, not a complete production security policy

@@ -18,6 +18,9 @@ abstract class UserRepository {
   /// Whether an account already exists for the normalized form of [email].
   Future<bool> emailExists(String email);
 
+  /// Returns accounts whose `_id` is in [ids]. Missing ids are omitted.
+  Future<List<UserAccount>> findByIds(Iterable<ObjectId> ids);
+
   /// Inserts a new account. Duplicate normalized emails fail with
   /// [DuplicateUserEmailException].
   Future<UserAccount> create(CreateUserAccountData data);

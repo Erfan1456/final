@@ -63,6 +63,10 @@ class SeededAuthController extends AuthController {
     logoutAllCalls += 1;
     state = const AuthState.unauthenticated();
   }
+
+  void expireSession() {
+    state = const AuthState.unauthenticated();
+  }
 }
 
 AuthUser testUser({

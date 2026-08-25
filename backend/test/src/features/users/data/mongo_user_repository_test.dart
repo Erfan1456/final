@@ -25,6 +25,16 @@ class _MemoryUserDocuments implements UserDocumentStore {
   }
 
   @override
+  Future<List<Map<String, dynamic>>> findMany(
+    Map<String, dynamic> selector,
+  ) async {
+    return [
+      for (final document in documents)
+        if (_matches(document, selector)) Map<String, dynamic>.from(document),
+    ];
+  }
+
+  @override
   Future<UserInsertResult> insertOne(Map<String, dynamic> document) async {
     final forced = insertResult;
     if (forced != null) {
@@ -68,7 +78,15 @@ class _MemoryUserDocuments implements UserDocumentStore {
 
   bool _matches(Map<String, dynamic> document, Map<String, dynamic> selector) {
     for (final entry in selector.entries) {
-      if (document[entry.key] != entry.value) {
+      final expected = entry.value;
+      if (expected is Map && expected.containsKey(r'$in')) {
+        final options = expected[r'$in'];
+        if (options is! List || !options.contains(document[entry.key])) {
+          return false;
+        }
+        continue;
+      }
+      if (document[entry.key] != expected) {
         return false;
       }
     }
@@ -297,6 +315,24 @@ void main() {
         ),
         throwsA(isA<UserAccountWriteException>()),
       );
+    });
+  });
+
+  group('MongoUserRepository.findByIds', () {
+    test('returns matching accounts and omits missing ids', () async {
+      final otherId = ObjectId.fromHexString('507f1f77bcf86cd799439099');
+      final store = _MemoryUserDocuments()..documents.add(storedCustomer());
+      final repository = MongoUserRepository(documents: store);
+
+      final found = await repository.findByIds(<ObjectId>[existingId, otherId]);
+
+      expect(found, hasLength(1));
+      expect(found.single.id, equals(existingId));
+    });
+
+    test('returns an empty list for no ids', () async {
+      final repository = MongoUserRepository(documents: _MemoryUserDocuments());
+      expect(await repository.findByIds(const <ObjectId>[]), isEmpty);
     });
   });
 }

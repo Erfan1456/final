@@ -2,18 +2,26 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:home_cleaning_marketplace/app/router/app_routes.dart';
+import 'package:home_cleaning_marketplace/features/addresses/presentation/address_form_screen.dart';
+import 'package:home_cleaning_marketplace/features/addresses/presentation/address_list_screen.dart';
+import 'package:home_cleaning_marketplace/features/admin/presentation/admin_home_screen.dart';
+import 'package:home_cleaning_marketplace/features/admin/presentation/cleaner_approval_detail_screen.dart';
+import 'package:home_cleaning_marketplace/features/admin/presentation/cleaner_approval_list_screen.dart';
 import 'package:home_cleaning_marketplace/features/auth/domain/auth_session_state.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/auth_controller.dart';
-import 'package:home_cleaning_marketplace/features/auth/presentation/authenticated_home_screen.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/login_screen.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/signup_screen.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/splash_screen.dart';
+import 'package:home_cleaning_marketplace/features/cleaner/presentation/cleaner_home_screen.dart';
+import 'package:home_cleaning_marketplace/features/cleaner/presentation/cleaner_onboarding_screen.dart';
+import 'package:home_cleaning_marketplace/features/customer/presentation/customer_home_screen.dart';
+import 'package:home_cleaning_marketplace/features/customer/presentation/customer_profile_screen.dart';
 
 class _RouterRefresh extends ChangeNotifier {
   void ping() => notifyListeners();
 }
 
-/// Application router with authentication redirects.
+/// Application router with authentication and role redirects.
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refresh = _RouterRefresh();
   ref.listen<AuthState>(authControllerProvider, (previous, next) {
@@ -43,8 +51,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           }
           return AppRoutes.loginPath;
         case AuthStatus.authenticated:
-          if (isAuthRoute || isSplash || isRoot) {
-            return AppRoutes.homePath;
+          final role = auth.user?.role ?? 'customer';
+          final home = AppRoutes.homeForRole(role);
+          if (isAuthRoute ||
+              isSplash ||
+              isRoot ||
+              location == AppRoutes.homePath) {
+            return home;
+          }
+          if (AppRoutes.isForeignRolePath(location, role)) {
+            return home;
           }
           return null;
       }
@@ -69,7 +85,62 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.homePath,
         name: AppRoutes.homeName,
-        builder: (context, state) => const AuthenticatedHomeScreen(),
+        redirect: (context, state) {
+          final role =
+              ref.read(authControllerProvider).user?.role ?? 'customer';
+          return AppRoutes.homeForRole(role);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.customerHomePath,
+        name: AppRoutes.customerHomeName,
+        builder: (context, state) => const CustomerHomeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.customerProfilePath,
+        builder: (context, state) => const CustomerProfileScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.customerAddressesPath,
+        builder: (context, state) => const AddressListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.customerAddressNewPath,
+        builder: (context, state) => const AddressFormScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.customerAddressEditPath,
+        builder: (context, state) {
+          return AddressFormScreen(
+            addressId: state.pathParameters['addressId'],
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.cleanerHomePath,
+        name: AppRoutes.cleanerHomeName,
+        builder: (context, state) => const CleanerHomeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.cleanerOnboardingPath,
+        builder: (context, state) => const CleanerOnboardingScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminHomePath,
+        name: AppRoutes.adminHomeName,
+        builder: (context, state) => const AdminHomeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminCleanersPath,
+        builder: (context, state) => const CleanerApprovalListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminCleanerDetailPath,
+        builder: (context, state) {
+          return CleanerApprovalDetailScreen(
+            userId: state.pathParameters['userId'] ?? '',
+          );
+        },
       ),
     ],
   );

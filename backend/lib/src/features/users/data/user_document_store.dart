@@ -55,6 +55,9 @@ abstract class UserDocumentStore {
   /// Finds a single document matching [selector], or `null`.
   Future<Map<String, dynamic>?> findOne(Map<String, dynamic> selector);
 
+  /// Finds documents matching [selector].
+  Future<List<Map<String, dynamic>>> findMany(Map<String, dynamic> selector);
+
   /// Inserts [document]. Must not log document contents.
   Future<UserInsertResult> insertOne(Map<String, dynamic> document);
 
@@ -79,6 +82,11 @@ class MongoUserDocumentStore implements UserDocumentStore {
   @override
   Future<Map<String, dynamic>?> findOne(Map<String, dynamic> selector) {
     return _collection.findOne(selector);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> findMany(Map<String, dynamic> selector) {
+    return _collection.find(selector).toList();
   }
 
   @override
