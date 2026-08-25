@@ -6,7 +6,8 @@ plugins {
 
 android {
     namespace = "com.example.project"
-    compileSdk = flutter.compileSdkVersion
+    // flutter_secure_storage 11.0.0 compiles against API 37.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

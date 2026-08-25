@@ -29,7 +29,9 @@ The Dart Frog backend currently implements:
 * `POST /api/v1/auth/login` — password authentication
 * `POST /api/v1/auth/refresh` — refresh-token rotation
 * `POST /api/v1/auth/logout` — idempotent session revocation
+* `GET /api/v1/account/me` — protected current account
+* `DELETE /api/v1/account/sessions` — revoke all refresh sessions
 
 See [authentication-api.md](authentication-api.md). `/api/v1/health` remains available even when MongoDB is unconfigured or unreachable. `/api/v1/ready` returns HTTP 200 when ping succeeds and HTTP 503 when the database is unconfigured or unavailable.
 
-Authentication middleware and product endpoints are not implemented. The auth routes are not ready for unrestricted public internet exposure until production rate limiting exists.
+Product marketplace endpoints are not implemented. The auth routes are not ready for unrestricted public internet exposure until production rate limiting exists.

@@ -25,4 +25,6 @@ No architecture has been chosen in TASK 001. Concrete architecture documents sho
 * [backend-api-architecture.md](backend-api-architecture.md) — Dart Frog backend infrastructure, `/api/v1`, health, readiness, users persistence, password hashing, token/session primitives, and authentication HTTP routes.
 * [password-security.md](password-security.md) — Argon2id password hashing, policy, verification, and rehash detection.
 * [auth-token-and-session-security.md](auth-token-and-session-security.md) — HS256 access JWTs, opaque refresh tokens, atomic rotation, and replay detection.
-* [authentication-application-flow.md](authentication-application-flow.md) — authentication application service, signup/login/refresh/logout flow, dummy-hash login, and transparent rehash.
+* [authentication-application-flow.md](authentication-application-flow.md)
+* [protected-api-authentication.md](protected-api-authentication.md)
+* [flutter-authentication.md](flutter-authentication.md) — authentication application service, signup/login/refresh/logout flow, dummy-hash login, and transparent rehash.

@@ -6,14 +6,16 @@ This directory is the Dart Frog backend API for the Home Cleaning Service Market
 
 Current API version: `/api/v1`
 
-MongoDB Atlas is the persistence provider. `mongo_dart` is the backend driver. Users persistence, Argon2id password hashing, access-token/refresh-session primitives, and public authentication HTTP routes now exist:
+MongoDB Atlas is the persistence provider. `mongo_dart` is the backend driver. Users persistence, Argon2id password hashing, access-token/refresh-session primitives, public authentication HTTP routes, and protected account routes now exist:
 
 * `POST /api/v1/auth/signup`
 * `POST /api/v1/auth/login`
 * `POST /api/v1/auth/refresh`
 * `POST /api/v1/auth/logout`
+* `GET /api/v1/account/me`
+* `DELETE /api/v1/account/sessions`
 
-TASK 011 did not create real user or session documents in Atlas. Authentication middleware, `/me`, and product CRUD are still absent.
+TASK 012 did not create real user or session documents in Atlas. Product CRUD is still absent.
 
 Do not place a real MongoDB URI, passwords, or other secrets in this package. Flutter never receives the MongoDB connection URI.
 
@@ -26,8 +28,10 @@ Do not place a real MongoDB URI, passwords, or other secrets in this package. Fl
 * `POST /api/v1/auth/login` — password authentication
 * `POST /api/v1/auth/refresh` — refresh-token rotation
 * `POST /api/v1/auth/logout` — idempotent session revocation
+* `GET /api/v1/account/me` — protected current account
+* `DELETE /api/v1/account/sessions` — revoke all refresh sessions
 
-See [../documentation/api/authentication-api.md](../documentation/api/authentication-api.md). These auth endpoints require production rate limiting before unrestricted internet exposure. There is still no authentication middleware or product CRUD.
+See [../documentation/api/authentication-api.md](../documentation/api/authentication-api.md) and [../documentation/architecture/protected-api-authentication.md](../documentation/architecture/protected-api-authentication.md). These auth endpoints require production rate limiting before unrestricted internet exposure. Product CRUD is still absent.
 
 ## Configuration
 
@@ -71,7 +75,7 @@ dart test
 
 The development server defaults to port 8080.
 
-When the Flutter Android emulator later calls this API, use `http://10.0.2.2:8080` instead of `http://localhost:8080`, because emulator `localhost` refers to the emulator itself. Do not hardcode `10.0.2.2` into production Flutter code.
+When the Flutter Android emulator calls this API, use `http://10.0.2.2:8080` instead of `http://localhost:8080`, because emulator `localhost` refers to the emulator itself. Do not hardcode `10.0.2.2` into production Flutter code. Debug Android builds may allow that local HTTP exception. Production API traffic must use HTTPS. `ACCESS_TOKEN_SECRET` is backend-only configuration; never put it in Flutter.
 
 ## Architecture directories
 
@@ -79,8 +83,9 @@ When the Flutter Android emulator later calls this API, use `http://10.0.2.2:808
 * `lib/src/config/` — environment loading and server configuration
 * `lib/src/database/` — MongoDB connection lifecycle and collection names
 * `lib/src/features/users/` — user account persistence model and repository
+* `lib/src/features/account/` — current-account use cases for protected routes
 * `lib/src/features/auth/application/` — authentication use cases
-* `lib/src/features/auth/http/` — auth JSON parsing and error mapping
+* `lib/src/features/auth/http/` — auth JSON parsing, Bearer verification, and error mapping
 * `lib/src/features/auth/security/` — password policy and Argon2id hashing
 * `lib/src/features/auth/tokens/` — access JWT and refresh-token primitives
 * `lib/src/features/auth/sessions/` — user session persistence and rotation
@@ -97,7 +102,7 @@ Business logic should not accumulate in route handlers. Future features should a
 * Access JWT and refresh-session primitives
 * Approved `user_sessions` indexes
 * Public authentication HTTP routes (signup, login, refresh, logout)
-* No authentication middleware or `/me`
+* Protected account routes (`GET /account/me`, `DELETE /account/sessions`)
 * No product resources
 * No production rate limiting yet
 * CORS is a small development-oriented foundation, not a complete production security policy

@@ -26,6 +26,8 @@ Current documents:
 * [password-security.md](architecture/password-security.md)
 * [auth-token-and-session-security.md](architecture/auth-token-and-session-security.md)
 * [authentication-application-flow.md](architecture/authentication-application-flow.md)
+* [protected-api-authentication.md](architecture/protected-api-authentication.md)
+* [flutter-authentication.md](architecture/flutter-authentication.md)
 
 ### `setup/`
 
@@ -71,6 +73,7 @@ Current documents:
 * [ADR-007-password-hashing-and-policy.md](decisions/ADR-007-password-hashing-and-policy.md)
 * [ADR-008-access-and-refresh-token-strategy.md](decisions/ADR-008-access-and-refresh-token-strategy.md)
 * [ADR-009-authentication-application-flow.md](decisions/ADR-009-authentication-application-flow.md)
+* [ADR-010-flutter-authentication-and-secure-session-storage.md](decisions/ADR-010-flutter-authentication-and-secure-session-storage.md)
 
 ### `workflows/`
 

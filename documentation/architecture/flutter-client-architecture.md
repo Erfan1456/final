@@ -59,7 +59,9 @@ features/
         └── use_cases/
 ```
 
-Those nested folders are created only when a real feature needs them. Empty architecture folders are not created for unimplemented features. The current `foundation` feature contains only a presentation screen because it has no data, domain, or view-model requirements.
+Those nested folders are created only when a real feature needs them. Empty architecture folders are not created for unimplemented features.
+
+Authentication now lives under `features/auth/` with data, domain, and presentation layers. See [flutter-authentication.md](flutter-authentication.md).
 
 ## State Management
 
@@ -77,15 +79,13 @@ Future feature view models may use `Notifier` or `AsyncNotifier` when they have 
 
 `go_router` provides declarative navigation, a route hierarchy, and a boundary for later deep linking and authentication/role redirects.
 
-TASK 005 registers only the foundation route `/`. Product routes are added when those screens exist.
+TASK 012 registers `/splash`, `/login`, `/signup`, and `/home` with authentication redirects. Marketplace product routes are still absent.
 
 ## Networking
 
-Dio is the HTTP transport for future communication with the Dart backend. It is configured from public `AppConfig` values such as `API_BASE_URL`.
+Dio is the HTTP transport for communication with the Dart backend. It is configured from public `AppConfig` values such as `API_BASE_URL`.
 
-Flutter never directly accesses MongoDB Atlas.
-
-Feature views must not call Dio directly. Future feature services should depend on the shared Dio provider rather than constructing arbitrary clients. TASK 005 does not perform HTTP requests and does not add authentication interceptors or token handling.
+Plain Dio is used for public auth calls. Authenticated Dio attaches Bearer tokens and performs single-flight refresh. See [flutter-authentication.md](flutter-authentication.md).
 
 `API_BASE_URL` is public runtime configuration, not a secret. MongoDB URIs, passwords, tokens, and private credentials must never be placed in the Flutter client.
 
@@ -130,7 +130,7 @@ As features are implemented, tests should cover:
 * widget/view tests for rendering and user interaction
 * integration tests for composed flows
 
-TASK 005 includes an application smoke test and `AppConfig` unit tests only.
+TASK 012 includes authentication unit, interceptor, repository, controller, router, and widget tests in addition to the earlier application smoke test and `AppConfig` tests.
 
 ## Domain Layer Policy
 
@@ -138,4 +138,4 @@ The domain/use-case layer is optional. Add it only when justified by complexity,
 
 ## Current State
 
-TASK 005 contains only architecture infrastructure and a foundation screen that proves bootstrap, routing, theme, and feature organization. No marketplace product features are implemented.
+TASK 012 adds a Flutter authentication vertical slice on the architecture foundation. Marketplace product features such as booking, cleaner search, and payments are not implemented.

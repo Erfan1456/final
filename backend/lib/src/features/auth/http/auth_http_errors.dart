@@ -42,6 +42,13 @@ Response mapAuthException(Exception error) {
       statusCode: HttpStatus.unauthorized,
     );
   }
+  if (error is InvalidAccessTokenException) {
+    return jsonError(
+      code: 'invalid_access_token',
+      message: 'Authentication is required.',
+      statusCode: HttpStatus.unauthorized,
+    );
+  }
   if (error is AccountUnavailableException) {
     return jsonError(
       code: 'account_unavailable',

@@ -9,6 +9,16 @@ import 'package:home_cleaning_marketplace_api/src/http/cors_headers.dart';
 ServerConfig? _sharedConfig;
 MongoDatabase? _sharedMongo;
 
+/// Test-only seam so CORS/middleware tests inject [ServerConfig] instead of
+/// loading the developer's private `.env`.
+///
+/// Production Dart Frog never calls this. Passing [config] uses that value;
+/// omitting it restores lazy environment loading.
+void resetMiddlewareCaches({ServerConfig? config}) {
+  _sharedConfig = config;
+  _sharedMongo = null;
+}
+
 ServerConfig _serverConfig() {
   return _sharedConfig ??= ServerConfig.fromEnvironment(
     const EnvironmentLoader().load(),

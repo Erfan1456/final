@@ -19,7 +19,7 @@ Database: MongoDB Atlas — backend connectivity foundation implemented
 Primary Android development environment: Android Studio / Android Emulator
 ```
 
-The Dart Frog backend lives in `backend/`. MongoDB Atlas connectivity is implemented in the backend only. Authentication and product CRUD are not implemented.
+The Dart Frog backend lives in `backend/`. MongoDB Atlas connectivity is implemented in the backend only. Flutter authentication and protected account APIs now exist. Marketplace product CRUD is not implemented.
 
 ## Intended High-Level Architecture
 
@@ -58,7 +58,7 @@ From the Git repository root:
 cd project
 flutter pub get
 flutter devices
-flutter run
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
 ```
 
 Use a connected device or emulator available on the local machine. This README does not assume that a specific emulator is currently running.
@@ -75,7 +75,7 @@ dart analyze
 dart test
 ```
 
-When an Android emulator later calls this API on the Windows development host, use `http://10.0.2.2:<port>` instead of `http://localhost:<port>`. Do not hardcode that emulator address into production Flutter code.
+When an Android emulator calls this API on the Windows development host, use `http://10.0.2.2:<port>` instead of `http://localhost:<port>`. Emulator `localhost` is the emulator itself. Debug Android builds may allow that local HTTP exception; production API traffic must use HTTPS. Do not hardcode that emulator address into production Flutter code. `ACCESS_TOKEN_SECRET` is backend-only configuration and must never be placed in Flutter.
 
 ## Documentation
 
@@ -92,4 +92,4 @@ Cursor task reports live in [documentation/cursor/](documentation/cursor/).
 
 ## Current Status
 
-The repository is still at the foundation-plus-authentication-API stage. Marketplace product features and Flutter auth UI are not implemented.
+The repository now has a protected backend account API and a Flutter authentication vertical slice. Marketplace product features are not implemented.

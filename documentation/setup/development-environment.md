@@ -46,3 +46,25 @@ These commands inspect the local toolchain. They do not start implementation wor
 MongoDB Atlas development infrastructure has been configured externally by the user.
 
 No credentials or connection URI belong in this document. Backend connectivity uses `MONGODB_URI` from the server environment or an ignored local `backend/.env`. See [../database/mongodb-atlas-integration.md](../database/mongodb-atlas-integration.md).
+
+`ACCESS_TOKEN_SECRET` is backend-only HS256 configuration. It must never be placed in Flutter, logged, or committed. This document never records its value.
+
+## Android emulator + local Dart Frog
+
+Local backend (from `backend/`):
+
+```bash
+dart_frog dev
+```
+
+The development server defaults to port 8080.
+
+Local Flutter on the Android emulator (from `project/`):
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
+```
+
+`10.0.2.2` is the Android emulator route to the Windows host machine. `localhost` inside the emulator is the emulator itself, not Dart Frog.
+
+Debug Android builds may allow cleartext HTTP to that development host. That exception is DEBUG ONLY. Production API traffic must use HTTPS. Do not put MongoDB URIs or `ACCESS_TOKEN_SECRET` in Flutter.

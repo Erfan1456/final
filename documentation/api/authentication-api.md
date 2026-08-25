@@ -9,7 +9,12 @@ TASK 011 composed existing user, password, access-token, and refresh-session pri
 * `POST /api/v1/auth/refresh`
 * `POST /api/v1/auth/logout`
 
-There is still no `/me` endpoint, logout-all, password reset, email-verification delivery, OAuth, MFA, authentication middleware, or protected marketplace route.
+TASK 012 added protected account routes:
+
+* `GET /api/v1/account/me`
+* `DELETE /api/v1/account/sessions`
+
+There is still no password reset, email-verification delivery, OAuth, MFA, or protected marketplace/product route.
 
 These endpoints are **not** ready for unrestricted public internet exposure until production rate limiting exists. Argon2id hashing and CORS are not substitutes for request throttling.
 
@@ -239,6 +244,110 @@ HTTP **200**
 ```
 
 Logout does not reveal whether the token or session existed. It does not issue replacement tokens.
+
+## Protected authentication
+
+Protected account routes require:
+
+```http
+Authorization: Bearer <access-token>
+```
+
+Do not send passwords, refresh tokens, or Mongo credentials on these requests. Example tokens in this document are placeholders, never real credentials.
+
+Missing header, wrong scheme, blank token, and every access-JWT verification failure return the same generic response:
+
+HTTP **401**
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "invalid_access_token",
+    "message": "Authentication is required."
+  }
+}
+```
+
+If access-token verification cannot run because backend signing configuration is unavailable:
+
+HTTP **503**
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "authentication_unavailable",
+    "message": "Authentication is temporarily unavailable."
+  }
+}
+```
+
+Public auth routes (`/auth/signup`, `/auth/login`, `/auth/refresh`, `/auth/logout`) and `/health` / `/ready` are not behind this middleware.
+
+## GET /api/v1/account/me
+
+Returns the currently authenticated user's safe public account.
+
+The access JWT is verified first. The handler then loads the persisted `UserAccount` by the verified `userId`.
+
+### Success
+
+HTTP **200**
+
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "<user id>",
+      "role": "customer",
+      "email": "person@example.com",
+      "account_status": "active",
+      "email_verified": false,
+      "created_at": "<iso-8601>",
+      "updated_at": "<iso-8601>"
+    }
+  }
+}
+```
+
+The persisted role is returned. Responses never include `password_hash`, `email_normalized`, session hashes, JWTs, or refresh tokens.
+
+### Errors
+
+* Missing/invalid access token → HTTP **401** `invalid_access_token`
+* Missing user after a verified token → HTTP **401** `invalid_access_token`
+* Suspended or deactivated account → HTTP **403** `account_unavailable`
+* Auth configuration unavailable → HTTP **503** `authentication_unavailable`
+* Wrong method → HTTP **405**
+
+## DELETE /api/v1/account/sessions
+
+Revokes every refresh session belonging to the authenticated user.
+
+The access JWT used for this request may remain cryptographically valid until its normal 15-minute expiration. There is no access-token blacklist. Clients must delete local tokens immediately after logout-all.
+
+### Success
+
+HTTP **200**
+
+```json
+{
+  "success": true,
+  "data": {
+    "sessions_revoked": true
+  }
+}
+```
+
+The response does not include token hashes, session documents, session IDs, or Mongo update details.
+
+### Errors
+
+* Missing/invalid access token → HTTP **401** `invalid_access_token`
+* Auth configuration unavailable → HTTP **503** `authentication_unavailable`
+* Wrong method → HTTP **405**
 
 ## Production security prerequisite
 

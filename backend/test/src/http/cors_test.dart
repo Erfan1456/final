@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dart_frog/dart_frog.dart';
+import 'package:home_cleaning_marketplace_api/src/config/server_config.dart';
 import 'package:home_cleaning_marketplace_api/src/http/cors_headers.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
@@ -36,20 +37,17 @@ void main() {
   });
 
   group('middleware OPTIONS preflight', () {
+    tearDown(resetMiddlewareCaches);
+
     test('returns 204 for a development localhost origin', () async {
-      final context = _MockRequestContext();
-      final request = _MockRequest();
-      when(() => context.request).thenReturn(request);
-      when(() => request.method).thenReturn(HttpMethod.options);
-      when(() => request.headers).thenReturn(
-        const <String, String>{'origin': 'http://localhost:3000'},
+      resetMiddlewareCaches(
+        config: const ServerConfig(
+          environment: 'development',
+          allowedOrigins: <String>[],
+        ),
       );
 
-      Future<Response> unusedHandler(RequestContext context) {
-        return Future<Response>.value(Response());
-      }
-
-      final response = await middleware(unusedHandler)(context);
+      final response = await _options('http://localhost:3000');
 
       expect(response.statusCode, equals(HttpStatus.noContent));
       expect(
@@ -57,5 +55,55 @@ void main() {
         equals('http://localhost:3000'),
       );
     });
+
+    test('echoes a configured allowed origin', () async {
+      resetMiddlewareCaches(
+        config: const ServerConfig(
+          environment: 'production',
+          allowedOrigins: <String>['https://app.example.test'],
+        ),
+      );
+
+      final response = await _options('https://app.example.test');
+
+      expect(response.statusCode, equals(HttpStatus.noContent));
+      expect(
+        response.headers[HttpHeaders.accessControlAllowOriginHeader],
+        equals('https://app.example.test'),
+      );
+    });
+
+    test('omits Allow-Origin for a disallowed origin', () async {
+      resetMiddlewareCaches(
+        config: const ServerConfig(
+          environment: 'production',
+          allowedOrigins: <String>['https://app.example.test'],
+        ),
+      );
+
+      final response = await _options('http://localhost:3000');
+
+      expect(response.statusCode, equals(HttpStatus.noContent));
+      expect(
+        response.headers[HttpHeaders.accessControlAllowOriginHeader],
+        isNull,
+      );
+    });
   });
+}
+
+Future<Response> _options(String origin) async {
+  final context = _MockRequestContext();
+  final request = _MockRequest();
+  when(() => context.request).thenReturn(request);
+  when(() => request.method).thenReturn(HttpMethod.options);
+  when(() => request.headers).thenReturn(
+    <String, String>{'origin': origin},
+  );
+
+  Future<Response> unusedHandler(RequestContext context) {
+    return Future<Response>.value(Response());
+  }
+
+  return middleware(unusedHandler)(context);
 }
