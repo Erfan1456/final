@@ -6,6 +6,7 @@ import 'package:home_cleaning_marketplace_api/src/database/mongo_database.dart';
 import 'package:home_cleaning_marketplace_api/src/features/authorization/application/role_scoped_composition.dart';
 import 'package:home_cleaning_marketplace_api/src/features/authorization/http/role_http_errors.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/sandbox_payment_simulation_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payouts/application/sandbox_payout_simulation_service.dart';
 import 'package:home_cleaning_marketplace_api/src/http/json_response.dart';
 
 Handler middleware(Handler handler) {
@@ -20,20 +21,38 @@ Handler middleware(Handler handler) {
           statusCode: HttpStatus.notFound,
         );
       }
-      final service = _tryRead<SandboxPaymentSimulationService>(context);
-      if (service != null) {
-        return await handler(
-          context.provide<SandboxPaymentSimulationService>(() => service),
+      var next = context;
+      final paymentSimulation = _tryRead<SandboxPaymentSimulationService>(
+        context,
+      );
+      if (paymentSimulation != null) {
+        next = next.provide<SandboxPaymentSimulationService>(
+          () => paymentSimulation,
         );
+      } else {
+        final mongo = context.read<MongoDatabase>();
+        final simulation = await RoleScopedComposition.sandboxSimulation(
+          mongo: mongo,
+          config: config,
+        );
+        next = next.provide<SandboxPaymentSimulationService>(() => simulation);
       }
-      final mongo = context.read<MongoDatabase>();
-      final simulation = await RoleScopedComposition.sandboxSimulation(
-        mongo: mongo,
-        config: config,
+      final payoutSimulation = _tryRead<SandboxPayoutSimulationService>(
+        context,
       );
-      return await handler(
-        context.provide<SandboxPaymentSimulationService>(() => simulation),
-      );
+      if (payoutSimulation != null) {
+        next = next.provide<SandboxPayoutSimulationService>(
+          () => payoutSimulation,
+        );
+      } else {
+        final mongo = context.read<MongoDatabase>();
+        final simulation = await RoleScopedComposition.sandboxPayoutSimulation(
+          mongo: mongo,
+          config: config,
+        );
+        next = next.provide<SandboxPayoutSimulationService>(() => simulation);
+      }
+      return await handler(next);
     } on Exception catch (error) {
       return mapRoleScopedException(error);
     }

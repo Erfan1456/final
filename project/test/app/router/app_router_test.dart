@@ -488,4 +488,81 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Admin Dashboard'), findsOneWidget);
   });
+
+  testWidgets('cleaner can open earnings and payout routes', (tester) async {
+    await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
+    final context = tester.element(find.text('Cleaner home'));
+    final router = GoRouter.of(context);
+    router.go(AppRoutes.cleanerEarningsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Earnings & Payouts'), findsWidgets);
+    router.go(AppRoutes.cleanerEarningsLedgerPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Earnings ledger'), findsWidgets);
+    router.go(AppRoutes.cleanerPayoutsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Payout history'), findsWidgets);
+    router.go(AppRoutes.cleanerPayoutRequestPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Request payout'), findsWidgets);
+  });
+
+  testWidgets('customer is redirected from cleaner finance routes', (
+    tester,
+  ) async {
+    await pumpApp(tester, AuthState.authenticated(testUser()));
+    final context = tester.element(find.byType(CustomerHomeScreen));
+    GoRouter.of(context).go(AppRoutes.cleanerEarningsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Manage Profile'), findsOneWidget);
+  });
+
+  testWidgets('admin can open payouts, finance, and reconciliation', (
+    tester,
+  ) async {
+    await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
+    final context = tester.element(find.text('Admin Dashboard'));
+    final router = GoRouter.of(context);
+    router.go(AppRoutes.adminPayoutsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Payouts'), findsWidgets);
+    router.go(AppRoutes.adminPayoutDetailLocation('507f1f77bcf86cd7994390f1'));
+    await tester.pumpAndSettle();
+    expect(find.text('Payout detail'), findsOneWidget);
+    router.go(AppRoutes.adminFinancePath);
+    await tester.pumpAndSettle();
+    expect(find.text('Finance'), findsWidgets);
+    router.go(AppRoutes.adminFinanceReconciliationPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Reconciliation'), findsWidgets);
+    router.go(AppRoutes.adminUserFinanceLocation('507f1f77bcf86cd799439022'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cleaner finance'), findsOneWidget);
+  });
+
+  testWidgets('customer cannot remain on admin finance routes', (tester) async {
+    await pumpApp(tester, AuthState.authenticated(testUser()));
+    final customerContext = tester.element(find.byType(CustomerHomeScreen));
+    GoRouter.of(customerContext).go(AppRoutes.adminFinancePath);
+    await tester.pumpAndSettle();
+    expect(find.text('Manage Profile'), findsOneWidget);
+  });
+
+  testWidgets('cleaner cannot remain on admin payout routes', (tester) async {
+    await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
+    final cleanerContext = tester.element(find.text('Cleaner home'));
+    GoRouter.of(cleanerContext).go(AppRoutes.adminPayoutsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Cleaner home'), findsOneWidget);
+  });
+
+  testWidgets('admin is redirected from cleaner payout-request routes', (
+    tester,
+  ) async {
+    await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
+    final context = tester.element(find.text('Admin Dashboard'));
+    GoRouter.of(context).go(AppRoutes.cleanerPayoutRequestPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Admin Dashboard'), findsOneWidget);
+  });
 }

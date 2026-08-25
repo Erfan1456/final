@@ -10,10 +10,13 @@ import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/disputes/data/dispute_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/earnings/data/earnings_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/notifications/data/notification_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_refund_request_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_webhook_event_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payouts/data/payout_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payouts/data/payout_provider_event_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/reviews/data/review_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/data/service_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/user_indexes.dart';
@@ -41,4 +44,7 @@ Future<void> ensureApprovedDatabaseIndexes(Db db) async {
   await ensureReviewIndexesOnDb(db);
   await ensureDisputeIndexesOnDb(db);
   await ensureAuditLogIndexesOnDb(db);
+  await ensureEarningsLedgerIndexesOnDb(db);
+  await ensurePayoutIndexesOnDb(db);
+  await ensurePayoutProviderEventIndexesOnDb(db);
 }

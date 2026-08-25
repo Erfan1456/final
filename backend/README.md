@@ -21,7 +21,7 @@ MongoDB Atlas is the persistence provider. `mongo_dart` is the backend driver. U
 * admin cleaner list, detail, approve, and reject
 * public service catalog, cleaner offerings, availability, and customer discovery
 
-TASK 015–018 may ensure approved booking, payment, conversation, notification, review, dispute, audit, and user-listing indexes through the controlled index tool. It does not create live bookings, conversations, messages, notifications, reviews, disputes, audit rows, users, or availability fixtures.
+TASK 015–019 may ensure approved booking, payment, conversation, notification, review, dispute, audit, earnings, payout, and user-listing indexes through the controlled index tool. It does not create live bookings, conversations, messages, notifications, reviews, disputes, audit rows, earnings, payout requests, users, or availability fixtures.
 
 Do not place a real MongoDB URI, passwords, or other secrets in this package. Flutter never receives the MongoDB connection URI.
 
@@ -63,8 +63,11 @@ Do not place a real MongoDB URI, passwords, or other secrets in this package. Fl
 * admin review list/detail/hide/unhide
 * participant booking dispute create/get/close
 * admin disputes, users, bookings, and audit-log list/detail
+* cleaner earnings summary/ledger and payout request/list/cancel
+* admin payouts process/reject, finance summary, reconciliation, cleaner finance
+* sandbox payout webhook and development payout simulate (dev only)
 
-See [../documentation/api/authentication-api.md](../documentation/api/authentication-api.md), [../documentation/api/profile-address-onboarding-admin-api.md](../documentation/api/profile-address-onboarding-admin-api.md), [../documentation/api/services-availability-discovery-api.md](../documentation/api/services-availability-discovery-api.md), [../documentation/api/booking-api.md](../documentation/api/booking-api.md), [../documentation/api/payment-api.md](../documentation/api/payment-api.md), [../documentation/api/chat-api.md](../documentation/api/chat-api.md), [../documentation/api/notification-api.md](../documentation/api/notification-api.md), [../documentation/api/review-api.md](../documentation/api/review-api.md), [../documentation/api/dispute-api.md](../documentation/api/dispute-api.md), [../documentation/api/admin-operations-api.md](../documentation/api/admin-operations-api.md), and [../documentation/architecture/protected-api-authentication.md](../documentation/architecture/protected-api-authentication.md). These auth endpoints require production rate limiting before unrestricted internet exposure. WebSockets, push notifications, payouts, password recovery, MFA, AI moderation, and a production payment processor are still absent.
+See [../documentation/api/authentication-api.md](../documentation/api/authentication-api.md), [../documentation/api/profile-address-onboarding-admin-api.md](../documentation/api/profile-address-onboarding-admin-api.md), [../documentation/api/services-availability-discovery-api.md](../documentation/api/services-availability-discovery-api.md), [../documentation/api/booking-api.md](../documentation/api/booking-api.md), [../documentation/api/payment-api.md](../documentation/api/payment-api.md), [../documentation/api/chat-api.md](../documentation/api/chat-api.md), [../documentation/api/notification-api.md](../documentation/api/notification-api.md), [../documentation/api/review-api.md](../documentation/api/review-api.md), [../documentation/api/dispute-api.md](../documentation/api/dispute-api.md), [../documentation/api/admin-operations-api.md](../documentation/api/admin-operations-api.md), [../documentation/api/earnings-and-payout-api.md](../documentation/api/earnings-and-payout-api.md), and [../documentation/architecture/protected-api-authentication.md](../documentation/architecture/protected-api-authentication.md). These auth endpoints require production rate limiting before unrestricted internet exposure. WebSockets, push notifications, password recovery, MFA, AI moderation, a production payment processor, and a real payout provider are still absent. Sandbox payouts do not transfer real money.
 
 ## Configuration
 
@@ -72,6 +75,7 @@ Public, non-secret process environment variables currently supported:
 
 * `APP_ENV` — defaults to `development` when absent
 * `ALLOWED_ORIGINS` — comma-separated browser origins for CORS
+* `PLATFORM_COMMISSION_BPS` — integer 0–10000; not a secret; development/test default 1500 when unset
 
 `ALLOWED_ORIGINS` is not a secret. In development, if it is absent, localhost and 127.0.0.1 origins are permitted. Production must set an explicit allow-list and never rely on `Access-Control-Allow-Origin: *`.
 
@@ -79,8 +83,10 @@ Secret / deployment environment variables:
 
 * `MONGODB_URI` — required for database readiness (`GET /api/v1/ready`)
 * `ACCESS_TOKEN_SECRET` — HS256 access-token signing secret; required to issue tokens from auth routes. The process can still start without it. Auth routes then return HTTP 503.
+* `SANDBOX_PAYMENT_WEBHOOK_SECRET` — backend-only HMAC secret for sandbox payment webhooks (minimum 32 UTF-8 bytes)
+* `SANDBOX_PAYOUT_WEBHOOK_SECRET` — backend-only HMAC secret for sandbox payout webhooks (minimum 32 UTF-8 bytes)
 
-There is no default MongoDB URI and no default access-token secret. The process can still start and serve liveness health when `MONGODB_URI` or `ACCESS_TOKEN_SECRET` is missing.
+There is no default MongoDB URI and no default access-token secret. The process can still start and serve liveness health when `MONGODB_URI` or `ACCESS_TOKEN_SECRET` is missing. Missing sandbox secrets report those adapters unavailable without blocking boot.
 
 ## Local development
 
@@ -93,6 +99,9 @@ APP_ENV=development
 ALLOWED_ORIGINS=
 MONGODB_URI=mongodb+srv://USERNAME:PASSWORD@CLUSTER_HOST/home_cleaning_marketplace
 ACCESS_TOKEN_SECRET=<replace-with-a-strong-random-secret>
+SANDBOX_PAYMENT_WEBHOOK_SECRET=
+SANDBOX_PAYOUT_WEBHOOK_SECRET=
+PLATFORM_COMMISSION_BPS=1500
 ```
 
 Replace the placeholders with values from your private Atlas configuration. Do not commit the real file.
@@ -126,6 +135,9 @@ When the Flutter Android emulator calls this API, use `http://10.0.2.2:8080` ins
 * `lib/src/features/availability/` — UTC availability slots
 * `lib/src/features/bookings/` — booking reservation and lifecycle
 * `lib/src/features/payments/` — sandbox payment ledger and webhooks
+* `lib/src/features/earnings/` — append-only earnings ledger and settlement
+* `lib/src/features/payouts/` — payout requests, sandbox provider, and webhooks
+* `lib/src/features/finance/` — admin finance summary and reconciliation
 * `lib/src/features/chat/` — booking-scoped conversations and messages
 * `lib/src/features/notifications/` — in-app notification feed
 * `lib/src/features/reviews/` — verified reviews and admin moderation
@@ -153,7 +165,7 @@ Business logic should not accumulate in route handlers. Future features should a
 * Platform service catalog, cleaner offerings, availability, customer discovery, and booking reservation/lifecycle
 * Sandbox payment ledger, signed webhooks, and refund foundation
 * Booking-scoped chat, in-app notifications, verified reviews, and admin moderation
-* Approved indexes for profiles, catalog, bookings, payments, conversations, messages, notifications, and reviews
-* No production payment processor, WebSockets, or push notifications
+* Approved indexes for profiles, catalog, bookings, payments, conversations, messages, notifications, reviews, disputes, audit, earnings, and payouts
+* No production payment or payout processor, WebSockets, or push notifications
 * No production rate limiting yet
 * CORS is a small development-oriented foundation, not a complete production security policy

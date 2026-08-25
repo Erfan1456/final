@@ -33,6 +33,9 @@ import 'package:home_cleaning_marketplace_api/src/features/discovery/application
 import 'package:home_cleaning_marketplace_api/src/features/disputes/application/admin_dispute_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/disputes/application/booking_dispute_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/disputes/data/dispute_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/earnings/application/earnings_settlement_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/earnings/data/earnings_ledger_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/finance/application/admin_finance_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/notifications/application/notification_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/notifications/data/notification_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/admin_payment_service.dart';
@@ -46,6 +49,15 @@ import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment
 import 'package:home_cleaning_marketplace_api/src/features/payments/provider/payment_provider.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/provider/payment_provider_resolver.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/provider/sandbox_payment_provider.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payouts/application/admin_payout_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payouts/application/cleaner_payout_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payouts/application/payout_webhook_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payouts/application/sandbox_payout_simulation_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payouts/data/payout_provider_event_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payouts/data/payout_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payouts/provider/payout_provider.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payouts/provider/payout_provider_resolver.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payouts/provider/sandbox_payout_provider.dart';
 import 'package:home_cleaning_marketplace_api/src/features/reviews/application/admin_review_moderation_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/reviews/application/cleaner_review_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/reviews/application/customer_review_service.dart';
@@ -86,6 +98,12 @@ class RoleScopedComposition {
   static AdminDisputeService? _adminDisputes;
   static AdminUserManagementService? _adminUsers;
   static AdminBookingOperationsService? _adminBookings;
+  static EarningsSettlementService? _earningsSettlement;
+  static CleanerPayoutService? _cleanerPayouts;
+  static AdminPayoutService? _adminPayouts;
+  static PayoutWebhookService? _payoutWebhooks;
+  static SandboxPayoutSimulationService? _sandboxPayoutSimulation;
+  static AdminFinanceService? _adminFinance;
 
   /// Builds a [RoleRequestAuthorizer] from request providers.
   ///
@@ -260,6 +278,7 @@ class RoleScopedComposition {
       customerProfiles: MongoCustomerProfileRepository.fromDb(db),
       cancellation: await bookingCancellation(mongo: mongo, config: config),
       notifications: await notifications(mongo: mongo),
+      earnings: await earningsSettlement(mongo: mongo, config: config),
     );
   }
 
@@ -531,6 +550,113 @@ class RoleScopedComposition {
     );
   }
 
+  /// Shared earnings settlement for booking completion and payment webhooks.
+  static Future<EarningsSettlementService> earningsSettlement({
+    required MongoDatabase mongo,
+    required ServerConfig config,
+  }) async {
+    final cached = _earningsSettlement;
+    if (cached != null) {
+      return cached;
+    }
+    final wired = await _paymentStack(mongo: mongo, config: config);
+    return _earningsSettlement = wired.earnings;
+  }
+
+  /// Shared cleaner earnings and payout-request service.
+  static Future<CleanerPayoutService> cleanerPayouts({
+    required MongoDatabase mongo,
+    required ServerConfig config,
+  }) async {
+    final cached = _cleanerPayouts;
+    if (cached != null) {
+      return cached;
+    }
+    final wired = await _paymentStack(mongo: mongo, config: config);
+    return _cleanerPayouts = CleanerPayoutService(
+      ledger: wired.ledger,
+      payouts: wired.payouts,
+    );
+  }
+
+  /// Shared admin payout operations.
+  static Future<AdminPayoutService> adminPayouts({
+    required MongoDatabase mongo,
+    required ServerConfig config,
+  }) async {
+    final cached = _adminPayouts;
+    if (cached != null) {
+      return cached;
+    }
+    final wired = await _paymentStack(mongo: mongo, config: config);
+    final db = await _requireDb(mongo);
+    return _adminPayouts = AdminPayoutService(
+      payouts: wired.payouts,
+      events: wired.payoutEvents,
+      cleanerPayouts: await cleanerPayouts(mongo: mongo, config: config),
+      cleanerProfiles: MongoCleanerProfileRepository.fromDb(db),
+      provider: wired.payoutProvider,
+      notifications: await notifications(mongo: mongo),
+      audit: await audit(mongo: mongo),
+    );
+  }
+
+  /// Shared payout webhook processor.
+  static Future<PayoutWebhookService> payoutWebhooks({
+    required MongoDatabase mongo,
+    required ServerConfig config,
+  }) async {
+    final cached = _payoutWebhooks;
+    if (cached != null) {
+      return cached;
+    }
+    final wired = await _paymentStack(mongo: mongo, config: config);
+    return _payoutWebhooks = wired.payoutWebhooks;
+  }
+
+  /// Development-only sandbox payout simulator.
+  static Future<SandboxPayoutSimulationService> sandboxPayoutSimulation({
+    required MongoDatabase mongo,
+    required ServerConfig config,
+  }) async {
+    final cached = _sandboxPayoutSimulation;
+    if (cached != null) {
+      return cached;
+    }
+    final wired = await _paymentStack(mongo: mongo, config: config);
+    return _sandboxPayoutSimulation = SandboxPayoutSimulationService(
+      config: config,
+      payouts: wired.payouts,
+      webhooks: wired.payoutWebhooks,
+      sandbox: wired.payoutProvider is SandboxPayoutProvider
+          ? wired.payoutProvider! as SandboxPayoutProvider
+          : null,
+      audit: await audit(mongo: mongo),
+    );
+  }
+
+  /// Shared admin finance and reconciliation.
+  static Future<AdminFinanceService> adminFinance({
+    required MongoDatabase mongo,
+    required ServerConfig config,
+  }) async {
+    final cached = _adminFinance;
+    if (cached != null) {
+      return cached;
+    }
+    final wired = await _paymentStack(mongo: mongo, config: config);
+    final db = await _requireDb(mongo);
+    return _adminFinance = AdminFinanceService(
+      ledger: wired.ledger,
+      payouts: wired.payouts,
+      bookings: wired.bookings,
+      payments: wired.payments,
+      cleanerPayouts: await cleanerPayouts(mongo: mongo, config: config),
+      cleanerProfiles: MongoCleanerProfileRepository.fromDb(db),
+      users: _users ??= MongoUserRepository.fromDb(db),
+    );
+  }
+
   static _PaymentStack? _paymentStackCache;
 
   static Future<_PaymentStack> _paymentStack({
@@ -546,11 +672,28 @@ class RoleScopedComposition {
     final events = MongoPaymentWebhookEventRepository.fromDb(db);
     final refundRequests = MongoPaymentRefundRequestRepository.fromDb(db);
     final bookings = MongoBookingRepository.fromDb(db);
+    final ledger = MongoEarningsLedgerRepository.fromDb(db);
+    final payouts = MongoPayoutRepository.fromDb(db);
+    final payoutEvents = MongoPayoutProviderEventRepository.fromDb(db);
     final provider = const PaymentProviderResolver().resolve(config);
+    final payoutProvider = const PayoutProviderResolver().resolve(config);
+    final earnings = EarningsSettlementService(
+      config: config,
+      bookings: bookings,
+      payments: payments,
+      ledger: ledger,
+    );
     final webhooks = PaymentWebhookService(
       provider: provider,
       payments: payments,
       events: events,
+      notifications: await notifications(mongo: mongo),
+      earnings: earnings,
+    );
+    final payoutWebhooks = PayoutWebhookService(
+      provider: payoutProvider,
+      payouts: payouts,
+      events: payoutEvents,
       notifications: await notifications(mongo: mongo),
     );
     return _paymentStackCache = _PaymentStack(
@@ -560,6 +703,12 @@ class RoleScopedComposition {
       bookings: bookings,
       provider: provider,
       webhooks: webhooks,
+      ledger: ledger,
+      earnings: earnings,
+      payouts: payouts,
+      payoutEvents: payoutEvents,
+      payoutProvider: payoutProvider,
+      payoutWebhooks: payoutWebhooks,
     );
   }
 
@@ -609,6 +758,12 @@ class _PaymentStack {
     required this.bookings,
     required this.provider,
     required this.webhooks,
+    required this.ledger,
+    required this.earnings,
+    required this.payouts,
+    required this.payoutEvents,
+    required this.payoutProvider,
+    required this.payoutWebhooks,
   });
 
   final PaymentRepository payments;
@@ -617,4 +772,10 @@ class _PaymentStack {
   final BookingRepository bookings;
   final PaymentProvider? provider;
   final PaymentWebhookService webhooks;
+  final EarningsLedgerRepository ledger;
+  final EarningsSettlementService earnings;
+  final PayoutRepository payouts;
+  final PayoutProviderEventRepository payoutEvents;
+  final PayoutProvider? payoutProvider;
+  final PayoutWebhookService payoutWebhooks;
 }

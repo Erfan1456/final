@@ -17,10 +17,13 @@ import 'package:home_cleaning_marketplace_api/src/features/cleaner_profiles/data
 import 'package:home_cleaning_marketplace_api/src/features/cleaner_services/data/cleaner_service_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/disputes/data/dispute_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/earnings/data/earnings_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/notifications/data/notification_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_refund_request_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_webhook_event_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payouts/data/payout_indexes.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payouts/data/payout_provider_event_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/reviews/data/review_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/data/service_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/user_indexes.dart';
@@ -104,6 +107,15 @@ Future<void> main() async {
         .getIndexes();
     final auditIndexes = await db
         .collection(CollectionNames.auditLogs)
+        .getIndexes();
+    final earningsIndexes = await db
+        .collection(CollectionNames.earningsLedger)
+        .getIndexes();
+    final payoutIndexes = await db
+        .collection(CollectionNames.payoutRequests)
+        .getIndexes();
+    final payoutEventIndexes = await db
+        .collection(CollectionNames.payoutProviderEvents)
         .getIndexes();
 
     if (!_hasNamedIndex(usersIndexes, usersEmailNormalizedUniqueIndexName) ||
@@ -256,7 +268,33 @@ Future<void> main() async {
         !_hasNamedIndex(auditIndexes, auditLogsActorIdDescIndexName) ||
         !_hasNamedIndex(auditIndexes, auditLogsActionIdDescIndexName) ||
         !_hasNamedIndex(auditIndexes, auditLogsTargetIdDescIndexName) ||
-        !_hasNamedIndex(auditIndexes, auditLogsCreatedAtIndexName)) {
+        !_hasNamedIndex(auditIndexes, auditLogsCreatedAtIndexName) ||
+        !_hasNamedIndex(
+          earningsIndexes,
+          earningsLedgerSourceEventUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(
+          earningsIndexes,
+          earningsLedgerCleanerCurrencyIdDescIndexName,
+        ) ||
+        !_hasNamedIndex(earningsIndexes, earningsLedgerBookingTypeIndexName) ||
+        !_hasNamedIndex(earningsIndexes, earningsLedgerCreatedAtIndexName) ||
+        !_hasNamedIndex(
+          payoutIndexes,
+          payoutRequestsCleanerIdempotencyUniqueIndexName,
+        ) ||
+        !_hasPartialUniqueActivePayoutIndex(payoutIndexes) ||
+        !_hasNamedIndex(payoutIndexes, payoutRequestsCleanerIdDescIndexName) ||
+        !_hasNamedIndex(payoutIndexes, payoutRequestsStatusIdDescIndexName) ||
+        !_hasPartialUniqueProviderPayoutIndex(payoutIndexes) ||
+        !_hasNamedIndex(
+          payoutEventIndexes,
+          payoutEventsProviderEventUniqueIndexName,
+        ) ||
+        !_hasNamedIndex(
+          payoutEventIndexes,
+          payoutEventsProviderPayoutCreatedIndexName,
+        )) {
       stderr.writeln('Database indexes could not be ensured.');
       exitCode = 1;
       return;
@@ -375,7 +413,24 @@ Future<void> main() async {
       ..writeln('$auditLogsActorIdDescIndexName exists')
       ..writeln('$auditLogsActionIdDescIndexName exists')
       ..writeln('$auditLogsTargetIdDescIndexName exists')
-      ..writeln('$auditLogsCreatedAtIndexName exists');
+      ..writeln('$auditLogsCreatedAtIndexName exists')
+      ..writeln('$earningsLedgerSourceEventUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('$earningsLedgerCleanerCurrencyIdDescIndexName exists')
+      ..writeln('$earningsLedgerBookingTypeIndexName exists')
+      ..writeln('$earningsLedgerCreatedAtIndexName exists')
+      ..writeln('$payoutRequestsCleanerIdempotencyUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('$payoutRequestsCleanerActiveUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('partialFilterExpression.payout_active = true')
+      ..writeln('$payoutRequestsCleanerIdDescIndexName exists')
+      ..writeln('$payoutRequestsStatusIdDescIndexName exists')
+      ..writeln('$payoutRequestsProviderPayoutUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('$payoutEventsProviderEventUniqueIndexName exists')
+      ..writeln('unique = true')
+      ..writeln('$payoutEventsProviderPayoutCreatedIndexName exists');
   } catch (_) {
     stderr.writeln('Database indexes could not be ensured.');
     exitCode = 1;
@@ -444,6 +499,54 @@ bool _hasPartialUniqueSettlementIndex(List<Map<String, dynamic>> indexes) {
     }
     final filter = index['partialFilterExpression'];
     if (filter is! Map || filter[paymentsSettlementRecordedField] != true) {
+      return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+bool _hasPartialUniqueActivePayoutIndex(List<Map<String, dynamic>> indexes) {
+  for (final index in indexes) {
+    if (index['name'] != payoutRequestsCleanerActiveUniqueIndexName) {
+      continue;
+    }
+    if (index['unique'] != true) {
+      return false;
+    }
+    final key = index['key'];
+    if (key is! Map || key[payoutRequestsCleanerUserIdField] != 1) {
+      return false;
+    }
+    final filter = index['partialFilterExpression'];
+    if (filter is! Map || filter[payoutRequestsPayoutActiveField] != true) {
+      return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+bool _hasPartialUniqueProviderPayoutIndex(List<Map<String, dynamic>> indexes) {
+  for (final index in indexes) {
+    if (index['name'] != payoutRequestsProviderPayoutUniqueIndexName) {
+      continue;
+    }
+    if (index['unique'] != true) {
+      return false;
+    }
+    final key = index['key'];
+    if (key is! Map ||
+        key[payoutRequestsProviderField] != 1 ||
+        key[payoutRequestsProviderPayoutIdField] != 1) {
+      return false;
+    }
+    final filter = index['partialFilterExpression'];
+    if (filter is! Map) {
+      return false;
+    }
+    final type = filter[payoutRequestsProviderPayoutIdField];
+    if (type is! Map || type[r'$type'] != 'string') {
       return false;
     }
     return true;

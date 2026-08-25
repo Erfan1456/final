@@ -38,6 +38,11 @@ import 'package:home_cleaning_marketplace/features/admin/presentation/admin_user
 import 'package:home_cleaning_marketplace/features/disputes/data/dispute_models.dart';
 import 'package:home_cleaning_marketplace/features/disputes/presentation/admin_dispute_controller.dart';
 import 'package:home_cleaning_marketplace/features/disputes/presentation/booking_dispute_controller.dart';
+import 'package:home_cleaning_marketplace/features/earnings/data/earnings_models.dart';
+import 'package:home_cleaning_marketplace/features/earnings/presentation/cleaner_earnings_controller.dart';
+import 'package:home_cleaning_marketplace/features/admin/data/admin_finance_models.dart';
+import 'package:home_cleaning_marketplace/features/admin/presentation/admin_finance_controller.dart';
+import 'package:home_cleaning_marketplace/features/admin/presentation/admin_payout_controller.dart';
 
 class SeededCustomerProfileController extends CustomerProfileController {
   SeededCustomerProfileController(this._seed);
@@ -1067,6 +1072,177 @@ class SeededAdminAuditLogController extends AdminAuditLogController {
   }
 }
 
+class SeededCleanerEarningsController extends CleanerEarningsController {
+  SeededCleanerEarningsController(this._seed);
+
+  final CleanerEarningsState _seed;
+  int loadCalls = 0;
+  int selectCalls = 0;
+  int loadMoreLedgerCalls = 0;
+  int loadMorePayoutsCalls = 0;
+  int requestCalls = 0;
+  int cancelCalls = 0;
+  String? lastIdempotencyKey;
+  int? lastAmount;
+  String? lastCurrency;
+
+  @override
+  CleanerEarningsState build() => _seed;
+
+  @override
+  Future<void> load() async {
+    loadCalls += 1;
+  }
+
+  @override
+  Future<void> selectCurrency(String currencyCode) async {
+    selectCalls += 1;
+    state = state.copyWith(selectedCurrency: currencyCode, loading: false);
+  }
+
+  @override
+  Future<void> loadMoreLedger() async {
+    loadMoreLedgerCalls += 1;
+  }
+
+  @override
+  Future<void> loadMorePayouts() async {
+    loadMorePayoutsCalls += 1;
+  }
+
+  @override
+  void beginPayoutRequest({String Function()? keyFactory}) {
+    super.beginPayoutRequest(
+      keyFactory: keyFactory ?? () => 'test-payout-idem-key1',
+    );
+  }
+
+  @override
+  Future<bool> requestPayout({
+    required int amountMinor,
+    required String currencyCode,
+    String Function()? keyFactory,
+  }) async {
+    if (state.saving) {
+      return false;
+    }
+    requestCalls += 1;
+    lastAmount = amountMinor;
+    lastCurrency = currencyCode;
+    lastIdempotencyKey = state.requestIdempotencyKey;
+    return true;
+  }
+
+  @override
+  Future<bool> cancelPayout(String payoutId) async {
+    cancelCalls += 1;
+    return true;
+  }
+}
+
+class SeededAdminPayoutController extends AdminPayoutController {
+  SeededAdminPayoutController(this._seed);
+
+  final AdminPayoutState _seed;
+  int loadCalls = 0;
+  int loadMoreCalls = 0;
+  int loadDetailCalls = 0;
+  int processCalls = 0;
+  int rejectCalls = 0;
+  int simulateSuccessCalls = 0;
+  int simulateFailureCalls = 0;
+  AdminPayoutFilters? lastFilters;
+  String? lastRejectReason;
+
+  @override
+  AdminPayoutState build() => _seed;
+
+  @override
+  Future<void> load({AdminPayoutFilters? filters}) async {
+    loadCalls += 1;
+    lastFilters = filters ?? state.filters;
+    if (filters != null) {
+      state = state.copyWith(filters: filters, loading: false);
+    }
+  }
+
+  @override
+  Future<void> applyFilters(AdminPayoutFilters filters) {
+    return load(filters: filters);
+  }
+
+  @override
+  Future<void> loadMore() async {
+    loadMoreCalls += 1;
+  }
+
+  @override
+  Future<void> loadDetail(String payoutId) async {
+    loadDetailCalls += 1;
+  }
+
+  @override
+  Future<bool> process(String payoutId) async {
+    processCalls += 1;
+    return true;
+  }
+
+  @override
+  Future<bool> reject({
+    required String payoutId,
+    required String reason,
+  }) async {
+    rejectCalls += 1;
+    lastRejectReason = reason;
+    return true;
+  }
+
+  @override
+  Future<bool> simulateSuccess(String payoutId) async {
+    simulateSuccessCalls += 1;
+    return true;
+  }
+
+  @override
+  Future<bool> simulateFailure(String payoutId) async {
+    simulateFailureCalls += 1;
+    return true;
+  }
+}
+
+class SeededAdminFinanceController extends AdminFinanceController {
+  SeededAdminFinanceController(this._seed);
+
+  final AdminFinanceState _seed;
+  int summaryCalls = 0;
+  int reconciliationCalls = 0;
+  int loadMoreCalls = 0;
+  int cleanerFinanceCalls = 0;
+
+  @override
+  AdminFinanceState build() => _seed;
+
+  @override
+  Future<void> loadSummary({String? from, String? to, String? currency}) async {
+    summaryCalls += 1;
+  }
+
+  @override
+  Future<void> loadReconciliation({String? currency}) async {
+    reconciliationCalls += 1;
+  }
+
+  @override
+  Future<void> loadMoreReconciliation() async {
+    loadMoreCalls += 1;
+  }
+
+  @override
+  Future<void> loadCleanerFinance(String userId) async {
+    cleanerFinanceCalls += 1;
+  }
+}
+
 CustomerProfile testCustomerProfile() {
   final created = DateTime.utc(2026, 8, 25, 12);
   return CustomerProfile(
@@ -1227,6 +1403,18 @@ List<dynamic> featureControllerOverrides() {
       () => SeededAdminAuditLogController(
         const AdminAuditLogState(loading: false),
       ),
+    ),
+    cleanerEarningsControllerProvider.overrideWith(
+      () => SeededCleanerEarningsController(
+        const CleanerEarningsState(loading: false),
+      ),
+    ),
+    adminPayoutControllerProvider.overrideWith(
+      () => SeededAdminPayoutController(const AdminPayoutState(loading: false)),
+    ),
+    adminFinanceControllerProvider.overrideWith(
+      () =>
+          SeededAdminFinanceController(const AdminFinanceState(loading: false)),
     ),
   ];
 }
@@ -2129,4 +2317,153 @@ Map<String, dynamic> adminAuditJson({
 
 AdminAuditLogSummary testAdminAuditLog({String action = 'user_suspended'}) {
   return AdminAuditLogSummary.fromJson(adminAuditJson(action: action));
+}
+
+Map<String, dynamic> earningsCurrencyJson({
+  String currency = 'BDT',
+  int available = 85000,
+}) {
+  return <String, dynamic>{
+    'currency_code': currency,
+    'gross_earned_minor': 100000,
+    'platform_fees_minor': 15000,
+    'refunds_gross_minor': 0,
+    'cleaner_refund_adjustments_minor': 0,
+    'net_ledger_minor': 85000,
+    'reserved_payout_minor': 0,
+    'paid_out_minor': 0,
+    'available_balance_minor': available,
+  };
+}
+
+CleanerCurrencyEarningsSummary testEarningsSummary({
+  String currency = 'BDT',
+  int available = 85000,
+}) {
+  return CleanerCurrencyEarningsSummary.fromJson(
+    earningsCurrencyJson(currency: currency, available: available),
+  );
+}
+
+Map<String, dynamic> earningsLedgerJson({
+  String type = 'service_earning',
+  int cleanerAmount = 85000,
+}) {
+  return <String, dynamic>{
+    'id': '507f1f77bcf86cd7994390e1',
+    'booking_id': '507f1f77bcf86cd7994390b1',
+    'payment_id': '507f1f77bcf86cd7994390d1',
+    'entry_type': type,
+    'gross_amount_minor': type == 'refund_adjustment' ? -20000 : 100000,
+    'commission_bps': 1500,
+    'platform_fee_minor': type == 'refund_adjustment' ? -3000 : 15000,
+    'cleaner_amount_minor': cleanerAmount,
+    'currency_code': 'BDT',
+    'created_at': '2026-08-25T12:00:00.000Z',
+  };
+}
+
+EarningsLedgerEntry testEarningsLedgerEntry({
+  String type = 'service_earning',
+  int cleanerAmount = 85000,
+}) {
+  return EarningsLedgerEntry.fromJson(
+    earningsLedgerJson(type: type, cleanerAmount: cleanerAmount),
+  );
+}
+
+Map<String, dynamic> cleanerPayoutJson({
+  String status = 'requested',
+  bool simulationAvailable = false,
+  String? rejectionReason,
+}) {
+  return <String, dynamic>{
+    'id': '507f1f77bcf86cd7994390f1',
+    'amount_minor': 10000,
+    'currency_code': 'BDT',
+    'status': status,
+    'attempt_number': 1,
+    'requested_at': '2026-08-25T12:00:00.000Z',
+    'processing_at': null,
+    'paid_at': null,
+    'failed_at': null,
+    'cancelled_at': null,
+    'rejected_at': rejectionReason == null ? null : '2026-08-25T13:00:00.000Z',
+    'failure_code': null,
+    'failure_message': null,
+    'rejection_reason': rejectionReason,
+    'cleaner_user_id': '507f1f77bcf86cd799439022',
+    'cleaner_display_name': 'Ada Cleaner',
+    'simulation_available': simulationAvailable,
+  };
+}
+
+CleanerPayout testCleanerPayout({
+  String status = 'requested',
+  bool simulationAvailable = false,
+  String? rejectionReason,
+}) {
+  return CleanerPayout.fromJson(
+    cleanerPayoutJson(
+      status: status,
+      simulationAvailable: simulationAvailable,
+      rejectionReason: rejectionReason,
+    ),
+  );
+}
+
+AdminPayoutDetail testAdminPayoutDetail({
+  String status = 'requested',
+  bool simulationAvailable = false,
+}) {
+  return AdminPayoutDetail.fromJson(<String, dynamic>{
+    'payout': cleanerPayoutJson(
+      status: status,
+      simulationAvailable: simulationAvailable,
+    ),
+    'earnings_summary': earningsCurrencyJson(),
+    'provider_events': <Map<String, dynamic>>[
+      <String, dynamic>{
+        'provider_event_id': 'evt_1',
+        'event_type': 'payout.paid',
+        'processing_status': 'processed',
+        'created_at': '2026-08-25T12:00:00.000Z',
+        'processed_at': '2026-08-25T12:00:01.000Z',
+      },
+    ],
+  });
+}
+
+AdminFinanceSummary testAdminFinanceSummary() {
+  return AdminFinanceSummary.fromJson(<String, dynamic>{
+    'from': '2026-07-26T00:00:00.000Z',
+    'to': '2026-08-25T00:00:00.000Z',
+    'currencies': <Map<String, dynamic>>[
+      <String, dynamic>{
+        'currency_code': 'BDT',
+        'gross_service_volume_minor': 100000,
+        'platform_fee_minor': 15000,
+        'cleaner_net_earnings_minor': 85000,
+        'refund_gross_minor': 0,
+        'cleaner_refund_adjustments_minor': 0,
+        'payout_requested_minor': 0,
+        'payout_processing_minor': 0,
+        'payout_paid_minor': 0,
+        'payout_failed_minor': 0,
+      },
+    ],
+  });
+}
+
+FinanceReconciliationIssue testReconciliationIssue({
+  String type = 'missing_service_earning',
+}) {
+  return FinanceReconciliationIssue.fromJson(<String, dynamic>{
+    'issue_type': type,
+    'booking_id': '507f1f77bcf86cd7994390b1',
+    'payment_id': '507f1f77bcf86cd7994390d1',
+    'currency_code': 'BDT',
+    'explanation':
+        'Completed booking with a successful payment has no service earning.',
+  });
 }

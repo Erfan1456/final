@@ -212,4 +212,62 @@ void main() {
       );
     });
   });
+
+  group('platform commission and payout sandbox', () {
+    test('defaults to 1500 bps when unset', () {
+      final config = ServerConfig.fromEnvironment(const <String, String>{});
+      expect(config.platformCommissionBps, equals(1500));
+      expect(config.hasExplicitPlatformCommissionBps, isFalse);
+      expect(config.hasValidPlatformCommissionBps, isTrue);
+      expect(config.toString(), contains('platformCommissionBps: 1500'));
+    });
+
+    test('parses explicit integer bps including 0 and 10000', () {
+      expect(
+        ServerConfig.fromEnvironment(const <String, String>{
+          'PLATFORM_COMMISSION_BPS': '0',
+        }).platformCommissionBps,
+        equals(0),
+      );
+      expect(
+        ServerConfig.fromEnvironment(const <String, String>{
+          'PLATFORM_COMMISSION_BPS': '10000',
+        }).platformCommissionBps,
+        equals(10000),
+      );
+    });
+
+    test('rejects non-integer and out-of-range commission', () {
+      final invalid = ServerConfig.fromEnvironment(const <String, String>{
+        'PLATFORM_COMMISSION_BPS': '15.5',
+      });
+      expect(invalid.hasValidPlatformCommissionBps, isFalse);
+      expect(invalid.platformCommissionBps, equals(1500));
+      final high = ServerConfig.fromEnvironment(const <String, String>{
+        'PLATFORM_COMMISSION_BPS': '10001',
+      });
+      expect(high.hasValidPlatformCommissionBps, isFalse);
+    });
+
+    test('payout webhook secret is omitted from toString', () {
+      const fakeSecret = 'test-sandbox-payout-webhook-32b!!';
+      final config = ServerConfig.fromEnvironment(const <String, String>{
+        'SANDBOX_PAYOUT_WEBHOOK_SECRET': fakeSecret,
+      });
+      expect(config.hasSandboxPayoutWebhookSecret, isTrue);
+      expect(config.hasValidSandboxPayoutWebhookSecret, isTrue);
+      expect(config.toString(), isNot(contains(fakeSecret)));
+    });
+
+    test('production never allows sandbox payouts', () {
+      const fakeSecret = 'test-sandbox-payout-webhook-32b!!';
+      final config = ServerConfig.fromEnvironment(const <String, String>{
+        'APP_ENV': 'production',
+        'SANDBOX_PAYOUT_WEBHOOK_SECRET': fakeSecret,
+      });
+      expect(config.allowsSandboxPayouts, isFalse);
+      expect(config.isProduction, isTrue);
+      expect(config.toString(), isNot(contains(fakeSecret)));
+    });
+  });
 }

@@ -45,6 +45,9 @@ import 'package:home_cleaning_marketplace/features/reviews/presentation/customer
 import 'package:home_cleaning_marketplace/features/disputes/presentation/admin_dispute_detail_screen.dart';
 import 'package:home_cleaning_marketplace/features/disputes/presentation/admin_dispute_list_screen.dart';
 import 'package:home_cleaning_marketplace/features/disputes/presentation/booking_dispute_screen.dart';
+import 'package:home_cleaning_marketplace/features/earnings/presentation/cleaner_earnings_screen.dart';
+import 'package:home_cleaning_marketplace/features/admin/presentation/admin_finance_screens.dart';
+import 'package:home_cleaning_marketplace/features/admin/presentation/admin_payout_screens.dart';
 
 class _RouterRefresh extends ChangeNotifier {
   void ping() => notifyListeners();
@@ -280,6 +283,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const CleanerReviewsScreen(),
       ),
       GoRoute(
+        path: AppRoutes.cleanerEarningsPath,
+        builder: (context, state) => const CleanerEarningsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.cleanerEarningsLedgerPath,
+        builder: (context, state) => const CleanerEarningsLedgerScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.cleanerPayoutsPath,
+        builder: (context, state) => const CleanerPayoutHistoryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.cleanerPayoutRequestPath,
+        builder: (context, state) => const CleanerPayoutRequestScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.cleanerPayoutDetailPath,
+        builder: (context, state) => const CleanerPayoutHistoryScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.adminHomePath,
         name: AppRoutes.adminHomeName,
         builder: (context, state) => const AdminHomeScreen(),
@@ -365,6 +388,34 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           return AdminAuditDetailScreen(
             auditLogId: state.pathParameters['auditLogId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.adminPayoutsPath,
+        builder: (context, state) => const AdminPayoutListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminPayoutDetailPath,
+        builder: (context, state) {
+          return AdminPayoutDetailScreen(
+            payoutId: state.pathParameters['payoutId'] ?? '',
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.adminFinancePath,
+        builder: (context, state) => const AdminFinanceScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminFinanceReconciliationPath,
+        builder: (context, state) => const AdminFinanceReconciliationScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminUserFinancePath,
+        builder: (context, state) {
+          return AdminCleanerFinanceScreen(
+            userId: state.pathParameters['userId'] ?? '',
           );
         },
       ),

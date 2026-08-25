@@ -12,7 +12,10 @@ enum AuditAction {
   disputeReviewStarted,
   disputeResolved,
   disputeClosed,
-  bookingAdminCancelled;
+  bookingAdminCancelled,
+  payoutProcessingStarted,
+  payoutRejected,
+  payoutSandboxSimulated;
 
   /// Stable database/wire representation.
   String get wireValue {
@@ -41,6 +44,12 @@ enum AuditAction {
         return 'dispute_closed';
       case AuditAction.bookingAdminCancelled:
         return 'booking_admin_cancelled';
+      case AuditAction.payoutProcessingStarted:
+        return 'payout_processing_started';
+      case AuditAction.payoutRejected:
+        return 'payout_rejected';
+      case AuditAction.payoutSandboxSimulated:
+        return 'payout_sandbox_simulated';
     }
   }
 
@@ -71,6 +80,12 @@ enum AuditAction {
         return AuditAction.disputeClosed;
       case 'booking_admin_cancelled':
         return AuditAction.bookingAdminCancelled;
+      case 'payout_processing_started':
+        return AuditAction.payoutProcessingStarted;
+      case 'payout_rejected':
+        return AuditAction.payoutRejected;
+      case 'payout_sandbox_simulated':
+        return AuditAction.payoutSandboxSimulated;
       default:
         throw const FormatException('Unknown AuditAction.');
     }
@@ -85,4 +100,5 @@ abstract final class AuditTargetType {
   static const String payment = 'payment';
   static const String dispute = 'dispute';
   static const String booking = 'booking';
+  static const String payout = 'payout';
 }

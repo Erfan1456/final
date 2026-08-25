@@ -2,7 +2,7 @@
 
 Admin-only user management, booking oversight, and audit log routes. Persisted admin role is required. JWT role alone is not sufficient.
 
-Payouts, password recovery, MFA, chargebacks, and AI moderation are not implemented.
+Payouts, finance summary, and reconciliation live in [earnings-and-payout-api.md](earnings-and-payout-api.md). Password recovery, MFA, chargebacks, and AI moderation are not implemented.
 
 All list endpoints use keyset pagination: `limit` default 20 (1–50), `after` ObjectId cursor, sort `_id` descending. No offset.
 

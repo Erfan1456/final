@@ -66,5 +66,6 @@ Cleaner JSON: customer display name (profile full name or `Customer`), snapshots
 * Role guards redirect foreign roles; backend authorization remains authoritative
 * TASK 017: **Message Cleaner** / **Message Customer** from booking detail; completed bookings show **Leave Review** / **Edit Review**
 * TASK 018: eligible bookings show **Report a Problem** / **View Dispute**; admin may cancel `pending`/`confirmed` bookings with payment-aware refund-before-cancel. See [disputes-admin-operations-and-audit.md](disputes-admin-operations-and-audit.md).
+* TASK 019: cleaner job completion and successful payment both trigger idempotent earning creation. See [earnings-payouts-and-reconciliation.md](earnings-payouts-and-reconciliation.md).
 
 Quoted amounts display as minor units (`BDT 250000 minor units / hour`, `Quoted total: BDT 500000 minor units`) without dividing by 100.

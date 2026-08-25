@@ -141,6 +141,26 @@ String messageForApiCode(String code) {
       return 'This booking cannot be cancelled by an administrator.';
     case 'audit_log_not_found':
       return 'Audit log was not found.';
+    case 'insufficient_payout_balance':
+      return 'Available payout balance is insufficient.';
+    case 'payout_already_active':
+      return 'A payout request is already in progress.';
+    case 'payout_not_found':
+      return 'Payout was not found.';
+    case 'invalid_payout_state':
+      return 'This payout action is not allowed right now.';
+    case 'payout_provider_unavailable':
+      return 'Payout processing is temporarily unavailable.';
+    case 'invalid_payout_amount':
+      return 'Payout amount must be a whole number of at least 1 minor unit.';
+    case 'invalid_payout_currency':
+      return 'Currency code must be three letters.';
+    case 'payout_integrity_mismatch':
+      return 'Payout details could not be verified.';
+    case 'payout_webhook_event_conflict':
+      return 'This payout event could not be processed.';
+    case 'invalid_payout_rejection_reason':
+      return 'Rejection reason must be between 5 and 500 characters.';
     case 'invalid_input':
       return 'Please check your details and try again.';
     case 'invalid_access_token':

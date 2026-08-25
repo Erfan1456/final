@@ -206,6 +206,14 @@ String? notificationTargetLocation(
         return AppRoutes.cleanerBookingDisputeLocation(resourceId);
       }
       return null;
+    case 'payout':
+      if (role == 'cleaner') {
+        if (resourceId == null || resourceId.isEmpty) {
+          return AppRoutes.cleanerPayoutsPath;
+        }
+        return AppRoutes.cleanerPayoutDetailLocation(resourceId);
+      }
+      return null;
     default:
       return null;
   }

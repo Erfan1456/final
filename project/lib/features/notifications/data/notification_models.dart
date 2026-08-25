@@ -14,6 +14,12 @@ enum NotificationType {
   disputeUnderReview,
   disputeResolved,
   disputeClosed,
+  payoutRequested,
+  payoutProcessing,
+  payoutPaid,
+  payoutFailed,
+  payoutRejected,
+  payoutCancelled,
   unknown;
 
   static NotificationType fromWire(String value) {
@@ -48,6 +54,18 @@ enum NotificationType {
         return NotificationType.disputeResolved;
       case 'dispute_closed':
         return NotificationType.disputeClosed;
+      case 'payout_requested':
+        return NotificationType.payoutRequested;
+      case 'payout_processing':
+        return NotificationType.payoutProcessing;
+      case 'payout_paid':
+        return NotificationType.payoutPaid;
+      case 'payout_failed':
+        return NotificationType.payoutFailed;
+      case 'payout_rejected':
+        return NotificationType.payoutRejected;
+      case 'payout_cancelled':
+        return NotificationType.payoutCancelled;
       default:
         return NotificationType.unknown;
     }
@@ -85,6 +103,18 @@ enum NotificationType {
         return 'dispute_resolved';
       case NotificationType.disputeClosed:
         return 'dispute_closed';
+      case NotificationType.payoutRequested:
+        return 'payout_requested';
+      case NotificationType.payoutProcessing:
+        return 'payout_processing';
+      case NotificationType.payoutPaid:
+        return 'payout_paid';
+      case NotificationType.payoutFailed:
+        return 'payout_failed';
+      case NotificationType.payoutRejected:
+        return 'payout_rejected';
+      case NotificationType.payoutCancelled:
+        return 'payout_cancelled';
       case NotificationType.unknown:
         return 'unknown';
     }

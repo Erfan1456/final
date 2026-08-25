@@ -2,7 +2,7 @@
 
 TASK 018 adds booking-scoped disputes, admin user moderation, admin booking oversight with payment-aware cancellation, and an append-only audit log.
 
-There are no payouts, password recovery, MFA, real payment gateway, push notifications, WebSockets, evidence file uploads, chargebacks, legal adjudication, or AI features.
+There are no password recovery, MFA, real payment gateway, push notifications, WebSockets, evidence file uploads, chargebacks, legal adjudication, or AI features. Cleaner earnings and sandbox payout settlement are documented in [earnings-payouts-and-reconciliation.md](earnings-payouts-and-reconciliation.md).
 
 ## Participant dispute
 

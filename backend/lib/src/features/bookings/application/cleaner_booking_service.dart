@@ -4,6 +4,7 @@ import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booki
 import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_status.dart';
 import 'package:home_cleaning_marketplace_api/src/features/bookings/domain/booking_validation.dart';
 import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/data/customer_profile_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/earnings/application/earnings_settlement_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/notifications/application/notification_sink.dart';
 import 'package:home_cleaning_marketplace_api/src/features/notifications/domain/notification_type.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/booking_cancellation_orchestrator.dart';
@@ -20,17 +21,20 @@ class CleanerBookingService {
     required CustomerProfileRepository customerProfiles,
     required BookingCancellationOrchestrator cancellation,
     NotificationSink? notifications,
+    EarningsSettlementService? earnings,
     DateTime Function()? clock,
   }) : _bookings = bookings,
        _customerProfiles = customerProfiles,
        _cancellation = cancellation,
        _notifications = notifications ?? const NoOpNotificationSink(),
+       _earnings = earnings,
        _clock = clock ?? DateTime.now;
 
   final BookingRepository _bookings;
   final CustomerProfileRepository _customerProfiles;
   final BookingCancellationOrchestrator _cancellation;
   final NotificationSink _notifications;
+  final EarningsSettlementService? _earnings;
   final DateTime Function() _clock;
 
   /// Lists assigned bookings with keyset pagination.
@@ -178,6 +182,9 @@ class CleanerBookingService {
   }) async {
     if (updated != null) {
       await _notifyCustomerTransition(updated);
+      if (updated.status == BookingStatus.completed) {
+        await _earnings?.tryEnsureBookingEarning(updated.id);
+      }
       return _toJson(updated);
     }
     await _requireOwned(user: user, bookingId: bookingId);

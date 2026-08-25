@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:home_cleaning_marketplace/app/router/app_routes.dart';
 import 'package:home_cleaning_marketplace/features/admin/presentation/admin_user_management_controller.dart';
 import 'package:home_cleaning_marketplace/features/bookings/presentation/booking_widgets.dart';
 
@@ -50,6 +52,13 @@ class _AdminUserDetailScreenState extends ConsumerState<AdminUserDetailScreen> {
                     if (detail.cleanerProfile != null) ...[
                       Text(detail.cleanerProfile!.fullName),
                       Text(detail.cleanerProfile!.onboardingStatus.wireValue),
+                      const SizedBox(height: 8),
+                      FilledButton.tonal(
+                        onPressed: () => context.push(
+                          AppRoutes.adminUserFinanceLocation(detail.user.id),
+                        ),
+                        child: const Text('View Financial Summary'),
+                      ),
                     ],
                     Text('Bookings: ${detail.bookingCount}'),
                     Text('Payments: ${detail.paymentCount}'),

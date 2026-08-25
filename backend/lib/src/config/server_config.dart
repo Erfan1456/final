@@ -9,6 +9,10 @@ import 'dart:io';
 /// - `MONGODB_URI` — MongoDB Atlas connection URI (secret; never logged)
 /// - `ACCESS_TOKEN_SECRET` — HS256 signing secret (secret; never logged)
 /// - `SANDBOX_PAYMENT_WEBHOOK_SECRET` — sandbox HMAC secret (never logged)
+/// - `SANDBOX_PAYOUT_WEBHOOK_SECRET` — sandbox payout HMAC secret
+///   (never logged)
+/// - `PLATFORM_COMMISSION_BPS` — platform commission in basis points
+///   (not secret)
 ///
 /// The MongoDB URI has no default. When it is absent, [hasMongoUri] is false
 /// and liveness health can still succeed.
@@ -19,6 +23,14 @@ import 'dart:io';
 ///
 /// [sandboxPaymentWebhookSecret] has no default. The process can start without
 /// it; sandbox payment initialization reports unavailable instead.
+///
+/// [sandboxPayoutWebhookSecret] has no default. The process can start without
+/// it; sandbox payout initialization reports unavailable instead.
+///
+/// [platformCommissionBps] defaults to [defaultPlatformCommissionBps] (1500)
+/// when unset. That default is intended for development/test. Production
+/// should set `PLATFORM_COMMISSION_BPS` explicitly; the process still boots
+/// with the documented default so configuration loading stays non-throwing.
 class ServerConfig {
   /// Creates an explicit configuration, useful for tests.
   const ServerConfig({
@@ -27,6 +39,10 @@ class ServerConfig {
     this.mongoUri = '',
     this.accessTokenSecret = '',
     this.sandboxPaymentWebhookSecret = '',
+    this.sandboxPayoutWebhookSecret = '',
+    this.platformCommissionBps = defaultPlatformCommissionBps,
+    this.hasExplicitPlatformCommissionBps = false,
+    this.hasValidPlatformCommissionBps = true,
   });
 
   /// Reads settings from [environmentVariables], or from
@@ -53,6 +69,11 @@ class ServerConfig {
     final accessTokenSecret = env['ACCESS_TOKEN_SECRET']?.trim() ?? '';
     final sandboxPaymentWebhookSecret =
         env['SANDBOX_PAYMENT_WEBHOOK_SECRET']?.trim() ?? '';
+    final sandboxPayoutWebhookSecret =
+        env['SANDBOX_PAYOUT_WEBHOOK_SECRET']?.trim() ?? '';
+    final commission = _parsePlatformCommissionBps(
+      env['PLATFORM_COMMISSION_BPS']?.trim(),
+    );
 
     return ServerConfig(
       environment: environment,
@@ -60,11 +81,24 @@ class ServerConfig {
       mongoUri: mongoUri,
       accessTokenSecret: accessTokenSecret,
       sandboxPaymentWebhookSecret: sandboxPaymentWebhookSecret,
+      sandboxPayoutWebhookSecret: sandboxPayoutWebhookSecret,
+      platformCommissionBps: commission.bps,
+      hasExplicitPlatformCommissionBps: commission.explicit,
+      hasValidPlatformCommissionBps: commission.valid,
     );
   }
 
   /// Default `APP_ENV` when the variable is absent.
   static const String defaultEnvironment = 'development';
+
+  /// Development/test default: 1500 bps = 15%.
+  static const int defaultPlatformCommissionBps = 1500;
+
+  /// Inclusive minimum commission in basis points.
+  static const int minPlatformCommissionBps = 0;
+
+  /// Inclusive maximum commission in basis points (100%).
+  static const int maxPlatformCommissionBps = 10000;
 
   /// Current application environment name, for example `development`.
   final String environment;
@@ -89,6 +123,29 @@ class ServerConfig {
   /// include this value in [toString], exceptions, or HTTP responses.
   final String sandboxPaymentWebhookSecret;
 
+  /// HMAC secret for the development/test sandbox payout webhook.
+  ///
+  /// Backend only. Minimum 32 UTF-8 bytes at runtime. Do not print, log, or
+  /// include this value in [toString], exceptions, or HTTP responses.
+  final String sandboxPayoutWebhookSecret;
+
+  /// Platform commission in basis points snapshotted onto new earnings.
+  ///
+  /// Not a secret. Integer 0–10000. Existing earnings are never recalculated
+  /// when this value changes.
+  final int platformCommissionBps;
+
+  /// Whether `PLATFORM_COMMISSION_BPS` was present in the environment.
+  final bool hasExplicitPlatformCommissionBps;
+
+  /// Whether the configured commission parsed as an integer in 0–10000.
+  ///
+  /// Unset configuration uses [defaultPlatformCommissionBps] and is valid.
+  /// An explicit invalid value keeps the process booting with the default
+  /// but [hasValidPlatformCommissionBps] is false so earning creation can
+  /// refuse to snapshot a guessed rate.
+  final bool hasValidPlatformCommissionBps;
+
   /// Whether a non-empty MongoDB URI was configured.
   bool get hasMongoUri => mongoUri.isNotEmpty;
 
@@ -99,9 +156,18 @@ class ServerConfig {
   bool get hasSandboxPaymentWebhookSecret =>
       sandboxPaymentWebhookSecret.isNotEmpty;
 
+  /// Whether a non-empty sandbox payout webhook secret was configured.
+  bool get hasSandboxPayoutWebhookSecret =>
+      sandboxPayoutWebhookSecret.isNotEmpty;
+
   /// Whether the sandbox webhook secret meets the 32 UTF-8 byte minimum.
   bool get hasValidSandboxWebhookSecret {
     return utf8.encode(sandboxPaymentWebhookSecret).length >= 32;
+  }
+
+  /// Whether the sandbox payout webhook secret meets the 32 UTF-8 byte minimum.
+  bool get hasValidSandboxPayoutWebhookSecret {
+    return utf8.encode(sandboxPayoutWebhookSecret).length >= 32;
   }
 
   /// Whether [environment] is the development default.
@@ -117,6 +183,12 @@ class ServerConfig {
   ///
   /// Production never falls back to sandbox, even if a secret is present.
   bool get allowsSandboxPayments => isDevelopment || isTest;
+
+  /// Whether the development sandbox payout provider may be constructed.
+  ///
+  /// Production never falls back to sandbox payouts, even if a secret is
+  /// present.
+  bool get allowsSandboxPayouts => isDevelopment || isTest;
 
   /// Origin to echo in CORS headers, or `null` when the request origin is not
   /// allowed.
@@ -153,9 +225,35 @@ class ServerConfig {
     return uri.host == 'localhost' || uri.host == '127.0.0.1';
   }
 
+  static ({int bps, bool explicit, bool valid}) _parsePlatformCommissionBps(
+    String? raw,
+  ) {
+    if (raw == null || raw.isEmpty) {
+      return (
+        bps: defaultPlatformCommissionBps,
+        explicit: false,
+        valid: true,
+      );
+    }
+    final parsed = int.tryParse(raw);
+    if (parsed == null ||
+        parsed < minPlatformCommissionBps ||
+        parsed > maxPlatformCommissionBps) {
+      return (
+        bps: defaultPlatformCommissionBps,
+        explicit: true,
+        valid: false,
+      );
+    }
+    return (bps: parsed, explicit: true, valid: true);
+  }
+
   @override
   String toString() =>
       'ServerConfig(environment: $environment, hasMongoUri: $hasMongoUri, '
       'hasAccessTokenSecret: $hasAccessTokenSecret, '
-      'hasSandboxPaymentWebhookSecret: $hasSandboxPaymentWebhookSecret)';
+      'hasSandboxPaymentWebhookSecret: $hasSandboxPaymentWebhookSecret, '
+      'hasSandboxPayoutWebhookSecret: $hasSandboxPayoutWebhookSecret, '
+      'platformCommissionBps: $platformCommissionBps, '
+      'hasValidPlatformCommissionBps: $hasValidPlatformCommissionBps)';
 }

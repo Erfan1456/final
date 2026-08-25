@@ -57,8 +57,11 @@ The Dart Frog backend currently implements:
 * admin review list/detail/hide/unhide
 * participant booking dispute create/get/close
 * admin disputes, users, bookings, and audit logs
+* cleaner earnings, ledger, and payout requests
+* admin payouts, finance summary, reconciliation, and cleaner finance
+* sandbox payout webhook and development payout simulate (dev only)
 * discovery rating_average, review_count, and latest published reviews
 
-See [authentication-api.md](authentication-api.md), [profile-address-onboarding-admin-api.md](profile-address-onboarding-admin-api.md), [services-availability-discovery-api.md](services-availability-discovery-api.md), [booking-api.md](booking-api.md), [payment-api.md](payment-api.md), [chat-api.md](chat-api.md), [notification-api.md](notification-api.md), [review-api.md](review-api.md), [dispute-api.md](dispute-api.md), and [admin-operations-api.md](admin-operations-api.md). `/api/v1/health` remains available even when MongoDB is unconfigured or unreachable. `/api/v1/ready` returns HTTP 200 when ping succeeds and HTTP 503 when the database is unconfigured or unavailable.
+See [authentication-api.md](authentication-api.md), [profile-address-onboarding-admin-api.md](profile-address-onboarding-admin-api.md), [services-availability-discovery-api.md](services-availability-discovery-api.md), [booking-api.md](booking-api.md), [payment-api.md](payment-api.md), [chat-api.md](chat-api.md), [notification-api.md](notification-api.md), [review-api.md](review-api.md), [dispute-api.md](dispute-api.md), [admin-operations-api.md](admin-operations-api.md), and [earnings-and-payout-api.md](earnings-and-payout-api.md). `/api/v1/health` remains available even when MongoDB is unconfigured or unreachable. `/api/v1/ready` returns HTTP 200 when ping succeeds and HTTP 503 when the database is unconfigured or unavailable.
 
-WebSockets, push notifications, earnings, maps, geocoding, and a production payment processor are not implemented. The sandbox payment provider is development/test only. The auth routes are not ready for unrestricted public internet exposure until production rate limiting exists.
+WebSockets, push notifications, maps, geocoding, and a production payment or payout processor are not implemented. Sandbox payment and payout providers are development/test only. The auth routes are not ready for unrestricted public internet exposure until production rate limiting exists.

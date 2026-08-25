@@ -65,6 +65,11 @@ class CleanerHomeScreen extends ConsumerWidget {
               child: const Text('Booking Requests / Jobs'),
             ),
             const SizedBox(height: 16),
+            FilledButton.tonal(
+              onPressed: () => context.push(AppRoutes.cleanerEarningsPath),
+              child: const Text('Earnings & Payouts'),
+            ),
+            const SizedBox(height: 16),
             const NotificationHomeLink(),
             if (status == OnboardingStatus.approved) ...[
               const SizedBox(height: 16),

@@ -15,7 +15,7 @@ Planned coverage includes:
 * database security
 * development vs production considerations
 
-The first implemented collections are `users` and `user_sessions`. TASK 013 added `customer_profiles`, `cleaner_profiles`, and `addresses`. TASK 014 added `services`, `cleaner_services`, and `availability_slots`. TASK 015 added `bookings`. TASK 016 added `payments`, `payment_webhook_events`, and `payment_refund_requests`. TASK 017 added `conversations`, `conversation_members`, `messages`, `notifications`, and `reviews`. TASK 018 added `disputes` and `audit_logs`.
+The first implemented collections are `users` and `user_sessions`. TASK 013 added `customer_profiles`, `cleaner_profiles`, and `addresses`. TASK 014 added `services`, `cleaner_services`, and `availability_slots`. TASK 015 added `bookings`. TASK 016 added `payments`, `payment_webhook_events`, and `payment_refund_requests`. TASK 017 added `conversations`, `conversation_members`, `messages`, `notifications`, and `reviews`. TASK 018 added `disputes` and `audit_logs`. TASK 019 added `earnings_ledger`, `payout_requests`, and `payout_provider_events`.
 
 ## Current documents
 
@@ -39,6 +39,9 @@ The first implemented collections are `users` and `user_sessions`. TASK 013 adde
 * [reviews-collection.md](reviews-collection.md) — one verified review per completed booking and moderation.
 * [disputes-collection.md](disputes-collection.md) — one booking-scoped dispute, embedded history, and admin lifecycle.
 * [audit-logs-collection.md](audit-logs-collection.md) — append-only admin audit trail with best-effort writes.
+* [earnings-ledger-collection.md](earnings-ledger-collection.md) — append-only cleaner earnings and refund adjustments.
+* [payout-requests-collection.md](payout-requests-collection.md) — cleaner payout requests, reservation, and sandbox settlement state.
+* [payout-provider-events-collection.md](payout-provider-events-collection.md) — signed payout webhook receipts and event idempotency.
 * [../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md](../decisions/ADR-005-mongodb-driver-and-connection-lifecycle.md) — accepted driver and connection-lifecycle decision.
 * [../decisions/ADR-006-user-account-persistence-model.md](../decisions/ADR-006-user-account-persistence-model.md) — accepted user account persistence model.
 * [../decisions/ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md](../decisions/ADR-011-role-scoped-profiles-addresses-and-cleaner-onboarding.md) — accepted profile/address/onboarding collections and authorization.
@@ -47,3 +50,4 @@ The first implemented collections are `users` and `user_sessions`. TASK 013 adde
 * [../decisions/ADR-014-payment-provider-webhooks-and-refunds.md](../decisions/ADR-014-payment-provider-webhooks-and-refunds.md) — accepted provider-neutral sandbox payment ledger, signed webhooks, and refund foundation.
 * [../decisions/ADR-015-chat-notifications-and-verified-reviews.md](../decisions/ADR-015-chat-notifications-and-verified-reviews.md) — accepted booking-scoped chat, in-app notifications, and verified reviews.
 * [../decisions/ADR-016-disputes-admin-operations-and-audit.md](../decisions/ADR-016-disputes-admin-operations-and-audit.md) — accepted disputes, admin operations, and append-only audit.
+* [../decisions/ADR-017-cleaner-earnings-payouts-and-reconciliation.md](../decisions/ADR-017-cleaner-earnings-payouts-and-reconciliation.md) — accepted earnings ledger, payout requests, sandbox payouts, and read-only reconciliation.

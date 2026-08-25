@@ -17,6 +17,7 @@ import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/dom
 import 'package:home_cleaning_marketplace_api/src/features/disputes/domain/dispute_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/notifications/domain/notification_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/domain/payment_exceptions.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payouts/domain/payout_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/reviews/domain/review_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/services/domain/service_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/user_account_exceptions.dart';
@@ -390,6 +391,86 @@ Response mapRoleScopedException(Exception error) {
     return jsonError(
       code: 'invalid_input',
       message: 'Dispute category is invalid.',
+    );
+  }
+  if (error is PayoutNotFoundException) {
+    return jsonError(
+      code: 'payout_not_found',
+      message: 'Payout was not found.',
+      statusCode: HttpStatus.notFound,
+    );
+  }
+  if (error is PayoutAlreadyActiveException) {
+    return jsonError(
+      code: 'payout_already_active',
+      message: 'A payout request is already in progress.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is InsufficientPayoutBalanceException) {
+    return jsonError(
+      code: 'insufficient_payout_balance',
+      message: 'Available payout balance is insufficient.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is PayoutProviderUnavailableException) {
+    return jsonError(
+      code: 'payout_provider_unavailable',
+      message: 'Payout processing is temporarily unavailable.',
+      statusCode: HttpStatus.serviceUnavailable,
+    );
+  }
+  if (error is InvalidPayoutWebhookSignatureException) {
+    return jsonError(
+      code: 'invalid_payout_webhook_signature',
+      message: 'Payout webhook signature is invalid.',
+      statusCode: HttpStatus.unauthorized,
+    );
+  }
+  if (error is PayoutWebhookEventConflictException) {
+    return jsonError(
+      code: 'payout_webhook_event_conflict',
+      message: 'Payout webhook event conflict.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is PayoutIntegrityMismatchException) {
+    return jsonError(
+      code: 'payout_integrity_mismatch',
+      message: 'Payout details do not match this event.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is InvalidPayoutStateException) {
+    return jsonError(
+      code: 'invalid_payout_state',
+      message: 'This payout action is not allowed in the current state.',
+      statusCode: HttpStatus.conflict,
+    );
+  }
+  if (error is InvalidPayoutAmountException) {
+    return jsonError(
+      code: 'invalid_payout_amount',
+      message: 'Payout amount must be a whole number of at least 1.',
+    );
+  }
+  if (error is InvalidPayoutCurrencyException) {
+    return jsonError(
+      code: 'invalid_payout_currency',
+      message: 'Currency code must be three letters.',
+    );
+  }
+  if (error is MalformedPayoutWebhookException) {
+    return jsonError(
+      code: 'invalid_json',
+      message: 'Request body must be valid JSON.',
+    );
+  }
+  if (error is InvalidPayoutRejectionReasonException) {
+    return jsonError(
+      code: 'invalid_payout_rejection_reason',
+      message: error.message,
     );
   }
   if (error is UserNotFoundException) {

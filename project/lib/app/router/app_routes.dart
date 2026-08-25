@@ -54,6 +54,11 @@ abstract final class AppRoutes {
   static const String cleanerBookingDisputePath =
       '/cleaner/bookings/:bookingId/dispute';
   static const String cleanerReviewsPath = '/cleaner/reviews';
+  static const String cleanerEarningsPath = '/cleaner/earnings';
+  static const String cleanerEarningsLedgerPath = '/cleaner/earnings/ledger';
+  static const String cleanerPayoutsPath = '/cleaner/payouts';
+  static const String cleanerPayoutRequestPath = '/cleaner/payouts/request';
+  static const String cleanerPayoutDetailPath = '/cleaner/payouts/:payoutId';
 
   static const String notificationsPath = '/notifications';
 
@@ -73,6 +78,12 @@ abstract final class AppRoutes {
   static const String adminBookingDetailPath = '/admin/bookings/:bookingId';
   static const String adminAuditLogsPath = '/admin/audit-logs';
   static const String adminAuditLogDetailPath = '/admin/audit-logs/:auditLogId';
+  static const String adminPayoutsPath = '/admin/payouts';
+  static const String adminPayoutDetailPath = '/admin/payouts/:payoutId';
+  static const String adminFinancePath = '/admin/finance';
+  static const String adminFinanceReconciliationPath =
+      '/admin/finance/reconciliation';
+  static const String adminUserFinancePath = '/admin/users/:userId/finance';
 
   /// Role-specific authenticated home.
   static String homeForRole(String role) {
@@ -161,5 +172,19 @@ abstract final class AppRoutes {
 
   static String adminAuditLogDetailLocation(String auditLogId) {
     return '/admin/audit-logs/$auditLogId';
+  }
+
+  static String cleanerEarningsLocation() => cleanerEarningsPath;
+
+  static String cleanerPayoutDetailLocation(String payoutId) {
+    return '/cleaner/payouts/$payoutId';
+  }
+
+  static String adminPayoutDetailLocation(String payoutId) {
+    return '/admin/payouts/$payoutId';
+  }
+
+  static String adminUserFinanceLocation(String userId) {
+    return '/admin/users/$userId/finance';
   }
 }

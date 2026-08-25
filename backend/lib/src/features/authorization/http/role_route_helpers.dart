@@ -156,3 +156,12 @@ Response auditLogNotFoundResponse() {
     statusCode: HttpStatus.notFound,
   );
 }
+
+/// 404 used when a payout path id is malformed or unknown.
+Response payoutNotFoundResponse() {
+  return jsonError(
+    code: 'payout_not_found',
+    message: 'Payout was not found.',
+    statusCode: HttpStatus.notFound,
+  );
+}

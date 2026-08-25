@@ -1,3 +1,5 @@
+import 'package:home_cleaning_marketplace_api/src/features/earnings/application/earnings_settlement_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/earnings/domain/earnings_validation.dart';
 import 'package:home_cleaning_marketplace_api/src/features/notifications/application/notification_sink.dart';
 import 'package:home_cleaning_marketplace_api/src/features/notifications/domain/notification_type.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/data/payment_repository.dart';
@@ -20,17 +22,20 @@ class PaymentWebhookService {
     required PaymentRepository payments,
     required PaymentWebhookEventRepository events,
     NotificationSink? notifications,
+    EarningsSettlementService? earnings,
     DateTime Function()? clock,
   }) : _provider = provider,
        _payments = payments,
        _events = events,
        _notifications = notifications ?? const NoOpNotificationSink(),
+       _earnings = earnings,
        _clock = clock ?? DateTime.now;
 
   final PaymentProvider? _provider;
   final PaymentRepository _payments;
   final PaymentWebhookEventRepository _events;
   final NotificationSink _notifications;
+  final EarningsSettlementService? _earnings;
   final DateTime Function() _clock;
 
   /// Verifies, records, and applies a provider webhook.
@@ -198,6 +203,7 @@ class PaymentWebhookService {
       title: 'Payment completed',
       body: 'Payment completed.',
     );
+    await _earnings?.tryEnsureBookingEarning(updated.bookingId);
   }
 
   Future<void> _applyFailed({
@@ -273,6 +279,16 @@ class PaymentWebhookService {
       body: fullRefund
           ? 'Your payment was refunded.'
           : 'A partial refund was issued.',
+    );
+    final delta = updated.refundedAmountMinor - payment.refundedAmountMinor;
+    await _earnings?.tryApplyRefundAdjustment(
+      bookingId: updated.bookingId,
+      payment: updated,
+      refundDeltaMinor: delta,
+      sourceEventKey: EarningsValidation.refundEventSourceEventKey(
+        provider: updated.provider.wireValue,
+        providerEventId: event.providerEventId,
+      ),
     );
   }
 

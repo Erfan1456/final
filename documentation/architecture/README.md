@@ -34,3 +34,4 @@ No architecture has been chosen in TASK 001. Concrete architecture documents sho
 * [payment-processing-and-webhooks.md](payment-processing-and-webhooks.md) — sandbox payment ledger, HMAC webhooks, refunds, and payment-aware cancellation.
 * [chat-notifications-and-reviews.md](chat-notifications-and-reviews.md) — booking-scoped REST chat, in-app notifications, verified reviews, and admin moderation.
 * [disputes-admin-operations-and-audit.md](disputes-admin-operations-and-audit.md) — booking disputes, admin user/booking operations, and append-only audit.
+* [earnings-payouts-and-reconciliation.md](earnings-payouts-and-reconciliation.md) — append-only earnings ledger, payout requests, sandbox payout webhooks, and read-only reconciliation.

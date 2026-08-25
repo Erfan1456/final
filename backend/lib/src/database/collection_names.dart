@@ -58,4 +58,13 @@ abstract final class CollectionNames {
 
   /// Append-only administrative audit records.
   static const String auditLogs = 'audit_logs';
+
+  /// Append-only cleaner earnings ledger. Never updated or deleted.
+  static const String earningsLedger = 'earnings_ledger';
+
+  /// Cleaner payout requests. Not a bank or wallet destination store.
+  static const String payoutRequests = 'payout_requests';
+
+  /// Idempotent payout provider webhook event receipts.
+  static const String payoutProviderEvents = 'payout_provider_events';
 }

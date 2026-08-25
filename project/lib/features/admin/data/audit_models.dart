@@ -11,6 +11,9 @@ enum AuditAction {
   disputeResolved,
   disputeClosed,
   bookingAdminCancelled,
+  payoutProcessingStarted,
+  payoutRejected,
+  payoutSandboxSimulated,
   unknown;
 
   static AuditAction fromWire(String value) {
@@ -39,6 +42,12 @@ enum AuditAction {
         return AuditAction.disputeClosed;
       case 'booking_admin_cancelled':
         return AuditAction.bookingAdminCancelled;
+      case 'payout_processing_started':
+        return AuditAction.payoutProcessingStarted;
+      case 'payout_rejected':
+        return AuditAction.payoutRejected;
+      case 'payout_sandbox_simulated':
+        return AuditAction.payoutSandboxSimulated;
       default:
         return AuditAction.unknown;
     }
@@ -70,6 +79,12 @@ enum AuditAction {
         return 'dispute_closed';
       case AuditAction.bookingAdminCancelled:
         return 'booking_admin_cancelled';
+      case AuditAction.payoutProcessingStarted:
+        return 'payout_processing_started';
+      case AuditAction.payoutRejected:
+        return 'payout_rejected';
+      case AuditAction.payoutSandboxSimulated:
+        return 'payout_sandbox_simulated';
       case AuditAction.unknown:
         return 'unknown';
     }
@@ -101,6 +116,12 @@ enum AuditAction {
         return 'Dispute closed';
       case AuditAction.bookingAdminCancelled:
         return 'Booking cancelled by admin';
+      case AuditAction.payoutProcessingStarted:
+        return 'Payout processing started';
+      case AuditAction.payoutRejected:
+        return 'Payout rejected';
+      case AuditAction.payoutSandboxSimulated:
+        return 'Payout sandbox simulated';
       case AuditAction.unknown:
         return 'Unknown action';
     }

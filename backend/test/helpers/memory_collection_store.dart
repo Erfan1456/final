@@ -13,6 +13,10 @@ class MemoryCollectionDocumentStore implements CollectionDocumentStore {
   /// Forced insert result, if set.
   DocumentInsertResult? insertResult;
 
+  /// Unique field groups simulated in-memory. Partial unique indexes may set
+  /// [MemoryUniqueIndex.partialEquals].
+  final List<MemoryUniqueIndex> uniqueIndexes = <MemoryUniqueIndex>[];
+
   /// Forced update result, if set.
   DocumentUpdateResult? updateResult;
 
@@ -83,6 +87,9 @@ class MemoryCollectionDocumentStore implements CollectionDocumentStore {
     if (forced != null) {
       return forced;
     }
+    if (_violatesUniqueIndex(document)) {
+      return const DocumentInsertResult.duplicate();
+    }
     documents.add(Map<String, dynamic>.from(document));
     return const DocumentInsertResult.success();
   }
@@ -126,6 +133,56 @@ class MemoryCollectionDocumentStore implements CollectionDocumentStore {
     documents.removeAt(index);
     return const DocumentDeleteResult.success();
   }
+
+  bool _violatesUniqueIndex(Map<String, dynamic> document) {
+    for (final index in uniqueIndexes) {
+      if (!_appliesPartial(document, index.partialEquals)) {
+        continue;
+      }
+      final duplicate = documents.any((existing) {
+        if (!_appliesPartial(existing, index.partialEquals)) {
+          return false;
+        }
+        for (final field in index.fields) {
+          if (existing[field] != document[field]) {
+            return false;
+          }
+        }
+        return true;
+      });
+      if (duplicate) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
+/// In-memory unique index description used by repository race tests.
+class MemoryUniqueIndex {
+  /// Creates a unique index over [fields], optionally partial.
+  const MemoryUniqueIndex(this.fields, {this.partialEquals});
+
+  /// Fields that together must be unique.
+  final List<String> fields;
+
+  /// When set, the index only applies to documents matching these equalities.
+  final Map<String, Object?>? partialEquals;
+}
+
+bool _appliesPartial(
+  Map<String, dynamic> document,
+  Map<String, Object?>? partialEquals,
+) {
+  if (partialEquals == null) {
+    return true;
+  }
+  for (final entry in partialEquals.entries) {
+    if (document[entry.key] != entry.value) {
+      return false;
+    }
+  }
+  return true;
 }
 
 /// Whether [document] matches a Mongo-style [selector] used in tests.

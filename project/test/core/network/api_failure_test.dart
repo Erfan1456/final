@@ -72,6 +72,16 @@ void main() {
       contains('cannot be cancelled'),
     );
     expect(
+      messageForApiCode('insufficient_payout_balance'),
+      contains('insufficient'),
+    );
+    expect(messageForApiCode('payout_already_active'), contains('already'));
+    expect(messageForApiCode('payout_not_found'), 'Payout was not found.');
+    expect(
+      messageForApiCode('invalid_payout_rejection_reason'),
+      contains('5 and 500'),
+    );
+    expect(
       messageForApiCode('some_unknown_code'),
       equals('Something went wrong. Please try again.'),
     );

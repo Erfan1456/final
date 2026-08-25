@@ -77,3 +77,5 @@ Sandbox UI appears only when the API sets `simulation_available == true`. It is 
 TASK 017 notifies the customer after a successful paid, failed, or refunded webhook transition. Invalid signatures, integrity mismatches, ignored unknown payments, and stale no-op events do not notify.
 
 TASK 018 admin cancellation of a confirmed booking reuses this payment-aware orchestration. Refund failure leaves the booking confirmed. A successful refund request also appends a best-effort `payment_refund_requested` audit row without changing financial correctness.
+
+TASK 019 projects completed + successful-payment bookings into an append-only earnings ledger and applies refund adjustments using the original commission snapshot. Payment remains the charge/refund source of truth. See [earnings-payouts-and-reconciliation.md](earnings-payouts-and-reconciliation.md).

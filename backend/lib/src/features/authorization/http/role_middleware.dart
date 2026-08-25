@@ -19,9 +19,12 @@ import 'package:home_cleaning_marketplace_api/src/features/customer_profiles/app
 import 'package:home_cleaning_marketplace_api/src/features/discovery/application/cleaner_discovery_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/disputes/application/admin_dispute_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/disputes/application/booking_dispute_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/finance/application/admin_finance_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/notifications/application/notification_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/admin_payment_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/payments/application/customer_payment_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payouts/application/admin_payout_service.dart';
+import 'package:home_cleaning_marketplace_api/src/features/payouts/application/cleaner_payout_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/reviews/application/admin_review_moderation_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/reviews/application/cleaner_review_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/reviews/application/customer_review_service.dart';
@@ -92,12 +95,19 @@ Handler roleScopedMiddleware(
           final reviews =
               _tryRead<CleanerReviewService>(context) ??
               await RoleScopedComposition.cleanerReviews(mongo: mongo!);
+          final payouts =
+              _tryRead<CleanerPayoutService>(context) ??
+              await RoleScopedComposition.cleanerPayouts(
+                mongo: mongo!,
+                config: config!,
+              );
           next = next
               .provide<CleanerOnboardingService>(() => onboarding)
               .provide<CleanerServiceManagementService>(() => offerings)
               .provide<CleanerAvailabilityService>(() => availability)
               .provide<CleanerBookingService>(() => bookings)
-              .provide<CleanerReviewService>(() => reviews);
+              .provide<CleanerReviewService>(() => reviews)
+              .provide<CleanerPayoutService>(() => payouts);
         case UserRole.admin:
           final service =
               _tryRead<AdminCleanerReviewService>(context) ??
@@ -126,6 +136,18 @@ Handler roleScopedMiddleware(
           final audit =
               _tryRead<AuditLogService>(context) ??
               await RoleScopedComposition.audit(mongo: mongo!);
+          final payoutsAdmin =
+              _tryRead<AdminPayoutService>(context) ??
+              await RoleScopedComposition.adminPayouts(
+                mongo: mongo!,
+                config: config!,
+              );
+          final finance =
+              _tryRead<AdminFinanceService>(context) ??
+              await RoleScopedComposition.adminFinance(
+                mongo: mongo!,
+                config: config!,
+              );
           next = next
               .provide<AdminCleanerReviewService>(() => service)
               .provide<AdminPaymentService>(() => payments)
@@ -133,7 +155,9 @@ Handler roleScopedMiddleware(
               .provide<AdminDisputeService>(() => disputes)
               .provide<AdminUserManagementService>(() => users)
               .provide<AdminBookingOperationsService>(() => bookings)
-              .provide<AuditLogService>(() => audit);
+              .provide<AuditLogService>(() => audit)
+              .provide<AdminPayoutService>(() => payoutsAdmin)
+              .provide<AdminFinanceService>(() => finance);
       }
       return await handler(next);
     } on Exception catch (error) {

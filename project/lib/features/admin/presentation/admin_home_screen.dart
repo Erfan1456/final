@@ -56,6 +56,16 @@ class AdminHomeScreen extends ConsumerWidget {
               child: const Text('Audit Log'),
             ),
             const SizedBox(height: 12),
+            FilledButton(
+              onPressed: () => context.push(AppRoutes.adminPayoutsPath),
+              child: const Text('Payouts'),
+            ),
+            const SizedBox(height: 12),
+            FilledButton(
+              onPressed: () => context.push(AppRoutes.adminFinancePath),
+              child: const Text('Finance'),
+            ),
+            const SizedBox(height: 12),
             const NotificationHomeLink(),
             const SizedBox(height: 24),
             const LogoutActions(),
