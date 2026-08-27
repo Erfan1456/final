@@ -1,6 +1,5 @@
-import 'package:mongo_dart/mongo_dart.dart';
-
 import 'package:home_cleaning_marketplace_api/src/features/account_actions/domain/account_action_purpose.dart';
+import 'package:mongo_dart/mongo_dart.dart';
 
 /// Persisted hashed one-time account-action token.
 class AccountActionToken {

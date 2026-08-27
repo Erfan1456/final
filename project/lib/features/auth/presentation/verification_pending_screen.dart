@@ -93,9 +93,7 @@ class _VerificationPendingScreenState
               const SizedBox(height: 16),
               Text(
                 state.successMessage!,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                style: TextStyle(color: Theme.of(context).colorScheme.primary),
               ),
             ],
             if (state.developmentAction != null) ...[

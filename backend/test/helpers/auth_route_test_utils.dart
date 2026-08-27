@@ -59,7 +59,6 @@ SignupResult fakeSignupResult({
       createdAt: createdAt,
       updatedAt: createdAt,
     ),
-    verificationRequired: true,
   );
 }
 

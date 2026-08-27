@@ -42,9 +42,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   }
 
   void _openResetWithDevToken(String token) {
-    context.push(
-      AppRoutes.resetPasswordLocation(token: token),
-    );
+    context.push(AppRoutes.resetPasswordLocation(token: token));
   }
 
   @override

@@ -27,7 +27,7 @@ class AccountActionInsertResult {
   final bool isDuplicateKey;
 }
 
-/// Narrow collection access used by [AccountActionTokenRepository].
+/// Narrow collection access used by the account-action token repository.
 abstract class AccountActionTokenDocumentStore {
   /// Finds a single document matching [selector], or `null`.
   Future<Map<String, dynamic>?> findOne(Map<String, dynamic> selector);

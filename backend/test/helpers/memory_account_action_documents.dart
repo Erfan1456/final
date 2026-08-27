@@ -19,8 +19,7 @@ class MemoryAccountActionDocuments implements AccountActionTokenDocumentStore {
     Map<String, dynamic> document,
   ) async {
     final hash = document['token_hash'];
-    if (hash is String &&
-        documents.any((item) => item['token_hash'] == hash)) {
+    if (hash is String && documents.any((item) => item['token_hash'] == hash)) {
       return const AccountActionInsertResult.duplicate();
     }
     documents.add(Map<String, dynamic>.from(document));
@@ -69,7 +68,10 @@ class MemoryAccountActionDocuments implements AccountActionTokenDocumentStore {
     ];
   }
 
-  void _applyUpdate(Map<String, dynamic> document, Map<String, dynamic> update) {
+  void _applyUpdate(
+    Map<String, dynamic> document,
+    Map<String, dynamic> update,
+  ) {
     final set = update[r'$set'];
     if (set is Map) {
       document.addAll(Map<String, dynamic>.from(set));

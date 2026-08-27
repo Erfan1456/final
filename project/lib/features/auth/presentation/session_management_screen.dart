@@ -73,9 +73,8 @@ class SessionManagementScreen extends ConsumerWidget {
                                   tooltip: 'Revoke session',
                                   onPressed: submitting
                                       ? null
-                                      : () => notifier.revokeSession(
-                                          session.id,
-                                        ),
+                                      : () =>
+                                            notifier.revokeSession(session.id),
                                 ),
                         ),
                       );

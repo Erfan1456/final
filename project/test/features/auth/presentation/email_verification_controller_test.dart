@@ -16,7 +16,9 @@ class _FakeApi extends AuthApi {
   Exception? nextError;
 
   @override
-  Future<AccountActionRequestResult> requestEmailVerification(String email) async {
+  Future<AccountActionRequestResult> requestEmailVerification(
+    String email,
+  ) async {
     if (nextError != null) {
       throw nextError!;
     }

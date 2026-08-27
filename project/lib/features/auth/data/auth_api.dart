@@ -130,10 +130,7 @@ class AuthApi {
     try {
       await plain.post<dynamic>(
         '/api/v1/auth/password-reset/confirm',
-        data: <String, String>{
-          'token': token,
-          'new_password': newPassword,
-        },
+        data: <String, String>{'token': token, 'new_password': newPassword},
       );
     } on DioException catch (error) {
       throw mapDioException(error);
@@ -187,11 +184,7 @@ class AuthApi {
         );
       }
       return sessions
-          .map(
-            (session) => AccountSession.fromJson(
-              _requireMap(session),
-            ),
-          )
+          .map((session) => AccountSession.fromJson(_requireMap(session)))
           .toList(growable: false);
     } on DioException catch (error) {
       throw mapDioException(error);

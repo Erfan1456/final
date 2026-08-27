@@ -315,7 +315,10 @@ void main() {
       'maps 403 account_unavailable',
       () => expectCode(403, 'account_unavailable'),
     );
-    test('maps 403 email_not_verified', () => expectCode(403, 'email_not_verified'));
+    test(
+      'maps 403 email_not_verified',
+      () => expectCode(403, 'email_not_verified'),
+    );
     test(
       'maps invalid_or_expired_account_action_token',
       () => expectCode(400, 'invalid_or_expired_account_action_token'),

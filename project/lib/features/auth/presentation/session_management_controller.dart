@@ -72,7 +72,10 @@ class SessionManagementController extends Notifier<SessionManagementState> {
       if (!ref.mounted) {
         return;
       }
-      state = SessionManagementState(loading: false, errorMessage: error.message);
+      state = SessionManagementState(
+        loading: false,
+        errorMessage: error.message,
+      );
     } catch (_) {
       if (!ref.mounted) {
         return;
@@ -86,7 +89,11 @@ class SessionManagementController extends Notifier<SessionManagementState> {
 
   /// Revokes one session. Signs out locally when the current session is revoked.
   Future<void> revokeSession(String sessionId) async {
-    state = state.copyWith(isSubmitting: true, clearError: true, clearInfo: true);
+    state = state.copyWith(
+      isSubmitting: true,
+      clearError: true,
+      clearInfo: true,
+    );
     try {
       final currentSessionRevoked = await _repository.revokeSession(sessionId);
       if (!ref.mounted) {
@@ -109,10 +116,7 @@ class SessionManagementController extends Notifier<SessionManagementState> {
       if (!ref.mounted) {
         return;
       }
-      state = state.copyWith(
-        isSubmitting: false,
-        errorMessage: error.message,
-      );
+      state = state.copyWith(isSubmitting: false, errorMessage: error.message);
     } catch (_) {
       if (!ref.mounted) {
         return;
@@ -126,7 +130,11 @@ class SessionManagementController extends Notifier<SessionManagementState> {
 
   /// Revokes every session and signs out locally.
   Future<void> revokeAllSessions() async {
-    state = state.copyWith(isSubmitting: true, clearError: true, clearInfo: true);
+    state = state.copyWith(
+      isSubmitting: true,
+      clearError: true,
+      clearInfo: true,
+    );
     try {
       await _repository.logoutAll();
       if (!ref.mounted) {
@@ -137,10 +145,7 @@ class SessionManagementController extends Notifier<SessionManagementState> {
       if (!ref.mounted) {
         return;
       }
-      state = state.copyWith(
-        isSubmitting: false,
-        errorMessage: error.message,
-      );
+      state = state.copyWith(isSubmitting: false, errorMessage: error.message);
     } catch (_) {
       if (!ref.mounted) {
         return;

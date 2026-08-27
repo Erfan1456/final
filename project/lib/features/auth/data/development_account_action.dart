@@ -3,10 +3,7 @@
 /// Never persist or log [token].
 class DevelopmentAccountAction {
   /// Creates a development action result.
-  const DevelopmentAccountAction({
-    required this.purpose,
-    required this.token,
-  });
+  const DevelopmentAccountAction({required this.purpose, required this.token});
 
   /// Parses the safe development envelope. Unknown fields are ignored.
   factory DevelopmentAccountAction.fromJson(Map<String, dynamic> json) {

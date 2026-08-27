@@ -124,11 +124,13 @@ class AuthenticationServiceImpl implements AuthenticationService {
       rawToken: issued.rawToken,
       expiresAt: issued.token.expiresAt,
     );
-    return SignupResult(
-      user: user,
-      verificationRequired: true,
-      developmentAction: _exposeDevelopmentAction ? delivered : null,
-    );
+    if (_exposeDevelopmentAction) {
+      return SignupResult(
+        user: user,
+        developmentAction: delivered,
+      );
+    }
+    return SignupResult(user: user);
   }
 
   @override

@@ -1,7 +1,7 @@
-import 'package:home_cleaning_marketplace_api/src/features/account_actions/domain/account_action_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/account_actions/application/account_action_delivery_provider.dart';
 import 'package:home_cleaning_marketplace_api/src/features/account_actions/application/account_action_token_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/account_actions/application/development_account_action_delivery_provider.dart';
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/domain/account_action_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/account_actions/domain/account_action_purpose.dart';
 import 'package:home_cleaning_marketplace_api/src/features/account_actions/domain/account_action_token.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/application/auth_exceptions.dart';
@@ -11,7 +11,6 @@ import 'package:home_cleaning_marketplace_api/src/features/auth/security/passwor
 import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/auth_session_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/user_session.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/sessions/user_session_exceptions.dart';
-import 'package:home_cleaning_marketplace_api/src/features/auth/tokens/access_token_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/auth/tokens/access_token_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/data/user_repository.dart';
 import 'package:home_cleaning_marketplace_api/src/features/users/domain/account_status.dart';
@@ -211,40 +210,43 @@ void main() {
   });
 
   group('AuthenticationService.signUp', () {
-    test('creates an active unverified customer without issuing tokens', () async {
-      final result = await service.signUp(
-        email: '  Person@example.com  ',
-        password: signupPassword,
-        role: UserRole.customer,
-      );
+    test(
+      'creates an active unverified customer without issuing tokens',
+      () async {
+        final result = await service.signUp(
+          email: '  Person@example.com  ',
+          password: signupPassword,
+          role: UserRole.customer,
+        );
 
-      final data =
-          verify(() => users.create(captureAny())).captured.single
-              as CreateUserAccountData;
-      expect(data.role, equals(UserRole.customer));
-      expect(data.email, equals('Person@example.com'));
-      expect(data.passwordHash, equals('hashed:$signupPassword'));
-      expect(data.accountStatus, equals(AccountStatus.active));
-      expect(data.emailVerified, isFalse);
-      expect(hasher.hashCalls, equals(<String>[signupPassword]));
-      verifyNever(() => sessions.createSession(any()));
-      verifyNever(
-        () => tokens.issue(
-          userId: any(named: 'userId'),
-          sessionId: any(named: 'sessionId'),
-          role: any(named: 'role'),
-        ),
-      );
-      verify(
-        () => accountActions.issue(
-          userId: userId,
-          purpose: AccountActionPurpose.emailVerification,
-        ),
-      ).called(1);
-      expect(result.user.role, equals(UserRole.customer));
-      expect(result.verificationRequired, isTrue);
-      expect(result.developmentAction, isNotNull);
-    });
+        final data =
+            verify(() => users.create(captureAny())).captured.single
+                as CreateUserAccountData;
+        expect(data.role, equals(UserRole.customer));
+        expect(data.email, equals('Person@example.com'));
+        expect(data.passwordHash, equals('hashed:$signupPassword'));
+        expect(data.accountStatus, equals(AccountStatus.active));
+        expect(data.emailVerified, isFalse);
+        expect(hasher.hashCalls, equals(<String>[signupPassword]));
+        verifyNever(() => sessions.createSession(any()));
+        verifyNever(
+          () => tokens.issue(
+            userId: any(named: 'userId'),
+            sessionId: any(named: 'sessionId'),
+            role: any(named: 'role'),
+          ),
+        );
+        verify(
+          () => accountActions.issue(
+            userId: userId,
+            purpose: AccountActionPurpose.emailVerification,
+          ),
+        ).called(1);
+        expect(result.user.role, equals(UserRole.customer));
+        expect(result.verificationRequired, isTrue);
+        expect(result.developmentAction, isNotNull);
+      },
+    );
 
     test('creates a cleaner account pending verification', () async {
       final result = await service.signUp(

@@ -1,10 +1,10 @@
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/application/account_action_token_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/account_actions/data/account_action_token_indexes.dart';
 import 'package:home_cleaning_marketplace_api/src/features/account_actions/data/account_action_token_repository.dart';
+import 'package:home_cleaning_marketplace_api/src/features/account_actions/domain/account_action_exceptions.dart';
 import 'package:home_cleaning_marketplace_api/src/features/account_actions/domain/account_action_policy.dart';
 import 'package:home_cleaning_marketplace_api/src/features/account_actions/domain/account_action_purpose.dart';
 import 'package:home_cleaning_marketplace_api/src/features/account_actions/security/account_action_token_crypto.dart';
-import 'package:home_cleaning_marketplace_api/src/features/account_actions/application/account_action_token_service.dart';
-import 'package:home_cleaning_marketplace_api/src/features/account_actions/domain/account_action_exceptions.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide ServerConfig;
 import 'package:test/test.dart';
 
@@ -14,7 +14,40 @@ void main() {
   final userId = ObjectId.fromHexString('507f1f77bcf86cd799439011');
   final now = DateTime.utc(2026, 8, 25, 12);
   const rawToken = 'fixed-test-token-value-not-real';
-  const tokenBytes = [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7];
+  const tokenBytes = [
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+  ];
 
   group('AccountActionTokenCrypto', () {
     test('generates 32-byte unpadded base64url tokens', () {

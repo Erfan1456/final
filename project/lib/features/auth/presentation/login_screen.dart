@@ -39,9 +39,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   void _openVerificationPending() {
     context.go(
-      AppRoutes.verifyEmailPendingLocation(
-        email: _emailController.text.trim(),
-      ),
+      AppRoutes.verifyEmailPendingLocation(email: _emailController.text.trim()),
     );
   }
 

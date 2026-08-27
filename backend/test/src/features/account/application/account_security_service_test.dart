@@ -1,5 +1,4 @@
 import 'package:home_cleaning_marketplace_api/src/features/account/application/account_security_service.dart';
-import 'package:home_cleaning_marketplace_api/src/features/account_actions/application/account_action_delivery_provider.dart';
 import 'package:home_cleaning_marketplace_api/src/features/account_actions/application/account_action_token_service.dart';
 import 'package:home_cleaning_marketplace_api/src/features/account_actions/application/development_account_action_delivery_provider.dart';
 import 'package:home_cleaning_marketplace_api/src/features/account_actions/data/account_action_token_repository.dart';
@@ -101,7 +100,9 @@ void main() {
   group('AccountSecurityService.requestEmailVerification', () {
     test('returns generic result for unknown email', () async {
       when(() => users.findByEmail(any())).thenAnswer((_) async => null);
-      final result = await service.requestEmailVerification('missing@example.com');
+      final result = await service.requestEmailVerification(
+        'missing@example.com',
+      );
       expect(result.developmentAction, isNull);
     });
 
@@ -109,7 +110,9 @@ void main() {
       when(
         () => users.findByEmail(any()),
       ).thenAnswer((_) async => activeUser());
-      final result = await service.requestEmailVerification('person@example.com');
+      final result = await service.requestEmailVerification(
+        'person@example.com',
+      );
       expect(result.developmentAction, isNotNull);
       expect(
         result.developmentAction!.purpose,
@@ -123,7 +126,9 @@ void main() {
       when(
         () => users.findByEmail(any()),
       ).thenAnswer((_) async => activeUser());
-      final issued = await service.requestEmailVerification('person@example.com');
+      final issued = await service.requestEmailVerification(
+        'person@example.com',
+      );
       when(
         () => users.markEmailVerified(
           userId: userId,

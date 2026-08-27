@@ -573,7 +573,9 @@ void main() {
     expect(find.text('Reset your password'), findsOneWidget);
   });
 
-  testWidgets('authenticated customer can open account security', (tester) async {
+  testWidgets('authenticated customer can open account security', (
+    tester,
+  ) async {
     await pumpApp(tester, AuthState.authenticated(testUser()));
     final context = tester.element(find.byType(CustomerHomeScreen));
     final router = GoRouter.of(context);

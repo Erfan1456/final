@@ -29,7 +29,9 @@ class PasswordRecoveryState {
     return PasswordRecoveryState(
       isSubmitting: isSubmitting ?? this.isSubmitting,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      successMessage: clearSuccess ? null : (successMessage ?? this.successMessage),
+      successMessage: clearSuccess
+          ? null
+          : (successMessage ?? this.successMessage),
       developmentAction: clearDevelopmentAction
           ? null
           : (developmentAction ?? this.developmentAction),

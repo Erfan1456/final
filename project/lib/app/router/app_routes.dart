@@ -215,10 +215,7 @@ abstract final class AppRoutes {
     if (token != null && token.isNotEmpty) {
       query['token'] = token;
     }
-    return Uri(
-      path: verifyEmailPendingPath,
-      queryParameters: query,
-    ).toString();
+    return Uri(path: verifyEmailPendingPath, queryParameters: query).toString();
   }
 
   static String forgotPasswordLocation({String? email}) {

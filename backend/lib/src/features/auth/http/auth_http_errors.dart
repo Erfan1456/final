@@ -86,7 +86,6 @@ Response mapAuthException(Exception error) {
     return jsonError(
       code: error.code,
       message: error.message,
-      statusCode: HttpStatus.badRequest,
       headers: sensitiveNoStoreHeaders,
     );
   }
@@ -102,7 +101,6 @@ Response mapAuthException(Exception error) {
     return jsonError(
       code: 'invalid_current_password',
       message: 'Current password is incorrect.',
-      statusCode: HttpStatus.badRequest,
       headers: sensitiveNoStoreHeaders,
     );
   }
