@@ -36,6 +36,37 @@ Current documents:
 * [disputes-admin-operations-and-audit.md](architecture/disputes-admin-operations-and-audit.md)
 * [earnings-payouts-and-reconciliation.md](architecture/earnings-payouts-and-reconciliation.md)
 * [account-recovery-verification-and-session-security.md](architecture/account-recovery-verification-and-session-security.md)
+* [scalability-and-growth-review.md](architecture/scalability-and-growth-review.md)
+
+### `security/`
+
+Stores security audits and security-oriented operational notes. These documents do not claim formal certification or penetration-test completion.
+
+Current documents:
+
+* [final-security-audit.md](security/final-security-audit.md)
+
+### `deployment/`
+
+Stores target-neutral deployment architecture, container and Android release runbooks, environment reference, and operations procedures.
+
+Current documents:
+
+* [deployment-architecture.md](deployment/deployment-architecture.md)
+* [backend-container-runbook.md](deployment/backend-container-runbook.md)
+* [android-release-runbook.md](deployment/android-release-runbook.md)
+* [environment-reference.md](deployment/environment-reference.md)
+* [operations-runbook.md](deployment/operations-runbook.md)
+
+### `final/`
+
+Stores end-of-project functional completeness, production-readiness gaps, and the executive completion summary. Distinguishes software release readiness from full production service readiness.
+
+Current documents:
+
+* [project-completion-summary.md](final/project-completion-summary.md)
+* [functional-completeness.md](final/functional-completeness.md)
+* [production-readiness-gap-register.md](final/production-readiness-gap-register.md)
 
 ### `ux/`
 
@@ -47,12 +78,14 @@ Current documents:
 
 ### `testing/`
 
-Stores automated acceptance-testing notes and manual release-candidate checklists.
+Stores automated acceptance-testing notes, manual release-candidate checklists, CI documentation, and release verification tooling notes.
 
 Current documents:
 
 * [acceptance-testing.md](testing/acceptance-testing.md)
 * [manual-release-candidate-checklist.md](testing/manual-release-candidate-checklist.md)
+* [continuous-integration.md](testing/continuous-integration.md)
+* [release-verification.md](testing/release-verification.md)
 
 ### `setup/`
 
@@ -140,6 +173,7 @@ Current documents:
 * [ADR-017-cleaner-earnings-payouts-and-reconciliation.md](decisions/ADR-017-cleaner-earnings-payouts-and-reconciliation.md)
 * [ADR-018-account-recovery-verification-and-session-security.md](decisions/ADR-018-account-recovery-verification-and-session-security.md)
 * [ADR-019-release-candidate-ux-and-acceptance-testing.md](decisions/ADR-019-release-candidate-ux-and-acceptance-testing.md)
+* [ADR-020-production-deployment-and-release-readiness.md](decisions/ADR-020-production-deployment-and-release-readiness.md)
 
 ### `workflows/`
 

@@ -50,4 +50,20 @@ flutter test test/shared/presentation/app_formatters_test.dart
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
 ```
 
-Acceptance tests under `test/acceptance/` use Riverpod/router fakes only. They must not point at live Atlas or production backends. See [../documentation/testing/acceptance-testing.md](../documentation/testing/acceptance-testing.md).
+## Release configuration
+
+* `API_BASE_URL` via `--dart-define` (public, not a secret)
+* Debug/local: `http://10.0.2.2:8080` allowed
+* Release: non-empty `https://` required; invalid config shows a safe bootstrap error screen
+* Android applicationId / namespace: `com.homecleaningmarketplace.app`
+* Display name: Home Cleaning Marketplace
+* Main manifest includes `INTERNET`; release cleartext disabled (`usesCleartextTraffic=false`)
+* Debug manifest may allow cleartext to emulator/localhost via network security config
+* Release signing uses ignored `android/key.properties` when present; otherwise debug signing (not Play-ready)
+
+```bash
+flutter build apk --debug
+flutter build apk --release --dart-define=API_BASE_URL=https://api.example.invalid
+```
+
+Sandbox/development UI honesty: payment and payout screens show development banners when simulation is available. Do not claim production card/payout processing.

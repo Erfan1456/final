@@ -8,7 +8,7 @@ import 'package:home_cleaning_marketplace/features/auth/data/flutter_secure_auth
 
 BaseOptions _baseOptions(AppConfig config) {
   return BaseOptions(
-    baseUrl: config.apiBaseUrl,
+    baseUrl: config.normalizedApiBaseUrl,
     connectTimeout: const Duration(seconds: 15),
     receiveTimeout: const Duration(seconds: 15),
     sendTimeout: const Duration(seconds: 15),

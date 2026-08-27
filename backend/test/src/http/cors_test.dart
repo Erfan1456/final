@@ -33,6 +33,14 @@ void main() {
         headers[HttpHeaders.accessControlAllowHeadersHeader],
         contains('Content-Type'),
       );
+      expect(
+        headers[HttpHeaders.accessControlAllowHeadersHeader],
+        contains('Idempotency-Key'),
+      );
+      expect(
+        headers[HttpHeaders.accessControlAllowHeadersHeader],
+        contains('Authorization'),
+      );
     });
   });
 
@@ -54,6 +62,8 @@ void main() {
         response.headers[HttpHeaders.accessControlAllowOriginHeader],
         equals('http://localhost:3000'),
       );
+      expect(response.headers['X-Content-Type-Options'], equals('nosniff'));
+      expect(response.headers['X-Request-Id'], isNotEmpty);
     });
 
     test('echoes a configured allowed origin', () async {
@@ -84,6 +94,21 @@ void main() {
       final response = await _options('http://localhost:3000');
 
       expect(response.statusCode, equals(HttpStatus.noContent));
+      expect(
+        response.headers[HttpHeaders.accessControlAllowOriginHeader],
+        isNull,
+      );
+    });
+
+    test('does not reflect an arbitrary unknown origin', () async {
+      resetMiddlewareCaches(
+        config: const ServerConfig(
+          environment: 'production',
+          allowedOrigins: <String>['https://app.example.test'],
+        ),
+      );
+
+      final response = await _options('https://evil.example.test');
       expect(
         response.headers[HttpHeaders.accessControlAllowOriginHeader],
         isNull,

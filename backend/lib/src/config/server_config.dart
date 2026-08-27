@@ -91,6 +91,13 @@ class ServerConfig {
   /// Default `APP_ENV` when the variable is absent.
   static const String defaultEnvironment = 'development';
 
+  /// Supported [environment] values. Unknown values fail validation.
+  static const Set<String> supportedEnvironments = <String>{
+    'development',
+    'test',
+    'production',
+  };
+
   /// Development/test default: 1500 bps = 15%.
   static const int defaultPlatformCommissionBps = 1500;
 
@@ -178,6 +185,9 @@ class ServerConfig {
 
   /// Whether [environment] is production.
   bool get isProduction => environment == 'production';
+
+  /// Whether [environment] is one of [supportedEnvironments].
+  bool get isKnownEnvironment => supportedEnvironments.contains(environment);
 
   /// Whether development/test account-action delivery may be constructed.
   ///

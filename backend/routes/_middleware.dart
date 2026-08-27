@@ -1,10 +1,14 @@
 import 'dart:io';
 
 import 'package:dart_frog/dart_frog.dart';
+import 'package:home_cleaning_marketplace_api/src/config/configuration_validation.dart';
 import 'package:home_cleaning_marketplace_api/src/config/environment_loader.dart';
 import 'package:home_cleaning_marketplace_api/src/config/server_config.dart';
 import 'package:home_cleaning_marketplace_api/src/database/mongo_database.dart';
 import 'package:home_cleaning_marketplace_api/src/http/cors_headers.dart';
+import 'package:home_cleaning_marketplace_api/src/http/json_response.dart';
+import 'package:home_cleaning_marketplace_api/src/http/request_id.dart';
+import 'package:home_cleaning_marketplace_api/src/http/security_headers.dart';
 
 ServerConfig? _sharedConfig;
 MongoDatabase? _sharedMongo;
@@ -20,9 +24,14 @@ void resetMiddlewareCaches({ServerConfig? config}) {
 }
 
 ServerConfig _serverConfig() {
-  return _sharedConfig ??= ServerConfig.fromEnvironment(
+  if (_sharedConfig != null) {
+    return _sharedConfig!;
+  }
+  final loaded = ServerConfig.fromEnvironment(
     const EnvironmentLoader().load(),
   );
+  validateServerConfig(loaded);
+  return _sharedConfig = loaded;
 }
 
 MongoDatabase _mongoDatabase() {
@@ -37,28 +46,45 @@ Handler middleware(Handler handler) {
       .use(provider<MongoDatabase>((_) => mongo));
 
   return (context) async {
+    final requestId = RequestId.resolve(
+      context.request.headers[RequestId.headerName],
+    );
     final origin = config.allowedOriginHeader(
       context.request.headers['origin'],
     );
+    final baseHeaders = <String, String>{
+      ...securityResponseHeaders(),
+      RequestId.headerName: requestId,
+      ...corsHeaders(origin),
+    };
 
     if (context.request.method == HttpMethod.options) {
       return Response(
         statusCode: HttpStatus.noContent,
-        headers: corsHeaders(origin),
+        headers: baseHeaders,
       );
     }
 
-    final response = await withProviders(context);
-    final extraHeaders = corsHeaders(origin);
-    if (extraHeaders.isEmpty) {
-      return response;
+    try {
+      final scoped = context.provide<String>(() => requestId);
+      final response = await withProviders(scoped);
+      return response.copyWith(
+        headers: <String, Object?>{
+          ...response.headers,
+          ...baseHeaders,
+        },
+      );
+    } catch (_) {
+      // Never leak exception details to clients.
+      if (!config.isProduction) {
+        stderr.writeln('Unhandled request error request_id=$requestId');
+      }
+      return jsonError(
+        statusCode: HttpStatus.internalServerError,
+        code: 'internal_error',
+        message: 'Something went wrong. Please try again.',
+        headers: baseHeaders,
+      );
     }
-
-    return response.copyWith(
-      headers: <String, Object?>{
-        ...response.headers,
-        ...extraHeaders,
-      },
-    );
   };
 }

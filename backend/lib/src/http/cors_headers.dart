@@ -14,7 +14,7 @@ Map<String, String> corsHeaders(String? allowedOrigin) {
     HttpHeaders.accessControlAllowMethodsHeader:
         'GET, POST, PUT, PATCH, DELETE, OPTIONS',
     HttpHeaders.accessControlAllowHeadersHeader:
-        'Accept, Authorization, Content-Type',
+        'Accept, Authorization, Content-Type, Idempotency-Key, X-Request-Id',
     HttpHeaders.varyHeader: 'Origin',
   };
 }

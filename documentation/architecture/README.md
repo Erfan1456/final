@@ -36,3 +36,4 @@ No architecture has been chosen in TASK 001. Concrete architecture documents sho
 * [disputes-admin-operations-and-audit.md](disputes-admin-operations-and-audit.md) — booking disputes, admin user/booking operations, and append-only audit.
 * [earnings-payouts-and-reconciliation.md](earnings-payouts-and-reconciliation.md) — append-only earnings ledger, payout requests, sandbox payout webhooks, and read-only reconciliation.
 * [account-recovery-verification-and-session-security.md](account-recovery-verification-and-session-security.md) — email verification, password recovery, authenticated password change, session management, and dev-only action delivery.
+* [scalability-and-growth-review.md](scalability-and-growth-review.md) — staged growth review (0–1k through 100k–1M), honesty limits, and known consistency constraints.

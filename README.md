@@ -1,101 +1,116 @@
 # Home Cleaning Service Marketplace
 
-This repository will contain a marketplace application connecting customers with home-cleaning service providers.
+Flutter + Dart Frog + MongoDB Atlas marketplace connecting customers with
+home-cleaning service providers.
 
-Planned principal roles:
+## Status
 
-* Customer
-* Cleaner / Service Provider
-* Administrator
+| Gate | Result |
+|------|--------|
+| Software release ready | Intended outcome of TASK 022 (see final docs) |
+| Fully production service ready | **No** — email, payment, and payout providers remain development/sandbox only |
 
-Those roles and product features have not been implemented yet. The project is currently in the foundation and development stage.
-
-## Technology Direction
-
-```text
-Mobile client: Flutter + Dart
-Backend API: Dart + Dart Frog
-Database: MongoDB Atlas — backend connectivity foundation implemented
-Primary Android development environment: Android Studio / Android Emulator
-```
-
-The Dart Frog backend lives in `backend/`. MongoDB Atlas connectivity is implemented in the backend only. Flutter authentication, email verification, password recovery (dev-only delivery), role-scoped profiles, addresses, cleaner onboarding, admin approval, service catalog, offerings, availability, customer discovery, booking reservation/lifecycle, sandbox payments, booking chat, in-app notifications, verified reviews, booking disputes, admin user/booking operations, an append-only audit trail, cleaner earnings, payout requests, and read-only financial reconciliation now exist. WebSockets, push notifications, production email delivery, MFA, AI moderation, a production payment processor, and a real payout provider are not implemented.
-
-## Intended High-Level Architecture
+## Architecture
 
 ```text
-Flutter mobile client
-        ↓
-Dart Frog backend API
-        ↓
+Flutter Android app
+        |
+      HTTPS
+        |
+TLS / reverse proxy / load balancer
+        |
+Dart Frog API (containers)
+        |
 MongoDB Atlas
 ```
 
-The Flutter client must not contain the MongoDB database URI. Database credentials belong only to backend environment configuration.
+Roles: **Customer**, **Cleaner**, **Administrator**.
 
-Flutter authentication, email verification, password recovery (dev-only delivery), role-scoped profiles, addresses, cleaner onboarding, admin approval, service catalog, offerings, availability, customer discovery, booking reservation/lifecycle, sandbox payments, booking chat, in-app notifications, verified reviews, booking disputes, admin user/booking operations, an append-only audit trail, cleaner earnings, payout requests, and read-only financial reconciliation now exist. WebSockets, push notifications, production email delivery, MFA, AI moderation, a production payment processor, and a real payout provider are not implemented. The sandbox payout adapter is development/test only and does not transfer real money.
+## Major capabilities
 
-## Repository Layout
+- Auth: signup, email verification architecture, JWT + refresh rotation, password reset/change, sessions
+- Customer: profile, addresses, discovery, booking, sandbox payment UX, chat, notifications, reviews, disputes
+- Cleaner: onboarding/approval, services, availability, jobs, earnings, sandbox payouts
+- Admin: approvals, users, bookings, payments/refunds, reviews, disputes, payouts, finance/reconciliation, audit trail
+- Release quality: shared UX, acceptance journeys, logout state isolation, CI, Docker packaging
+
+## Honest provider limitations
+
+Production must **not** claim real email delivery, card capture, refunds, or payout transfers. Those flows use development/test providers only.
+
+## Technology
+
+| Layer | Stack |
+|-------|--------|
+| Mobile | Flutter / Dart (`project/`, package `home_cleaning_marketplace`) |
+| API | Dart Frog (`backend/`) |
+| Data | MongoDB Atlas (backend only) |
+
+## Repository layout
 
 ```text
 final/
-├── backend/
-├── documentation/
-├── project/
-├── README.md
-└── .gitignore
+├── backend/          # Dart Frog API + Dockerfile
+├── project/          # Flutter client
+├── documentation/    # Architecture, security, deployment, tasks
+├── tools/            # release_check.dart
+├── .github/workflows # CI (no production secrets)
+└── README.md
 ```
 
-`project/` is the Flutter package root. Flutter commands must be run from that directory.
+## Local development
 
-`backend/` is the Dart Frog API package root. Backend commands must be run from that directory.
-
-`documentation/` contains project technical documentation and Cursor task history.
-
-## Running the Current Flutter Project
-
-From the Git repository root:
-
-```bash
-cd project
-flutter pub get
-flutter devices
-flutter test
-flutter test test/acceptance
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
-```
-
-Use a connected device or emulator available on the local machine. This README does not assume that a specific emulator is currently running.
-
-Flutter acceptance tests under `project/test/acceptance/` use fakes only (no live Atlas). See `documentation/testing/acceptance-testing.md`.
-
-## Running the Current Backend
-
-From the Git repository root:
+Backend:
 
 ```bash
 cd backend
 dart pub get
+# copy .env.example → .env (private; never commit)
 dart_frog dev
 dart analyze
 dart test
 ```
 
-When an Android emulator calls this API on the Windows development host, use `http://10.0.2.2:<port>` instead of `http://localhost:<port>`. Emulator `localhost` is the emulator itself. Debug Android builds may allow that local HTTP exception; production API traffic must use HTTPS. Do not hardcode that emulator address into production Flutter code. `ACCESS_TOKEN_SECRET` is backend-only configuration and must never be placed in Flutter.
+Flutter (Android emulator → host API):
+
+```bash
+cd project
+flutter pub get
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
+flutter analyze
+flutter test
+```
+
+Release builds require HTTPS:
+
+```bash
+flutter build apk --release --dart-define=API_BASE_URL=https://api.example.invalid
+```
+
+Android application id: `com.homecleaningmarketplace.app`
+
+## Release verification
+
+```bash
+dart tools/release_check.dart
+dart tools/release_check.dart --full
+```
 
 ## Documentation
 
-Start with [documentation/README.md](documentation/README.md).
+Start at [`documentation/README.md`](documentation/README.md).
 
-Cursor task reports live in [documentation/cursor/](documentation/cursor/).
+Key final docs:
 
-## Security
+- [`documentation/final/project-completion-summary.md`](documentation/final/project-completion-summary.md)
+- [`documentation/final/production-readiness-gap-register.md`](documentation/final/production-readiness-gap-register.md)
+- [`documentation/security/final-security-audit.md`](documentation/security/final-security-audit.md)
+- [`documentation/deployment/`](documentation/deployment/)
+- [`documentation/decisions/ADR-020-production-deployment-and-release-readiness.md`](documentation/decisions/ADR-020-production-deployment-and-release-readiness.md)
 
-* Never commit database credentials.
-* Never commit real `.env` files.
-* Never place the MongoDB URI inside Flutter client code.
-* Secret and environment example files must contain placeholders only.
+## Security highlights
 
-## Current Status
-
-The repository now has authentication, role-scoped profiles, addresses, cleaner onboarding, admin approval, a platform service catalog, cleaner offerings, availability, customer discovery/comparison, bookings, a development/test sandbox payment ledger, booking-scoped chat, in-app notifications, verified reviews, booking disputes, admin user/booking operations, an append-only audit trail, a cleaner earnings ledger, payout requests, and read-only financial reconciliation. Password recovery, MFA, AI moderation, a production payment processor, and a real payout provider are not implemented. Sandbox payouts do not transfer real money.
+- Argon2id passwords; JWT access + rotating refresh sessions
+- Role-persisted authorization; CORS allow-list (no `*`)
+- Idempotency keys; financial ledger + reconciliation
+- Secrets only in backend runtime env — never in Flutter/`dart-define`

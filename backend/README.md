@@ -30,7 +30,45 @@ MongoDB Atlas is the persistence provider. `mongo_dart` is the backend driver. U
 
 TASK 015–019 may ensure approved booking, payment, conversation, notification, review, dispute, audit, earnings, payout, and user-listing indexes through the controlled index tool. It does not create live bookings, conversations, messages, notifications, reviews, disputes, audit rows, earnings, payout requests, users, or availability fixtures.
 
-Do not place a real MongoDB URI, passwords, or other secrets in this package. Flutter never receives the MongoDB connection URI.
+## Production configuration
+
+Supported `APP_ENV` values: `development`, `test`, `production`.
+
+Unknown `APP_ENV` fails boot validation. Production requires non-empty
+`MONGODB_URI`, `ACCESS_TOKEN_SECRET` (≥32 UTF-8 bytes), explicit
+`ALLOWED_ORIGINS` (no `*`), and explicit valid `PLATFORM_COMMISSION_BPS`.
+
+Sandbox payment/payout and development account-action delivery are **never**
+enabled when `APP_ENV=production`, even if sandbox secrets are present.
+
+See `.env.example` and `.env.production.example` (placeholders only).
+
+## Health / readiness
+
+* `GET /api/v1/health` — liveness (no Mongo required)
+* `GET /api/v1/ready` — readiness (Mongo ping)
+
+## Docker
+
+```bash
+cd backend
+docker build -t home-cleaning-marketplace-api:task022 .
+```
+
+Inject secrets at runtime only. Image does not copy `.env`.
+
+## Indexes / tests
+
+```bash
+dart analyze
+dart test
+dart pub global run dart_frog_cli:dart_frog build
+```
+
+Provider limitations: production email/payment/payout integrations are not
+implemented. Development/test sandbox adapters must not be described as live
+money movement.
+
 
 ## Current endpoints
 

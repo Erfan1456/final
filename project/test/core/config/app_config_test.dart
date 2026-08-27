@@ -2,23 +2,57 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_cleaning_marketplace/core/config/app_config.dart';
 
 void main() {
-  test('empty API base URL is treated as absent', () {
-    const config = AppConfig(apiBaseUrl: '');
+  group('AppConfig.validate', () {
+    test('debug allows empty and http local URLs', () {
+      expect(
+        () => AppConfig.unchecked(apiBaseUrl: '').validate(releaseMode: false),
+        returnsNormally,
+      );
+      expect(
+        () =>
+            AppConfig.unchecked(apiBaseUrl: 'http://10.0.2.2:8080')
+                .validate(releaseMode: false),
+        returnsNormally,
+      );
+      expect(
+        () =>
+            AppConfig.unchecked(apiBaseUrl: 'https://api.example.invalid')
+                .validate(releaseMode: false),
+        returnsNormally,
+      );
+    });
 
-    expect(config.apiBaseUrl, isEmpty);
-    expect(config.hasApiBaseUrl, isFalse);
-  });
+    test('release rejects empty and http', () {
+      expect(
+        () => AppConfig.unchecked(apiBaseUrl: '').validate(releaseMode: true),
+        throwsA(isA<AppConfigException>()),
+      );
+      expect(
+        () =>
+            AppConfig.unchecked(apiBaseUrl: 'http://api.example.invalid')
+                .validate(releaseMode: true),
+        throwsA(isA<AppConfigException>()),
+      );
+    });
 
-  test('whitespace-only API base URL is treated as absent', () {
-    const config = AppConfig(apiBaseUrl: '   ');
+    test('release accepts https and normalizes trailing slash', () {
+      final config = AppConfig.unchecked(
+        apiBaseUrl: 'https://api.example.invalid/',
+      );
+      expect(() => config.validate(releaseMode: true), returnsNormally);
+      expect(
+        config.normalizedApiBaseUrl,
+        equals('https://api.example.invalid'),
+      );
+    });
 
-    expect(config.hasApiBaseUrl, isFalse);
-  });
-
-  test('non-empty API base URL is present', () {
-    const config = AppConfig(apiBaseUrl: 'https://example.invalid');
-
-    expect(config.hasApiBaseUrl, isTrue);
-    expect(config.apiBaseUrl, 'https://example.invalid');
+    test('rejects invalid URI', () {
+      expect(
+        () =>
+            AppConfig.unchecked(apiBaseUrl: 'not a uri')
+                .validate(releaseMode: false),
+        throwsA(isA<AppConfigException>()),
+      );
+    });
   });
 }
