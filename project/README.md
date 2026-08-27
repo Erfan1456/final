@@ -45,5 +45,9 @@ flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
 flutter pub get
 flutter analyze
 flutter test
+flutter test test/acceptance
+flutter test test/shared/presentation/app_formatters_test.dart
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
 ```
+
+Acceptance tests under `test/acceptance/` use Riverpod/router fakes only. They must not point at live Atlas or production backends. See [../documentation/testing/acceptance-testing.md](../documentation/testing/acceptance-testing.md).

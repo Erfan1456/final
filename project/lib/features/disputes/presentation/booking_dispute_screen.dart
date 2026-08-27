@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_cleaning_marketplace/features/availability/presentation/cleaner_availability_screen.dart';
 import 'package:home_cleaning_marketplace/features/disputes/data/dispute_models.dart';
 import 'package:home_cleaning_marketplace/features/disputes/presentation/booking_dispute_controller.dart';
+import 'package:home_cleaning_marketplace/shared/widgets/app_confirmation_dialog.dart';
 
 class BookingDisputeScreen extends ConsumerStatefulWidget {
   const BookingDisputeScreen({super.key, required this.bookingId});
@@ -66,15 +67,27 @@ class _BookingDisputeScreenState extends ConsumerState<BookingDisputeScreen> {
                   dispute: dispute,
                   saving: state.saving,
                   errorMessage: state.errorMessage,
-                  onClose: dispute.canClose
-                      ? () => ref
-                            .read(bookingDisputeControllerProvider.notifier)
-                            .close(widget.bookingId)
-                      : null,
+                  onClose: dispute.canClose ? _closeDispute : null,
                 ),
         ),
       ),
     );
+  }
+
+  Future<void> _closeDispute() async {
+    final confirmed = await showAppConfirmationDialog(
+      context: context,
+      title: 'Close this dispute?',
+      message: 'Closing marks the dispute as closed for this booking.',
+      confirmLabel: 'Close dispute',
+      isDestructive: true,
+    );
+    if (!confirmed || !mounted) {
+      return;
+    }
+    await ref
+        .read(bookingDisputeControllerProvider.notifier)
+        .close(widget.bookingId);
   }
 
   Future<void> _submitCreate() async {

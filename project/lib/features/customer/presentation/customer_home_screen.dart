@@ -7,8 +7,11 @@ import 'package:home_cleaning_marketplace/features/auth/presentation/auth_contro
 import 'package:home_cleaning_marketplace/features/auth/presentation/logout_actions.dart';
 import 'package:home_cleaning_marketplace/features/customer/presentation/customer_profile_controller.dart';
 import 'package:home_cleaning_marketplace/features/notifications/presentation/notification_home_link.dart';
+import 'package:home_cleaning_marketplace/shared/presentation/app_layout.dart';
+import 'package:home_cleaning_marketplace/shared/presentation/app_spacing.dart';
+import 'package:home_cleaning_marketplace/shared/widgets/app_section.dart';
 
-/// Customer dashboard.
+/// Customer dashboard with primary marketplace paths.
 class CustomerHomeScreen extends ConsumerWidget {
   const CustomerHomeScreen({super.key});
 
@@ -18,62 +21,84 @@ class CustomerHomeScreen extends ConsumerWidget {
     final profile = ref.watch(customerProfileControllerProvider);
     final addresses = ref.watch(addressControllerProvider);
     final defaultAddress = addresses.defaultAddress;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Customer home')),
+      appBar: AppBar(title: const Text('Customer Home')),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(24),
-          children: [
-            Text(
-              'Home Cleaning Service Marketplace',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(user?.email ?? ''),
-            const SizedBox(height: 16),
-            Text(
-              profile.hasProfile
-                  ? 'Profile complete'
-                  : 'Profile not created yet',
-            ),
-            const SizedBox(height: 8),
-            if (defaultAddress != null)
+        child: AppLayout.constrained(
+          maxWidth: AppLayout.formMaxWidth,
+          child: ListView(
+            children: [
               Text(
-                'Default address: ${defaultAddress.label}, ${defaultAddress.line1}, ${defaultAddress.city}',
-              )
-            else
-              const Text('No default address selected'),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () => context.push(AppRoutes.customerProfilePath),
-              child: const Text('Manage Profile'),
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: () => context.push(AppRoutes.customerAddressesPath),
-              child: const Text('Manage Addresses'),
-            ),
-            const SizedBox(height: 12),
-            FilledButton.tonal(
-              onPressed: () => context.push(AppRoutes.customerDiscoverPath),
-              child: const Text('Find Cleaners'),
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: () => context.push(AppRoutes.customerBookingsPath),
-              child: const Text('My Bookings'),
-            ),
-            const SizedBox(height: 12),
-            const NotificationHomeLink(),
-            const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: () => context.push(AppRoutes.accountSecurityPath),
-              child: const Text('Security'),
-            ),
-            const SizedBox(height: 24),
-            const LogoutActions(),
-          ],
+                'Home Cleaning Service Marketplace',
+                style: theme.textTheme.headlineSmall,
+              ),
+              const SizedBox(height: AppSpacing.small),
+              Text(
+                'Signed in as ${user?.email ?? 'customer'}',
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: AppSpacing.section),
+              AppSection(
+                title: 'Your account',
+                subtitle: profile.hasProfile
+                    ? 'Profile ready'
+                    : 'Complete your profile to book faster',
+                children: [
+                  Text(
+                    defaultAddress == null
+                        ? 'No default address selected'
+                        : 'Default address: ${defaultAddress.label}, ${defaultAddress.line1}, ${defaultAddress.city}',
+                  ),
+                  const SizedBox(height: AppSpacing.small),
+                  FilledButton.tonal(
+                    onPressed: () =>
+                        context.push(AppRoutes.customerProfilePath),
+                    child: const Text('Profile'),
+                  ),
+                  const SizedBox(height: AppSpacing.small),
+                  OutlinedButton(
+                    onPressed: () =>
+                        context.push(AppRoutes.customerAddressesPath),
+                    child: const Text('Addresses'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.section),
+              AppSection(
+                title: 'Book a cleaner',
+                children: [
+                  FilledButton(
+                    onPressed: () =>
+                        context.push(AppRoutes.customerDiscoverPath),
+                    child: const Text('Find a Cleaner'),
+                  ),
+                  const SizedBox(height: AppSpacing.small),
+                  OutlinedButton(
+                    onPressed: () =>
+                        context.push(AppRoutes.customerBookingsPath),
+                    child: const Text('My Bookings'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.section),
+              AppSection(
+                title: 'Updates & security',
+                children: [
+                  const NotificationHomeLink(),
+                  const SizedBox(height: AppSpacing.small),
+                  OutlinedButton(
+                    onPressed: () =>
+                        context.push(AppRoutes.accountSecurityPath),
+                    child: const Text('Security'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.section),
+              const LogoutActions(),
+            ],
+          ),
         ),
       ),
     );

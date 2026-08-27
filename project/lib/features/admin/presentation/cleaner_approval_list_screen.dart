@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:home_cleaning_marketplace/features/admin/presentation/admin_cleaner_review_controller.dart';
+import 'package:home_cleaning_marketplace/shared/widgets/app_async_states.dart';
 
 /// Administrator cleaner approval queue.
 class CleanerApprovalListScreen extends ConsumerWidget {
@@ -37,36 +38,45 @@ class CleanerApprovalListScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            if (state.errorMessage != null) Text(state.errorMessage!),
+            if (state.errorMessage != null && state.items.isNotEmpty)
+              Text(state.errorMessage!),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  for (final item in state.items)
-                    ListTile(
-                      title: Text(item.fullName),
-                      subtitle: Text(
-                        '${item.email}\n${item.onboardingStatus.wireValue}'
-                        '${item.submittedAt == null ? '' : '\n${item.submittedAt!.toIso8601String()}'}',
+              child: AppAsyncContent(
+                loading: state.loading && state.items.isEmpty,
+                hasData: state.items.isNotEmpty,
+                errorMessage: state.errorMessage,
+                onRetry: () => ref
+                    .read(adminCleanerReviewControllerProvider.notifier)
+                    .load(),
+                emptyTitle: 'No pending cleaner approvals.',
+                builder: (context) => ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    for (final item in state.items)
+                      ListTile(
+                        title: Text(item.fullName),
+                        subtitle: Text(
+                          '${item.email}\n${item.onboardingStatus.wireValue}'
+                          '${item.submittedAt == null ? '' : '\n${item.submittedAt!.toIso8601String()}'}',
+                        ),
+                        isThreeLine: true,
+                        onTap: () =>
+                            context.push('/admin/cleaners/${item.userId}'),
                       ),
-                      isThreeLine: true,
-                      onTap: () =>
-                          context.push('/admin/cleaners/${item.userId}'),
-                    ),
-                  if (state.nextCursor != null)
-                    FilledButton(
-                      onPressed: state.loading
-                          ? null
-                          : () => ref
-                                .read(
-                                  adminCleanerReviewControllerProvider.notifier,
-                                )
-                                .loadMore(),
-                      child: const Text('Load More'),
-                    ),
-                  if (state.loading)
-                    const Center(child: CircularProgressIndicator()),
-                ],
+                    if (state.nextCursor != null)
+                      FilledButton(
+                        onPressed: state.loading
+                            ? null
+                            : () => ref
+                                  .read(
+                                    adminCleanerReviewControllerProvider
+                                        .notifier,
+                                  )
+                                  .loadMore(),
+                        child: const Text('Load More'),
+                      ),
+                  ],
+                ),
               ),
             ),
           ],

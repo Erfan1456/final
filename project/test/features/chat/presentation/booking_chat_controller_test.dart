@@ -8,6 +8,7 @@ import 'package:home_cleaning_marketplace/features/chat/data/chat_api.dart';
 import 'package:home_cleaning_marketplace/features/chat/data/chat_models.dart';
 import 'package:home_cleaning_marketplace/features/chat/presentation/booking_chat_controller.dart';
 
+import '../../../helpers/auth_test_fakes.dart';
 import '../../../helpers/feature_test_fakes.dart';
 
 class _FakeChatApi extends ChatApi {
@@ -105,7 +106,10 @@ void main() {
   setUp(() {
     api = _FakeChatApi();
     container = ProviderContainer(
-      overrides: [chatApiProvider.overrideWithValue(api)],
+      overrides: [
+        ...authenticatedAuthOverrides(),
+        chatApiProvider.overrideWithValue(api),
+      ],
     );
   });
 
@@ -244,7 +248,10 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 20));
     expect(api.afterCalls, equals(0));
     container = ProviderContainer(
-      overrides: [chatApiProvider.overrideWithValue(api)],
+      overrides: [
+        ...authenticatedAuthOverrides(),
+        chatApiProvider.overrideWithValue(api),
+      ],
     );
   });
 }

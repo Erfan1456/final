@@ -16,6 +16,10 @@ void main() {
   testWidgets('CustomerHome shows marketplace title and incomplete profile', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -42,12 +46,12 @@ void main() {
     );
 
     expect(find.text('Home Cleaning Service Marketplace'), findsOneWidget);
-    expect(find.text('person@example.com'), findsOneWidget);
-    expect(find.text('Profile not created yet'), findsOneWidget);
+    expect(find.textContaining('person@example.com'), findsOneWidget);
+    expect(find.textContaining('Complete your profile'), findsOneWidget);
     expect(find.text('No default address selected'), findsOneWidget);
-    expect(find.text('Manage Profile'), findsOneWidget);
-    expect(find.text('Manage Addresses'), findsOneWidget);
-    expect(find.text('Find Cleaners'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
+    expect(find.text('Addresses'), findsOneWidget);
+    expect(find.text('Find a Cleaner'), findsOneWidget);
     expect(find.text('My Bookings'), findsOneWidget);
     expect(find.text('Notifications'), findsOneWidget);
   });
@@ -55,6 +59,10 @@ void main() {
   testWidgets('CustomerHome shows profile complete and default address', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -87,7 +95,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Profile complete'), findsOneWidget);
+    expect(find.text('Profile ready'), findsOneWidget);
     expect(find.textContaining('Default address: Home'), findsOneWidget);
   });
 

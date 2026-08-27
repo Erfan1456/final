@@ -2,6 +2,7 @@ import 'package:home_cleaning_marketplace/features/addresses/data/address.dart';
 import 'package:home_cleaning_marketplace/features/addresses/presentation/address_controller.dart';
 import 'package:home_cleaning_marketplace/features/admin/data/admin_cleaner_models.dart';
 import 'package:home_cleaning_marketplace/features/admin/presentation/admin_cleaner_review_controller.dart';
+import 'package:home_cleaning_marketplace/features/auth/presentation/auth_identity.dart';
 import 'package:home_cleaning_marketplace/features/availability/data/availability_slot.dart';
 import 'package:home_cleaning_marketplace/features/availability/presentation/availability_controller.dart';
 import 'package:home_cleaning_marketplace/features/bookings/data/booking_models.dart';
@@ -18,6 +19,7 @@ import 'package:home_cleaning_marketplace/features/cleaner_services/presentation
 import 'package:home_cleaning_marketplace/features/customer/data/customer_profile.dart';
 import 'package:home_cleaning_marketplace/features/customer/presentation/customer_profile_controller.dart';
 import 'package:home_cleaning_marketplace/features/discovery/data/cleaner_discovery_models.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_cleaning_marketplace/features/discovery/presentation/comparison_controller.dart';
 import 'package:home_cleaning_marketplace/features/discovery/presentation/discovery_controller.dart';
 import 'package:home_cleaning_marketplace/features/notifications/data/notification_models.dart';
@@ -44,14 +46,32 @@ import 'package:home_cleaning_marketplace/features/admin/data/admin_finance_mode
 import 'package:home_cleaning_marketplace/features/admin/presentation/admin_finance_controller.dart';
 import 'package:home_cleaning_marketplace/features/admin/presentation/admin_payout_controller.dart';
 
+/// Whether seeded user-scoped state should be visible for the current auth id.
+bool seededStateVisibleForAuth(Ref ref, String? scopedToUserId) {
+  if (scopedToUserId == null) {
+    return true;
+  }
+  final key = watchAuthIdentityKey(ref);
+  if (!watchHasAuthSession(ref) || key == null || key == '__restoring__') {
+    return false;
+  }
+  return key == scopedToUserId;
+}
+
 class SeededCustomerProfileController extends CustomerProfileController {
-  SeededCustomerProfileController(this._seed);
+  SeededCustomerProfileController(this._seed, {this.scopedToUserId});
 
   final CustomerProfileState _seed;
+  final String? scopedToUserId;
   int saveCalls = 0;
 
   @override
-  CustomerProfileState build() => _seed;
+  CustomerProfileState build() {
+    if (!seededStateVisibleForAuth(ref, scopedToUserId)) {
+      return const CustomerProfileState(loading: false);
+    }
+    return _seed;
+  }
 
   @override
   Future<void> load() async {}
@@ -151,16 +171,22 @@ class SeededCleanerOnboardingController extends CleanerOnboardingController {
 }
 
 class SeededAdminCleanerReviewController extends AdminCleanerReviewController {
-  SeededAdminCleanerReviewController(this._seed);
+  SeededAdminCleanerReviewController(this._seed, {this.scopedToUserId});
 
   final AdminCleanerReviewState _seed;
+  final String? scopedToUserId;
   int loadCalls = 0;
   int loadMoreCalls = 0;
   int approveCalls = 0;
   int rejectCalls = 0;
 
   @override
-  AdminCleanerReviewState build() => _seed;
+  AdminCleanerReviewState build() {
+    if (!seededStateVisibleForAuth(ref, scopedToUserId)) {
+      return const AdminCleanerReviewState(loading: false);
+    }
+    return _seed;
+  }
 
   @override
   Future<void> load({String? status}) async {
@@ -326,9 +352,10 @@ class SeededComparisonController extends ComparisonController {
 }
 
 class SeededCustomerBookingController extends CustomerBookingController {
-  SeededCustomerBookingController(this._seed);
+  SeededCustomerBookingController(this._seed, {this.scopedToUserId});
 
   final CustomerBookingState _seed;
+  final String? scopedToUserId;
   int loadCalls = 0;
   int loadMoreCalls = 0;
   int loadDetailCalls = 0;
@@ -341,7 +368,12 @@ class SeededCustomerBookingController extends CustomerBookingController {
   String? lastNotes;
 
   @override
-  CustomerBookingState build() => _seed;
+  CustomerBookingState build() {
+    if (!seededStateVisibleForAuth(ref, scopedToUserId)) {
+      return const CustomerBookingState(loading: false);
+    }
+    return _seed;
+  }
 
   @override
   void beginSubmitAttempt({String Function()? keyFactory}) {
@@ -605,9 +637,10 @@ class SeededCleanerBookingController extends CleanerBookingController {
 }
 
 class SeededBookingChatController extends BookingChatController {
-  SeededBookingChatController(this._seed);
+  SeededBookingChatController(this._seed, {this.scopedToUserId});
 
   final BookingChatState _seed;
+  final String? scopedToUserId;
   int loadCalls = 0;
   int loadOlderCalls = 0;
   int sendCalls = 0;
@@ -616,7 +649,12 @@ class SeededBookingChatController extends BookingChatController {
   int stopPollingCalls = 0;
 
   @override
-  BookingChatState build() => _seed;
+  BookingChatState build() {
+    if (!seededStateVisibleForAuth(ref, scopedToUserId)) {
+      return const BookingChatState.idle();
+    }
+    return _seed;
+  }
 
   @override
   Future<void> load(String bookingId) async {
@@ -653,9 +691,10 @@ class SeededBookingChatController extends BookingChatController {
 }
 
 class SeededNotificationController extends NotificationController {
-  SeededNotificationController(this._seed);
+  SeededNotificationController(this._seed, {this.scopedToUserId});
 
   final NotificationState _seed;
+  final String? scopedToUserId;
   int loadCalls = 0;
   int loadMoreCalls = 0;
   int markOneCalls = 0;
@@ -664,7 +703,12 @@ class SeededNotificationController extends NotificationController {
   String? lastMarkedId;
 
   @override
-  NotificationState build() => _seed;
+  NotificationState build() {
+    if (!seededStateVisibleForAuth(ref, scopedToUserId)) {
+      return const NotificationState(loading: false);
+    }
+    return _seed;
+  }
 
   @override
   Future<void> load({bool? unreadOnly}) async {
@@ -1073,9 +1117,10 @@ class SeededAdminAuditLogController extends AdminAuditLogController {
 }
 
 class SeededCleanerEarningsController extends CleanerEarningsController {
-  SeededCleanerEarningsController(this._seed);
+  SeededCleanerEarningsController(this._seed, {this.scopedToUserId});
 
   final CleanerEarningsState _seed;
+  final String? scopedToUserId;
   int loadCalls = 0;
   int selectCalls = 0;
   int loadMoreLedgerCalls = 0;
@@ -1087,7 +1132,12 @@ class SeededCleanerEarningsController extends CleanerEarningsController {
   String? lastCurrency;
 
   @override
-  CleanerEarningsState build() => _seed;
+  CleanerEarningsState build() {
+    if (!seededStateVisibleForAuth(ref, scopedToUserId)) {
+      return const CleanerEarningsState(loading: false);
+    }
+    return _seed;
+  }
 
   @override
   Future<void> load() async {
@@ -1301,24 +1351,47 @@ AdminCleanerApplicationSummary testAdminSummary() {
   );
 }
 
-List<dynamic> featureControllerOverrides() {
+List<dynamic> featureControllerOverrides({
+  CleanerOnboardingState? cleanerOnboarding,
+  DiscoveryState? discovery,
+  CustomerProfileState? customerProfile,
+  AddressListState? addresses,
+  CustomerBookingState? customerBooking,
+  CleanerBookingState? cleanerBooking,
+  CustomerPaymentState? customerPayment,
+  AdminPaymentState? adminPayment,
+  BookingChatState? bookingChat,
+  NotificationState? notifications,
+  CustomerReviewState? customerReview,
+  BookingDisputeState? bookingDispute,
+  AdminDisputeState? adminDispute,
+  AdminCleanerReviewState? adminCleanerReview,
+  CleanerEarningsState? cleanerEarnings,
+  AdminPayoutState? adminPayout,
+  AdminFinanceState? adminFinance,
+  String? scopedToUserId,
+}) {
   return [
     customerProfileControllerProvider.overrideWith(
       () => SeededCustomerProfileController(
-        const CustomerProfileState(loading: false),
+        customerProfile ?? const CustomerProfileState(loading: false),
+        scopedToUserId: scopedToUserId,
       ),
     ),
     addressControllerProvider.overrideWith(
-      () => SeededAddressController(const AddressListState(loading: false)),
+      () => SeededAddressController(
+        addresses ?? const AddressListState(loading: false),
+      ),
     ),
     cleanerOnboardingControllerProvider.overrideWith(
       () => SeededCleanerOnboardingController(
-        const CleanerOnboardingState(loading: false),
+        cleanerOnboarding ?? const CleanerOnboardingState(loading: false),
       ),
     ),
     adminCleanerReviewControllerProvider.overrideWith(
       () => SeededAdminCleanerReviewController(
-        const AdminCleanerReviewState(loading: false),
+        adminCleanerReview ?? const AdminCleanerReviewState(loading: false),
+        scopedToUserId: scopedToUserId,
       ),
     ),
     catalogControllerProvider.overrideWith(
@@ -1336,40 +1409,49 @@ List<dynamic> featureControllerOverrides() {
           SeededAvailabilityController(const AvailabilityState(loading: false)),
     ),
     discoveryControllerProvider.overrideWith(
-      () => SeededDiscoveryController(const DiscoveryState(loading: false)),
+      () => SeededDiscoveryController(
+        discovery ?? const DiscoveryState(loading: false),
+      ),
     ),
     comparisonControllerProvider.overrideWith(
       () => SeededComparisonController(const ComparisonState()),
     ),
     customerBookingControllerProvider.overrideWith(
       () => SeededCustomerBookingController(
-        const CustomerBookingState(loading: false),
+        customerBooking ?? const CustomerBookingState(loading: false),
+        scopedToUserId: scopedToUserId,
       ),
     ),
     cleanerBookingControllerProvider.overrideWith(
       () => SeededCleanerBookingController(
-        const CleanerBookingState(loading: false),
+        cleanerBooking ?? const CleanerBookingState(loading: false),
       ),
     ),
     customerPaymentControllerProvider.overrideWith(
       () => SeededCustomerPaymentController(
-        const CustomerPaymentState(loading: false),
+        customerPayment ?? const CustomerPaymentState(loading: false),
       ),
     ),
     adminPaymentControllerProvider.overrideWith(
-      () =>
-          SeededAdminPaymentController(const AdminPaymentState(loading: false)),
+      () => SeededAdminPaymentController(
+        adminPayment ?? const AdminPaymentState(loading: false),
+      ),
     ),
     bookingChatControllerProvider.overrideWith(
-      () => SeededBookingChatController(const BookingChatState(loading: false)),
+      () => SeededBookingChatController(
+        bookingChat ?? const BookingChatState(loading: false),
+        scopedToUserId: scopedToUserId,
+      ),
     ),
     notificationControllerProvider.overrideWith(
-      () =>
-          SeededNotificationController(const NotificationState(loading: false)),
+      () => SeededNotificationController(
+        notifications ?? const NotificationState(loading: false),
+        scopedToUserId: scopedToUserId,
+      ),
     ),
     customerReviewControllerProvider.overrideWith(
       () => SeededCustomerReviewController(
-        const CustomerReviewState(loading: false),
+        customerReview ?? const CustomerReviewState(loading: false),
       ),
     ),
     cleanerReviewsControllerProvider.overrideWith(
@@ -1382,12 +1464,13 @@ List<dynamic> featureControllerOverrides() {
     ),
     bookingDisputeControllerProvider.overrideWith(
       () => SeededBookingDisputeController(
-        const BookingDisputeState(loading: false),
+        bookingDispute ?? const BookingDisputeState(loading: false),
       ),
     ),
     adminDisputeControllerProvider.overrideWith(
-      () =>
-          SeededAdminDisputeController(const AdminDisputeState(loading: false)),
+      () => SeededAdminDisputeController(
+        adminDispute ?? const AdminDisputeState(loading: false),
+      ),
     ),
     adminUserManagementControllerProvider.overrideWith(
       () => SeededAdminUserManagementController(
@@ -1406,15 +1489,19 @@ List<dynamic> featureControllerOverrides() {
     ),
     cleanerEarningsControllerProvider.overrideWith(
       () => SeededCleanerEarningsController(
-        const CleanerEarningsState(loading: false),
+        cleanerEarnings ?? const CleanerEarningsState(loading: false),
+        scopedToUserId: scopedToUserId,
       ),
     ),
     adminPayoutControllerProvider.overrideWith(
-      () => SeededAdminPayoutController(const AdminPayoutState(loading: false)),
+      () => SeededAdminPayoutController(
+        adminPayout ?? const AdminPayoutState(loading: false),
+      ),
     ),
     adminFinanceControllerProvider.overrideWith(
-      () =>
-          SeededAdminFinanceController(const AdminFinanceState(loading: false)),
+      () => SeededAdminFinanceController(
+        adminFinance ?? const AdminFinanceState(loading: false),
+      ),
     ),
   ];
 }

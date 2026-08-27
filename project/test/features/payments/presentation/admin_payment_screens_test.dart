@@ -33,7 +33,7 @@ void main() {
       ),
     );
     expect(find.text('Payments'), findsOneWidget);
-    expect(find.text('Cleaner Approvals'), findsOneWidget);
+    expect(find.text('Approvals'), findsOneWidget);
   });
 
   testWidgets('list shows items, filters, and load more', (tester) async {

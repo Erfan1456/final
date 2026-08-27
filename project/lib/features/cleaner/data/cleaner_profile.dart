@@ -41,6 +41,22 @@ enum OnboardingStatus {
         return 'unknown';
     }
   }
+
+  /// User-facing status label.
+  String get label {
+    switch (this) {
+      case OnboardingStatus.draft:
+        return 'Draft';
+      case OnboardingStatus.pending:
+        return 'Pending review';
+      case OnboardingStatus.approved:
+        return 'Approved';
+      case OnboardingStatus.rejected:
+        return 'Rejected';
+      case OnboardingStatus.unknown:
+        return 'Unknown';
+    }
+  }
 }
 
 /// Safe cleaner onboarding profile.

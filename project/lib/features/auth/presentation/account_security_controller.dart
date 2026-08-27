@@ -41,6 +41,9 @@ class AccountSecurityController extends Notifier<AccountSecurityState> {
     required String currentPassword,
     required String newPassword,
   }) async {
+    if (state.isSubmitting) {
+      return false;
+    }
     state = state.copyWith(
       isSubmitting: true,
       clearError: true,

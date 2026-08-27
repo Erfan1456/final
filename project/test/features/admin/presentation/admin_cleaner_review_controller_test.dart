@@ -7,6 +7,7 @@ import 'package:home_cleaning_marketplace/features/admin/data/admin_cleaner_mode
 import 'package:home_cleaning_marketplace/features/admin/presentation/admin_cleaner_review_controller.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/data/cleaner_profile.dart';
 
+import '../../../helpers/auth_test_fakes.dart';
 import '../../../helpers/feature_test_fakes.dart';
 
 class _FakeAdminApi extends AdminCleanerApi {
@@ -78,7 +79,10 @@ void main() {
   setUp(() {
     api = _FakeAdminApi();
     container = ProviderContainer(
-      overrides: [adminCleanerApiProvider.overrideWithValue(api)],
+      overrides: [
+        ...authenticatedAuthOverrides(),
+        adminCleanerApiProvider.overrideWithValue(api),
+      ],
     );
   });
 

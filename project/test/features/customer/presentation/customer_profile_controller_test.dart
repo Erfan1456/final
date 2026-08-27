@@ -6,6 +6,7 @@ import 'package:home_cleaning_marketplace/features/customer/data/customer_profil
 import 'package:home_cleaning_marketplace/features/customer/data/customer_profile_api.dart';
 import 'package:home_cleaning_marketplace/features/customer/presentation/customer_profile_controller.dart';
 
+import '../../../helpers/auth_test_fakes.dart';
 import '../../../helpers/feature_test_fakes.dart';
 
 class _FakeCustomerProfileApi extends CustomerProfileApi {
@@ -49,7 +50,10 @@ void main() {
   setUp(() {
     api = _FakeCustomerProfileApi();
     container = ProviderContainer(
-      overrides: [customerProfileApiProvider.overrideWithValue(api)],
+      overrides: [
+        ...authenticatedAuthOverrides(),
+        customerProfileApiProvider.overrideWithValue(api),
+      ],
     );
   });
 

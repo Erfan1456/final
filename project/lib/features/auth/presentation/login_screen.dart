@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:home_cleaning_marketplace/app/router/app_routes.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/auth_controller.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/auth_validation.dart';
+import 'package:home_cleaning_marketplace/shared/presentation/app_layout.dart';
+import 'package:home_cleaning_marketplace/shared/presentation/app_spacing.dart';
+import 'package:home_cleaning_marketplace/shared/widgets/app_buttons.dart';
 
 /// Email/password sign-in.
 class LoginScreen extends ConsumerStatefulWidget {
@@ -17,6 +20,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -52,93 +56,110 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Sign in')),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(24),
-          children: [
-            Text(
-              'Home Cleaning Service Marketplace',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 24),
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  TextFormField(
-                    controller: _emailController,
-                    enabled: !submitting,
-                    keyboardType: TextInputType.emailAddress,
-                    autofillHints: const [AutofillHints.email],
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(),
+        child: AppLayout.constrained(
+          maxWidth: AppLayout.formMaxWidth,
+          child: ListView(
+            children: [
+              Text(
+                'Home Cleaning Service Marketplace',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: AppSpacing.section),
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _emailController,
+                      enabled: !submitting,
+                      keyboardType: TextInputType.emailAddress,
+                      autofillHints: const [AutofillHints.email],
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) =>
+                          AuthValidation.emailError(value ?? ''),
                     ),
-                    validator: (value) =>
-                        AuthValidation.emailError(value ?? ''),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordController,
-                    enabled: !submitting,
-                    obscureText: true,
-                    autofillHints: const [AutofillHints.password],
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      border: OutlineInputBorder(),
+                    const SizedBox(height: AppSpacing.normal),
+                    TextFormField(
+                      controller: _passwordController,
+                      enabled: !submitting,
+                      obscureText: _obscurePassword,
+                      autofillHints: const [AutofillHints.password],
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          tooltip: _obscurePassword
+                              ? 'Show password'
+                              : 'Hide password',
+                          onPressed: submitting
+                              ? null
+                              : () => setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                }),
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                          ),
+                        ),
+                      ),
+                      onFieldSubmitted: (_) {
+                        if (!submitting) {
+                          _submit();
+                        }
+                      },
+                      validator: (value) =>
+                          AuthValidation.loginPasswordError(value ?? ''),
                     ),
-                    validator: (value) =>
-                        AuthValidation.loginPasswordError(value ?? ''),
-                  ),
-                  if (auth.errorMessage != null) ...[
-                    const SizedBox(height: 16),
-                    Text(
-                      auth.errorMessage!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
+                    if (auth.errorMessage != null) ...[
+                      const SizedBox(height: AppSpacing.normal),
+                      Text(
+                        auth.errorMessage!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ],
+                    if (emailNotVerified) ...[
+                      const SizedBox(height: AppSpacing.small),
+                      TextButton(
+                        onPressed: submitting ? null : _openVerificationPending,
+                        child: const Text('Verify your email'),
+                      ),
+                    ],
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: submitting
+                            ? null
+                            : () => context.push(
+                                AppRoutes.forgotPasswordLocation(
+                                  email: _emailController.text.trim(),
+                                ),
+                              ),
+                        child: const Text('Forgot password?'),
                       ),
                     ),
-                  ],
-                  if (emailNotVerified) ...[
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: submitting ? null : _openVerificationPending,
-                      child: const Text('Verify your email'),
+                    const SizedBox(height: AppSpacing.section),
+                    AppLoadingButton(
+                      label: 'Sign in',
+                      loading: submitting,
+                      onPressed: _submit,
                     ),
-                  ],
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
+                    TextButton(
                       onPressed: submitting
                           ? null
-                          : () => context.push(
-                              AppRoutes.forgotPasswordLocation(
-                                email: _emailController.text.trim(),
-                              ),
-                            ),
-                      child: const Text('Forgot password?'),
+                          : () => context.go(AppRoutes.signupPath),
+                      child: const Text('Create an account'),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    onPressed: submitting ? null : _submit,
-                    child: submitting
-                        ? const SizedBox(
-                            height: 16,
-                            width: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Sign in'),
-                  ),
-                  TextButton(
-                    onPressed: submitting
-                        ? null
-                        : () => context.go(AppRoutes.signupPath),
-                    child: const Text('Create an account'),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

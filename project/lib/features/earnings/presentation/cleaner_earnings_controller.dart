@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_cleaning_marketplace/core/network/api_failure.dart';
+import 'package:home_cleaning_marketplace/features/auth/presentation/auth_identity.dart';
 import 'package:home_cleaning_marketplace/features/bookings/data/booking_idempotency.dart';
 import 'package:home_cleaning_marketplace/features/earnings/data/earnings_api.dart';
 import 'package:home_cleaning_marketplace/features/earnings/data/earnings_models.dart';
@@ -98,6 +99,10 @@ class CleanerEarningsState {
 class CleanerEarningsController extends Notifier<CleanerEarningsState> {
   @override
   CleanerEarningsState build() {
+    watchAuthIdentityKey(ref);
+    if (!watchHasAuthSession(ref)) {
+      return const CleanerEarningsState(loading: false);
+    }
     Future<void>(load);
     return const CleanerEarningsState.loading();
   }

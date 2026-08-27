@@ -6,6 +6,7 @@ import 'package:home_cleaning_marketplace/features/availability/presentation/cle
 import 'package:home_cleaning_marketplace/features/bookings/data/booking_models.dart';
 import 'package:home_cleaning_marketplace/features/bookings/presentation/booking_widgets.dart';
 import 'package:home_cleaning_marketplace/features/bookings/presentation/cleaner_booking_controller.dart';
+import 'package:home_cleaning_marketplace/shared/widgets/app_async_states.dart';
 
 class CleanerBookingListScreen extends ConsumerWidget {
   const CleanerBookingListScreen({super.key});
@@ -40,54 +41,62 @@ class CleanerBookingListScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              if (state.errorMessage != null) Text(state.errorMessage!),
+              if (state.errorMessage != null && state.items.isNotEmpty)
+                Text(state.errorMessage!),
               Expanded(
-                child: state.loading
-                    ? const Center(child: CircularProgressIndicator())
-                    : ListView(
-                        children: [
-                          for (final booking in state.items)
-                            Card(
-                              child: ListTile(
-                                title: Text(
-                                  booking.status == BookingStatus.pending
-                                      ? '${booking.customerDisplayName} · Booking request'
-                                      : booking.customerDisplayName,
+                child: AppAsyncContent(
+                  loading: state.loading,
+                  hasData: state.items.isNotEmpty,
+                  errorMessage: state.errorMessage,
+                  onRetry: () => ref
+                      .read(cleanerBookingControllerProvider.notifier)
+                      .load(),
+                  emptyTitle: 'No booking requests right now.',
+                  builder: (context) => ListView(
+                    children: [
+                      for (final booking in state.items)
+                        Card(
+                          child: ListTile(
+                            title: Text(
+                              booking.status == BookingStatus.pending
+                                  ? '${booking.customerDisplayName} · Booking request'
+                                  : booking.customerDisplayName,
+                            ),
+                            subtitle: Text(
+                              '${booking.serviceSnapshot.name}\n'
+                              '${formatLocalDateTime(booking.startAt)}\n'
+                              '${booking.status.label} · ${booking.addressSnapshot.city}, ${booking.addressSnapshot.region}\n'
+                              '${formatQuotedTotal(booking.quotedTotalMinor, booking.currencyCode)}',
+                            ),
+                            isThreeLine: true,
+                            onTap: () {
+                              context.push(
+                                AppRoutes.cleanerBookingDetailLocation(
+                                  booking.id,
                                 ),
-                                subtitle: Text(
-                                  '${booking.serviceSnapshot.name}\n'
-                                  '${formatLocalDateTime(booking.startAt)}\n'
-                                  '${booking.status.label} · ${booking.addressSnapshot.city}, ${booking.addressSnapshot.region}\n'
-                                  '${formatQuotedTotal(booking.quotedTotalMinor, booking.currencyCode)}',
-                                ),
-                                isThreeLine: true,
-                                onTap: () {
-                                  context.push(
-                                    AppRoutes.cleanerBookingDetailLocation(
-                                      booking.id,
-                                    ),
-                                  );
+                              );
+                            },
+                          ),
+                        ),
+                      if (state.nextCursor != null)
+                        TextButton(
+                          onPressed: state.loadingMore
+                              ? null
+                              : () {
+                                  ref
+                                      .read(
+                                        cleanerBookingControllerProvider
+                                            .notifier,
+                                      )
+                                      .loadMore();
                                 },
-                              ),
-                            ),
-                          if (state.nextCursor != null)
-                            TextButton(
-                              onPressed: state.loadingMore
-                                  ? null
-                                  : () {
-                                      ref
-                                          .read(
-                                            cleanerBookingControllerProvider
-                                                .notifier,
-                                          )
-                                          .loadMore();
-                                    },
-                              child: Text(
-                                state.loadingMore ? 'Loading...' : 'Load More',
-                              ),
-                            ),
-                        ],
-                      ),
+                          child: Text(
+                            state.loadingMore ? 'Loading...' : 'Load More',
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),

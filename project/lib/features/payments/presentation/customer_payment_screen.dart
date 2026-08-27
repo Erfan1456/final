@@ -4,6 +4,11 @@ import 'package:home_cleaning_marketplace/features/bookings/data/booking_models.
 import 'package:home_cleaning_marketplace/features/bookings/presentation/customer_booking_controller.dart';
 import 'package:home_cleaning_marketplace/features/payments/data/payment_models.dart';
 import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_controller.dart';
+import 'package:home_cleaning_marketplace/shared/presentation/app_layout.dart';
+import 'package:home_cleaning_marketplace/shared/presentation/app_spacing.dart';
+import 'package:home_cleaning_marketplace/shared/widgets/app_async_states.dart';
+import 'package:home_cleaning_marketplace/shared/widgets/app_section.dart';
+import 'package:home_cleaning_marketplace/shared/widgets/app_status_chip.dart';
 
 class CustomerPaymentScreen extends ConsumerStatefulWidget {
   const CustomerPaymentScreen({super.key, required this.bookingId});
@@ -40,10 +45,10 @@ class _CustomerPaymentScreenState extends ConsumerState<CustomerPaymentScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Payment')),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
+        child: AppLayout.constrained(
+          maxWidth: AppLayout.formMaxWidth,
           child: paymentState.loading && current == null
-              ? const Center(child: CircularProgressIndicator())
+              ? const AppLoadingState(message: 'Loading payment...')
               : ListView(
                   children: [
                     if (booking != null) ...[
@@ -57,8 +62,16 @@ class _CustomerPaymentScreenState extends ConsumerState<CustomerPaymentScreen> {
                       ),
                     ],
                     if (current != null) ...[
+                      const SizedBox(height: AppSpacing.small),
                       Text('Provider: ${current.provider.label}'),
-                      Text('Status: ${current.status.label}'),
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: AppSpacing.small,
+                        children: [
+                          const Text('Status: '),
+                          AppStatusChip(label: current.status.label),
+                        ],
+                      ),
                       Text('Attempt ${current.attemptNumber}'),
                       Text(
                         formatPaymentAmount(
@@ -68,8 +81,16 @@ class _CustomerPaymentScreenState extends ConsumerState<CustomerPaymentScreen> {
                       ),
                     ],
                     if (paymentState.errorMessage != null)
-                      Text(paymentState.errorMessage!),
-                    const SizedBox(height: 16),
+                      Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.normal),
+                        child: Text(
+                          paymentState.errorMessage!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: AppSpacing.normal),
                     if (current == null || current.status.canRetry)
                       FilledButton(
                         onPressed: paymentState.submitting
@@ -94,7 +115,7 @@ class _CustomerPaymentScreenState extends ConsumerState<CustomerPaymentScreen> {
                         ),
                       ),
                     if (current != null && current.status.isPendingAttempt) ...[
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.small),
                       OutlinedButton(
                         onPressed: paymentState.submitting
                             ? null
@@ -107,12 +128,13 @@ class _CustomerPaymentScreenState extends ConsumerState<CustomerPaymentScreen> {
                       ),
                     ],
                     if (current?.simulationAvailable == true) ...[
-                      const SizedBox(height: 24),
-                      const Text('Development Sandbox'),
-                      const Text(
-                        'This is not a real card processor and does not charge money.',
+                      const SizedBox(height: AppSpacing.section),
+                      const AppDevelopmentBanner(
+                        message:
+                            'Development Sandbox — not a real card processor '
+                            'and does not charge money.',
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.small),
                       FilledButton.tonal(
                         onPressed: paymentState.submitting
                             ? null
@@ -126,7 +148,7 @@ class _CustomerPaymentScreenState extends ConsumerState<CustomerPaymentScreen> {
                                   ),
                         child: const Text('Simulate Success'),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.small),
                       OutlinedButton(
                         onPressed: paymentState.submitting
                             ? null

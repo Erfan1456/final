@@ -1,3 +1,6 @@
+export 'package:home_cleaning_marketplace/shared/presentation/app_money.dart'
+    show formatPaymentAmount;
+
 enum PaymentStatus {
   pending,
   authorized,
@@ -435,10 +438,6 @@ class AdminPaymentPage {
 
   final List<AdminPaymentSummary> items;
   final String? nextCursor;
-}
-
-String formatPaymentAmount(int amountMinor, String currencyCode) {
-  return '$currencyCode $amountMinor minor units';
 }
 
 String _requireString(Map<String, dynamic> json, String key) {

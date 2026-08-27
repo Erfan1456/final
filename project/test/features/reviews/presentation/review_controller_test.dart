@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,6 +17,7 @@ class _FakeCustomerReviewApi extends CustomerReviewApi {
 
   CustomerReview? review;
   ApiFailure? nextError;
+  Completer<void>? saveGate;
   int getCalls = 0;
   int saveCalls = 0;
 
@@ -39,6 +42,9 @@ class _FakeCustomerReviewApi extends CustomerReviewApi {
     String? comment,
   }) async {
     saveCalls += 1;
+    if (saveGate != null) {
+      await saveGate!.future;
+    }
     _throwIfNeeded();
     return testCustomerReview(rating: rating);
   }
@@ -138,6 +144,28 @@ void main() {
         .read(customerReviewControllerProvider.notifier)
         .save(bookingId: '507f1f77bcf86cd799439091', rating: 4);
     expect(saved, isTrue);
+    expect(api.saveCalls, equals(1));
+  });
+
+  test('save ignores duplicate presses while in flight', () async {
+    final api = _FakeCustomerReviewApi()..saveGate = Completer<void>();
+    final container = ProviderContainer(
+      overrides: [customerReviewApiProvider.overrideWithValue(api)],
+    );
+    addTearDown(container.dispose);
+    final notifier = container.read(customerReviewControllerProvider.notifier);
+    final first = notifier.save(
+      bookingId: '507f1f77bcf86cd799439091',
+      rating: 4,
+    );
+    await pumpEventQueue();
+    final second = notifier.save(
+      bookingId: '507f1f77bcf86cd799439091',
+      rating: 5,
+    );
+    api.saveGate!.complete();
+    final results = await Future.wait<bool>([first, second]);
+    expect(results, equals([true, false]));
     expect(api.saveCalls, equals(1));
   });
 

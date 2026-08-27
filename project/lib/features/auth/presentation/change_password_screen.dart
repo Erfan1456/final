@@ -18,6 +18,8 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
+  bool _obscureCurrent = true;
+  bool _obscureNew = true;
 
   @override
   void dispose() {
@@ -64,10 +66,25 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                   TextFormField(
                     controller: _currentPasswordController,
                     enabled: !submitting,
-                    obscureText: true,
-                    decoration: const InputDecoration(
+                    obscureText: _obscureCurrent,
+                    decoration: InputDecoration(
                       labelText: 'Current password',
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        tooltip: _obscureCurrent
+                            ? 'Show password'
+                            : 'Hide password',
+                        onPressed: submitting
+                            ? null
+                            : () => setState(() {
+                                _obscureCurrent = !_obscureCurrent;
+                              }),
+                        icon: Icon(
+                          _obscureCurrent
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                        ),
+                      ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -80,12 +97,27 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                   TextFormField(
                     controller: _newPasswordController,
                     enabled: !submitting,
-                    obscureText: true,
+                    obscureText: _obscureNew,
                     autofillHints: const [AutofillHints.newPassword],
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'New password',
                       helperText: '15–128 characters',
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        tooltip: _obscureNew
+                            ? 'Show password'
+                            : 'Hide password',
+                        onPressed: submitting
+                            ? null
+                            : () => setState(() {
+                                _obscureNew = !_obscureNew;
+                              }),
+                        icon: Icon(
+                          _obscureNew
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                        ),
+                      ),
                     ),
                     validator: (value) =>
                         AuthValidation.signupPasswordError(value ?? ''),

@@ -1,3 +1,6 @@
+export 'package:home_cleaning_marketplace/shared/presentation/app_money.dart'
+    show formatQuotedTotal;
+
 enum BookingStatus {
   pending,
   confirmed,
@@ -403,10 +406,6 @@ int quotedTotalMinorPreview({
   required int durationMinutes,
 }) {
   return (hourlyRateMinor * durationMinutes + 30) ~/ 60;
-}
-
-String formatQuotedTotal(int quotedTotalMinor, String currencyCode) {
-  return 'Quoted total: $currencyCode $quotedTotalMinor minor units';
 }
 
 String _requireString(Map<String, dynamic> json, String key) {

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_cleaning_marketplace/core/network/api_failure.dart';
+import 'package:home_cleaning_marketplace/features/auth/presentation/auth_identity.dart';
 import 'package:home_cleaning_marketplace/features/bookings/data/booking_api.dart';
 import 'package:home_cleaning_marketplace/features/bookings/data/booking_idempotency.dart';
 import 'package:home_cleaning_marketplace/features/bookings/data/booking_models.dart';
@@ -78,6 +79,11 @@ class CustomerBookingState {
 class CustomerBookingController extends Notifier<CustomerBookingState> {
   @override
   CustomerBookingState build() {
+    // Rebuild/clear when authenticated identity changes (same root ProviderScope).
+    watchAuthIdentityKey(ref);
+    if (!watchHasAuthSession(ref)) {
+      return const CustomerBookingState(loading: false);
+    }
     Future<void>(load);
     return const CustomerBookingState.loading();
   }

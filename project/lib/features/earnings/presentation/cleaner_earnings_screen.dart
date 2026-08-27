@@ -4,6 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:home_cleaning_marketplace/app/router/app_routes.dart';
 import 'package:home_cleaning_marketplace/features/earnings/presentation/cleaner_earnings_controller.dart';
 import 'package:home_cleaning_marketplace/features/payments/data/payment_models.dart';
+import 'package:home_cleaning_marketplace/shared/presentation/app_spacing.dart';
+import 'package:home_cleaning_marketplace/shared/widgets/app_async_states.dart';
+import 'package:home_cleaning_marketplace/shared/widgets/app_confirmation_dialog.dart';
+import 'package:home_cleaning_marketplace/shared/widgets/app_section.dart';
 
 class CleanerEarningsScreen extends ConsumerWidget {
   const CleanerEarningsScreen({super.key});
@@ -134,49 +138,72 @@ class CleanerEarningsLedgerScreen extends ConsumerWidget {
 class CleanerPayoutHistoryScreen extends ConsumerWidget {
   const CleanerPayoutHistoryScreen({super.key});
 
+  Future<void> _cancelPayout(
+    BuildContext context,
+    WidgetRef ref,
+    String payoutId,
+  ) async {
+    final confirmed = await showAppConfirmationDialog(
+      context: context,
+      title: 'Cancel this payout request?',
+      message: 'The reserved payout amount will be released back to your available balance.',
+      confirmLabel: 'Cancel request',
+      isDestructive: true,
+    );
+    if (confirmed) {
+      await ref
+          .read(cleanerEarningsControllerProvider.notifier)
+          .cancelPayout(payoutId);
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(cleanerEarningsControllerProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Payout history')),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(24),
-          children: [
-            if (state.errorMessage != null) Text(state.errorMessage!),
-            for (final payout in state.payouts) ...[
-              ListTile(
-                title: Text(
-                  '${formatPaymentAmount(payout.amountMinor, payout.currencyCode)} · ${payout.status.label}',
-                ),
-                subtitle: Text(
-                  'Attempt ${payout.attemptNumber} · ${payout.requestedAt.toIso8601String()}'
-                  '${payout.rejectionReason == null ? '' : '\n${payout.rejectionReason}'}',
-                ),
-              ),
-              if (payout.status.canCancel)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    onPressed: state.saving
-                        ? null
-                        : () => ref
-                              .read(cleanerEarningsControllerProvider.notifier)
-                              .cancelPayout(payout.id),
-                    child: const Text('Cancel Request'),
+        child: AppAsyncContent(
+          loading: state.loading && state.payouts.isEmpty,
+          hasData: state.payouts.isNotEmpty,
+          errorMessage: state.errorMessage,
+          emptyTitle: 'No payout requests yet.',
+          builder: (context) => ListView(
+            padding: const EdgeInsets.all(24),
+            children: [
+              if (state.errorMessage != null) Text(state.errorMessage!),
+              for (final payout in state.payouts) ...[
+                ListTile(
+                  title: Text(
+                    '${formatPaymentAmount(payout.amountMinor, payout.currencyCode)} · ${payout.status.label}',
+                  ),
+                  subtitle: Text(
+                    'Attempt ${payout.attemptNumber} · ${payout.requestedAt.toIso8601String()}'
+                    '${payout.rejectionReason == null ? '' : '\n${payout.rejectionReason}'}',
                   ),
                 ),
+                if (payout.status.canCancel)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      onPressed: state.saving
+                          ? null
+                          : () => _cancelPayout(context, ref, payout.id),
+                      child: const Text('Cancel Request'),
+                    ),
+                  ),
+              ],
+              if (state.payoutsCursor != null)
+                FilledButton(
+                  onPressed: state.loadingMore
+                      ? null
+                      : () => ref
+                            .read(cleanerEarningsControllerProvider.notifier)
+                            .loadMorePayouts(),
+                  child: const Text('Load More'),
+                ),
             ],
-            if (state.payoutsCursor != null)
-              FilledButton(
-                onPressed: state.loadingMore
-                    ? null
-                    : () => ref
-                          .read(cleanerEarningsControllerProvider.notifier)
-                          .loadMorePayouts(),
-                child: const Text('Load More'),
-              ),
-          ],
+          ),
         ),
       ),
     );
@@ -252,11 +279,14 @@ class _CleanerPayoutRequestScreenState
                 labelText: 'Amount (minor units)',
               ),
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'No bank or wallet destination is collected yet. This project currently uses a development payout workflow.',
+            const SizedBox(height: AppSpacing.normal),
+            const AppDevelopmentBanner(
+              message:
+                  'Development Sandbox — payouts are simulated only and do '
+                  'not transfer real money. No bank or wallet destination is '
+                  'collected yet.',
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.normal),
             FilledButton(
               onPressed: state.saving
                   ? null

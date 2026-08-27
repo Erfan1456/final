@@ -8,6 +8,7 @@ import 'package:home_cleaning_marketplace/features/bookings/data/booking_api.dar
 import 'package:home_cleaning_marketplace/features/bookings/data/booking_models.dart';
 import 'package:home_cleaning_marketplace/features/bookings/presentation/customer_booking_controller.dart';
 
+import '../../../helpers/auth_test_fakes.dart';
 import '../../../helpers/feature_test_fakes.dart';
 
 class _FakeCustomerBookingApi extends CustomerBookingApi {
@@ -85,7 +86,10 @@ void main() {
   setUp(() {
     api = _FakeCustomerBookingApi();
     container = ProviderContainer(
-      overrides: [customerBookingApiProvider.overrideWithValue(api)],
+      overrides: [
+        ...authenticatedAuthOverrides(),
+        customerBookingApiProvider.overrideWithValue(api),
+      ],
     );
   });
 

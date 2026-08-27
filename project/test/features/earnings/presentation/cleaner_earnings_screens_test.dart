@@ -115,7 +115,7 @@ void main() {
     );
     await tester.pump();
     expect(find.textContaining('Available balance'), findsOneWidget);
-    expect(find.textContaining('development payout workflow'), findsOneWidget);
+    expect(find.textContaining('Development Sandbox'), findsOneWidget);
     expect(find.text('Request Payout'), findsOneWidget);
     expect(find.textContaining('bank account'), findsNothing);
     expect(find.textContaining('CVV'), findsNothing);

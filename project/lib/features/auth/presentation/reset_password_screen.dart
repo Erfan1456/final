@@ -20,6 +20,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _tokenController;
   final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -88,12 +89,27 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   TextFormField(
                     controller: _passwordController,
                     enabled: !submitting,
-                    obscureText: true,
+                    obscureText: _obscurePassword,
                     autofillHints: const [AutofillHints.newPassword],
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'New password',
                       helperText: '15–128 characters',
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        tooltip: _obscurePassword
+                            ? 'Show password'
+                            : 'Hide password',
+                        onPressed: submitting
+                            ? null
+                            : () => setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              }),
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                        ),
+                      ),
                     ),
                     validator: (value) =>
                         AuthValidation.signupPasswordError(value ?? ''),

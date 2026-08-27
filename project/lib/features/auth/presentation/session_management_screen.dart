@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/session_management_controller.dart';
+import 'package:home_cleaning_marketplace/shared/widgets/app_confirmation_dialog.dart';
 
 /// Lists and revokes signed-in account sessions.
 class SessionManagementScreen extends ConsumerWidget {
@@ -12,6 +13,58 @@ class SessionManagementScreen extends ConsumerWidget {
         '${local.day.toString().padLeft(2, '0')} '
         '${local.hour.toString().padLeft(2, '0')}:'
         '${local.minute.toString().padLeft(2, '0')}';
+  }
+
+  Future<void> _revokeSession(
+    BuildContext context,
+    SessionManagementController notifier,
+    String sessionId,
+  ) async {
+    final confirmed = await showAppConfirmationDialog(
+      context: context,
+      title: 'Revoke session?',
+      message: 'Sign out this device from your account?',
+      confirmLabel: 'Revoke',
+      isDestructive: true,
+    );
+    if (confirmed) {
+      await notifier.revokeSession(sessionId);
+    }
+  }
+
+  Future<void> _revokeCurrentSession(
+    BuildContext context,
+    SessionManagementController notifier,
+    String sessionId,
+  ) async {
+    final confirmed = await showAppConfirmationDialog(
+      context: context,
+      title: 'End this session?',
+      message:
+          'This will end your current session on this device. '
+          'You will need to sign in again.',
+      confirmLabel: 'End session',
+      isDestructive: true,
+    );
+    if (confirmed) {
+      await notifier.revokeSession(sessionId);
+    }
+  }
+
+  Future<void> _revokeAll(
+    BuildContext context,
+    SessionManagementController notifier,
+  ) async {
+    final confirmed = await showAppConfirmationDialog(
+      context: context,
+      title: 'Sign out all devices?',
+      message: 'This will sign out every device that can access your account.',
+      confirmLabel: 'Sign out all',
+      isDestructive: true,
+    );
+    if (confirmed) {
+      await notifier.revokeAllSessions();
+    }
   }
 
   @override
@@ -58,7 +111,7 @@ class SessionManagementScreen extends ConsumerWidget {
                         child: ListTile(
                           title: Text(
                             session.isCurrent
-                                ? 'This device'
+                                ? 'This device (current session)'
                                 : 'Session ${session.id.substring(0, 8)}…',
                           ),
                           subtitle: Text(
@@ -66,16 +119,25 @@ class SessionManagementScreen extends ConsumerWidget {
                             'Expires ${_formatTimestamp(session.expiresAt)}',
                           ),
                           isThreeLine: true,
-                          trailing: session.isCurrent
-                              ? null
-                              : IconButton(
-                                  icon: const Icon(Icons.logout),
-                                  tooltip: 'Revoke session',
-                                  onPressed: submitting
-                                      ? null
-                                      : () =>
-                                            notifier.revokeSession(session.id),
-                                ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.logout),
+                            tooltip: session.isCurrent
+                                ? 'Revoke current session'
+                                : 'Revoke session',
+                            onPressed: submitting
+                                ? null
+                                : () => session.isCurrent
+                                      ? _revokeCurrentSession(
+                                          context,
+                                          notifier,
+                                          session.id,
+                                        )
+                                      : _revokeSession(
+                                          context,
+                                          notifier,
+                                          session.id,
+                                        ),
+                          ),
                         ),
                       );
                     }),
@@ -83,7 +145,7 @@ class SessionManagementScreen extends ConsumerWidget {
                   FilledButton(
                     onPressed: submitting || state.sessions.isEmpty
                         ? null
-                        : () => notifier.revokeAllSessions(),
+                        : () => _revokeAll(context, notifier),
                     child: submitting
                         ? const SizedBox(
                             height: 16,

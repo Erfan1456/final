@@ -33,6 +33,10 @@ class _FakeSignupApi extends AuthApi {
 
 void main() {
   testWidgets('signup fields render with Customer and Cleaner', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -83,6 +87,10 @@ void main() {
   testWidgets('successful signup navigates to verification pending', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     final api = _FakeSignupApi();
     final repository = AuthRepository(
       api: api,
@@ -118,12 +126,16 @@ void main() {
       find.widgetWithText(TextFormField, 'Password'),
       'fifteenCharsPass',
     );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Confirm password'),
+      'fifteenCharsPass',
+    );
     await tester.tap(find.text('Cleaner'));
     await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, 'Create account'));
     await tester.pumpAndSettle();
     expect(api.signupCalls, equals(1));
     expect(api.lastRole, equals('cleaner'));
-    expect(find.text('person@example.com'), findsOneWidget);
+    expect(find.textContaining('person@example.com'), findsOneWidget);
   });
 }

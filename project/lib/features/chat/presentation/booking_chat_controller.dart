@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_cleaning_marketplace/core/network/api_failure.dart';
+import 'package:home_cleaning_marketplace/features/auth/presentation/auth_identity.dart';
 import 'package:home_cleaning_marketplace/features/bookings/data/booking_idempotency.dart';
 import 'package:home_cleaning_marketplace/features/chat/data/chat_api.dart';
 import 'package:home_cleaning_marketplace/features/chat/data/chat_models.dart';
@@ -87,7 +88,11 @@ class BookingChatController extends Notifier<BookingChatState> {
 
   @override
   BookingChatState build() {
+    watchAuthIdentityKey(ref);
     ref.onDispose(stopPolling);
+    if (!watchHasAuthSession(ref)) {
+      return const BookingChatState.idle();
+    }
     return const BookingChatState.idle();
   }
 

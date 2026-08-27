@@ -39,10 +39,10 @@ void main() {
         child: const MaterialApp(home: AdminHomeScreen()),
       ),
     );
-    expect(find.text('Admin Dashboard'), findsOneWidget);
+    expect(find.text('Admin Home'), findsOneWidget);
     expect(find.text('admin@example.com'), findsNothing);
-    expect(find.text('person@example.com'), findsOneWidget);
-    expect(find.text('Cleaner Approvals'), findsOneWidget);
+    expect(find.textContaining('person@example.com'), findsOneWidget);
+    expect(find.text('Approvals'), findsOneWidget);
     expect(find.text('Payments'), findsOneWidget);
     expect(find.text('Review Moderation'), findsOneWidget);
     expect(find.text('Disputes'), findsOneWidget);

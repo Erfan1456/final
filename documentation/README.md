@@ -37,6 +37,23 @@ Current documents:
 * [earnings-payouts-and-reconciliation.md](architecture/earnings-payouts-and-reconciliation.md)
 * [account-recovery-verification-and-session-security.md](architecture/account-recovery-verification-and-session-security.md)
 
+### `ux/`
+
+Stores release-candidate Flutter UX conventions and shared presentation guidance.
+
+Current documents:
+
+* [release-candidate-ux-guidelines.md](ux/release-candidate-ux-guidelines.md)
+
+### `testing/`
+
+Stores automated acceptance-testing notes and manual release-candidate checklists.
+
+Current documents:
+
+* [acceptance-testing.md](testing/acceptance-testing.md)
+* [manual-release-candidate-checklist.md](testing/manual-release-candidate-checklist.md)
+
 ### `setup/`
 
 Stores environment setup and development setup instructions, such as Flutter, Dart, Android Studio, MongoDB Atlas, backend setup, environment variables, and local execution instructions.
@@ -122,6 +139,7 @@ Current documents:
 * [ADR-016-disputes-admin-operations-and-audit.md](decisions/ADR-016-disputes-admin-operations-and-audit.md)
 * [ADR-017-cleaner-earnings-payouts-and-reconciliation.md](decisions/ADR-017-cleaner-earnings-payouts-and-reconciliation.md)
 * [ADR-018-account-recovery-verification-and-session-security.md](decisions/ADR-018-account-recovery-verification-and-session-security.md)
+* [ADR-019-release-candidate-ux-and-acceptance-testing.md](decisions/ADR-019-release-candidate-ux-and-acceptance-testing.md)
 
 ### `workflows/`
 

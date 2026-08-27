@@ -6,6 +6,7 @@ import 'package:home_cleaning_marketplace/features/notifications/data/notificati
 import 'package:home_cleaning_marketplace/features/notifications/data/notification_models.dart';
 import 'package:home_cleaning_marketplace/features/notifications/presentation/notification_controller.dart';
 
+import '../../../helpers/auth_test_fakes.dart';
 import '../../../helpers/feature_test_fakes.dart';
 
 class _FakeNotificationApi extends NotificationApi {
@@ -85,7 +86,10 @@ void main() {
   setUp(() {
     api = _FakeNotificationApi();
     container = ProviderContainer(
-      overrides: [notificationApiProvider.overrideWithValue(api)],
+      overrides: [
+        ...authenticatedAuthOverrides(),
+        notificationApiProvider.overrideWithValue(api),
+      ],
     );
   });
 

@@ -271,4 +271,32 @@ void main() {
     );
     expect(find.text('Send'), findsNothing);
   });
+
+  testWidgets('empty chat shows empty state and disabled Send', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookingChatControllerProvider.overrideWith(
+            () => SeededBookingChatController(
+              BookingChatState(
+                loading: false,
+                conversation: testConversationDetail(),
+                messages: const [],
+              ),
+            ),
+          ),
+        ],
+        child: const MaterialApp(
+          home: BookingChatScreen(bookingId: '507f1f77bcf86cd799439091'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('No messages yet.'), findsOneWidget);
+    expect(find.text('Send a message about this booking.'), findsOneWidget);
+    final send = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Send'),
+    );
+    expect(send.onPressed, isNull);
+  });
 }

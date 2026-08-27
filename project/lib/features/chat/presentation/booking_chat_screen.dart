@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_cleaning_marketplace/features/availability/presentation/cleaner_availability_screen.dart';
 import 'package:home_cleaning_marketplace/features/chat/data/chat_models.dart';
 import 'package:home_cleaning_marketplace/features/chat/presentation/booking_chat_controller.dart';
+import 'package:home_cleaning_marketplace/shared/widgets/app_async_states.dart';
 
 class BookingChatScreen extends ConsumerStatefulWidget {
   const BookingChatScreen({super.key, required this.bookingId});
@@ -60,6 +61,7 @@ class _BookingChatScreenState extends ConsumerState<BookingChatScreen> {
       }
     });
     final state = ref.watch(bookingChatControllerProvider);
+    final sendDisabled = state.sending || state.composer.trim().isEmpty;
 
     return Scaffold(
       appBar: AppBar(
@@ -67,7 +69,7 @@ class _BookingChatScreenState extends ConsumerState<BookingChatScreen> {
       ),
       body: SafeArea(
         child: state.loading && state.conversation == null
-            ? const Center(child: CircularProgressIndicator())
+            ? const AppLoadingState()
             : Column(
                 children: [
                   if (state.conversation != null)
@@ -86,32 +88,36 @@ class _BookingChatScreenState extends ConsumerState<BookingChatScreen> {
                       child: Text(state.errorMessage!),
                     ),
                   Expanded(
-                    child: ListView(
-                      padding: const EdgeInsets.all(16),
-                      children: [
-                        if (state.messages.isNotEmpty)
-                          Align(
-                            alignment: Alignment.center,
-                            child: TextButton(
-                              onPressed: state.loadingOlder
-                                  ? null
-                                  : () => ref
-                                        .read(
-                                          bookingChatControllerProvider
-                                              .notifier,
-                                        )
-                                        .loadOlder(),
-                              child: Text(
-                                state.loadingOlder
-                                    ? 'Loading...'
-                                    : 'Load earlier messages',
+                    child: state.messages.isEmpty
+                        ? const AppEmptyState(
+                            title: 'No messages yet.',
+                            message: 'Send a message about this booking.',
+                          )
+                        : ListView(
+                            padding: const EdgeInsets.all(16),
+                            children: [
+                              Align(
+                                alignment: Alignment.center,
+                                child: TextButton(
+                                  onPressed: state.loadingOlder
+                                      ? null
+                                      : () => ref
+                                            .read(
+                                              bookingChatControllerProvider
+                                                  .notifier,
+                                            )
+                                            .loadOlder(),
+                                  child: Text(
+                                    state.loadingOlder
+                                        ? 'Loading...'
+                                        : 'Load earlier messages',
+                                  ),
+                                ),
                               ),
-                            ),
+                              for (final message in state.messages)
+                                _ChatBubble(message: message),
+                            ],
                           ),
-                        for (final message in state.messages)
-                          _ChatBubble(message: message),
-                      ],
-                    ),
                   ),
                   if (state.readOnly)
                     const Padding(
@@ -138,15 +144,22 @@ class _BookingChatScreenState extends ConsumerState<BookingChatScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          FilledButton(
-                            onPressed: state.sending
-                                ? null
-                                : () => ref
-                                      .read(
-                                        bookingChatControllerProvider.notifier,
-                                      )
-                                      .send(),
-                            child: Text(state.sending ? 'Sending...' : 'Send'),
+                          Semantics(
+                            button: true,
+                            label: 'Send message',
+                            child: FilledButton(
+                              onPressed: sendDisabled
+                                  ? null
+                                  : () => ref
+                                        .read(
+                                          bookingChatControllerProvider
+                                              .notifier,
+                                        )
+                                        .send(),
+                              child: Text(
+                                state.sending ? 'Sending...' : 'Send',
+                              ),
+                            ),
                           ),
                         ],
                       ),

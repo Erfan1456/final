@@ -5,8 +5,11 @@ import 'package:home_cleaning_marketplace/app/router/app_routes.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/auth_controller.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/logout_actions.dart';
 import 'package:home_cleaning_marketplace/features/notifications/presentation/notification_home_link.dart';
+import 'package:home_cleaning_marketplace/shared/presentation/app_layout.dart';
+import 'package:home_cleaning_marketplace/shared/presentation/app_spacing.dart';
+import 'package:home_cleaning_marketplace/shared/widgets/app_section.dart';
 
-/// Administrator dashboard.
+/// Administrator dashboard with grouped operational sections.
 class AdminHomeScreen extends ConsumerWidget {
   const AdminHomeScreen({super.key});
 
@@ -14,67 +17,90 @@ class AdminHomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authControllerProvider).user;
     return Scaffold(
-      appBar: AppBar(title: const Text('Admin Dashboard')),
+      appBar: AppBar(title: const Text('Admin Home')),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(24),
-          children: [
-            Text(user?.email ?? ''),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () => context.push(AppRoutes.adminCleanersPath),
-              child: const Text('Cleaner Approvals'),
-            ),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: () => context.push(AppRoutes.adminPaymentsPath),
-              child: const Text('Payments'),
-            ),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: () => context.push(AppRoutes.adminReviewsPath),
-              child: const Text('Review Moderation'),
-            ),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: () => context.push(AppRoutes.adminDisputesPath),
-              child: const Text('Disputes'),
-            ),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: () => context.push(AppRoutes.adminUsersPath),
-              child: const Text('Users'),
-            ),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: () => context.push(AppRoutes.adminBookingsPath),
-              child: const Text('Bookings'),
-            ),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: () => context.push(AppRoutes.adminAuditLogsPath),
-              child: const Text('Audit Log'),
-            ),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: () => context.push(AppRoutes.adminPayoutsPath),
-              child: const Text('Payouts'),
-            ),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: () => context.push(AppRoutes.adminFinancePath),
-              child: const Text('Finance'),
-            ),
-            const SizedBox(height: 12),
-            const NotificationHomeLink(),
-            const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: () => context.push(AppRoutes.accountSecurityPath),
-              child: const Text('Security'),
-            ),
-            const SizedBox(height: 24),
-            const LogoutActions(),
-          ],
+        child: AppLayout.constrained(
+          maxWidth: AppLayout.dashboardMaxWidth,
+          child: ListView(
+            children: [
+              Text('Signed in as ${user?.email ?? 'admin'}'),
+              const SizedBox(height: AppSpacing.section),
+              AppSection(
+                title: 'People & approvals',
+                children: [
+                  FilledButton(
+                    onPressed: () => context.push(AppRoutes.adminCleanersPath),
+                    child: const Text('Approvals'),
+                  ),
+                  const SizedBox(height: AppSpacing.small),
+                  OutlinedButton(
+                    onPressed: () => context.push(AppRoutes.adminUsersPath),
+                    child: const Text('Users'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.section),
+              AppSection(
+                title: 'Marketplace operations',
+                children: [
+                  FilledButton.tonal(
+                    onPressed: () => context.push(AppRoutes.adminBookingsPath),
+                    child: const Text('Bookings'),
+                  ),
+                  const SizedBox(height: AppSpacing.small),
+                  OutlinedButton(
+                    onPressed: () => context.push(AppRoutes.adminPaymentsPath),
+                    child: const Text('Payments'),
+                  ),
+                  const SizedBox(height: AppSpacing.small),
+                  OutlinedButton(
+                    onPressed: () => context.push(AppRoutes.adminPayoutsPath),
+                    child: const Text('Payouts'),
+                  ),
+                  const SizedBox(height: AppSpacing.small),
+                  OutlinedButton(
+                    onPressed: () => context.push(AppRoutes.adminDisputesPath),
+                    child: const Text('Disputes'),
+                  ),
+                  const SizedBox(height: AppSpacing.small),
+                  OutlinedButton(
+                    onPressed: () => context.push(AppRoutes.adminReviewsPath),
+                    child: const Text('Review Moderation'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.section),
+              AppSection(
+                title: 'Finance & audit',
+                children: [
+                  FilledButton.tonal(
+                    onPressed: () => context.push(AppRoutes.adminFinancePath),
+                    child: const Text('Finance'),
+                  ),
+                  const SizedBox(height: AppSpacing.small),
+                  OutlinedButton(
+                    onPressed: () => context.push(AppRoutes.adminAuditLogsPath),
+                    child: const Text('Audit Log'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.section),
+              AppSection(
+                title: 'Account',
+                children: [
+                  const NotificationHomeLink(),
+                  const SizedBox(height: AppSpacing.small),
+                  OutlinedButton(
+                    onPressed: () =>
+                        context.push(AppRoutes.accountSecurityPath),
+                    child: const Text('Security'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.section),
+              const LogoutActions(),
+            ],
+          ),
         ),
       ),
     );

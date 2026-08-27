@@ -157,7 +157,10 @@ void main() {
     expect(find.text('Resolved'), findsOneWidget);
     expect(find.textContaining('History'), findsOneWidget);
     await tester.tap(find.text('Close Dispute'));
-    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(find.text('Close this dispute?'), findsOneWidget);
+    await tester.tap(find.text('Close dispute'));
+    await tester.pumpAndSettle();
     expect(controller.closeCalls, 1);
   });
 

@@ -6,6 +6,7 @@ import 'package:home_cleaning_marketplace/features/admin/presentation/admin_payo
 import 'package:home_cleaning_marketplace/features/bookings/presentation/booking_widgets.dart';
 import 'package:home_cleaning_marketplace/features/earnings/data/earnings_models.dart';
 import 'package:home_cleaning_marketplace/features/payments/data/payment_models.dart';
+import 'package:home_cleaning_marketplace/shared/widgets/app_async_states.dart';
 
 class AdminPayoutListScreen extends ConsumerWidget {
   const AdminPayoutListScreen({super.key});
@@ -60,34 +61,43 @@ class AdminPayoutListScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            if (state.errorMessage != null) Text(state.errorMessage!),
+            if (state.errorMessage != null && state.items.isNotEmpty)
+              Text(state.errorMessage!),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  for (final item in state.items)
-                    ListTile(
-                      title: Text(
-                        '${item.cleanerDisplayName ?? 'Cleaner'} · ${item.status.label}',
+              child: AppAsyncContent(
+                loading: state.loading,
+                hasData: state.items.isNotEmpty,
+                errorMessage: state.errorMessage,
+                onRetry: () =>
+                    ref.read(adminPayoutControllerProvider.notifier).load(),
+                emptyTitle: 'No requested payouts.',
+                builder: (context) => ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    for (final item in state.items)
+                      ListTile(
+                        title: Text(
+                          '${item.cleanerDisplayName ?? 'Cleaner'} · ${item.status.label}',
+                        ),
+                        subtitle: Text(
+                          '${formatPaymentAmount(item.amountMinor, item.currencyCode)}\n'
+                          '${item.requestedAt.toIso8601String()}',
+                        ),
+                        onTap: () => context.push(
+                          AppRoutes.adminPayoutDetailLocation(item.id),
+                        ),
                       ),
-                      subtitle: Text(
-                        '${formatPaymentAmount(item.amountMinor, item.currencyCode)}\n'
-                        '${item.requestedAt.toIso8601String()}',
+                    if (state.nextCursor != null)
+                      FilledButton(
+                        onPressed: state.loadingMore
+                            ? null
+                            : () => ref
+                                  .read(adminPayoutControllerProvider.notifier)
+                                  .loadMore(),
+                        child: const Text('Load More'),
                       ),
-                      onTap: () => context.push(
-                        AppRoutes.adminPayoutDetailLocation(item.id),
-                      ),
-                    ),
-                  if (state.nextCursor != null)
-                    FilledButton(
-                      onPressed: state.loadingMore
-                          ? null
-                          : () => ref
-                                .read(adminPayoutControllerProvider.notifier)
-                                .loadMore(),
-                      child: const Text('Load More'),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

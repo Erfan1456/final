@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_cleaning_marketplace/core/network/api_failure.dart';
 import 'package:home_cleaning_marketplace/features/admin/data/admin_cleaner_api.dart';
 import 'package:home_cleaning_marketplace/features/admin/data/admin_cleaner_models.dart';
+import 'package:home_cleaning_marketplace/features/auth/presentation/auth_identity.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/data/cleaner_profile.dart';
 
 /// Admin cleaner-review presentation state.
@@ -63,6 +64,10 @@ class AdminCleanerReviewState {
 class AdminCleanerReviewController extends Notifier<AdminCleanerReviewState> {
   @override
   AdminCleanerReviewState build() {
+    watchAuthIdentityKey(ref);
+    if (!watchHasAuthSession(ref)) {
+      return const AdminCleanerReviewState(loading: false);
+    }
     Future<void>(load);
     return const AdminCleanerReviewState.loading();
   }

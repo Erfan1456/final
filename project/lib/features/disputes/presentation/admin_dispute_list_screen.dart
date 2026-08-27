@@ -5,6 +5,7 @@ import 'package:home_cleaning_marketplace/app/router/app_routes.dart';
 import 'package:home_cleaning_marketplace/features/availability/presentation/cleaner_availability_screen.dart';
 import 'package:home_cleaning_marketplace/features/disputes/data/dispute_models.dart';
 import 'package:home_cleaning_marketplace/features/disputes/presentation/admin_dispute_controller.dart';
+import 'package:home_cleaning_marketplace/shared/widgets/app_async_states.dart';
 
 class AdminDisputeListScreen extends ConsumerWidget {
   const AdminDisputeListScreen({super.key});
@@ -12,6 +13,12 @@ class AdminDisputeListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(adminDisputeControllerProvider);
+    final emptyTitle =
+        state.filters.status == null ||
+            state.filters.status == 'open' ||
+            state.filters.status == 'under_review'
+        ? 'No open disputes.'
+        : 'No disputes.';
     return Scaffold(
       appBar: AppBar(title: const Text('Disputes')),
       body: SafeArea(
@@ -62,42 +69,47 @@ class AdminDisputeListScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            if (state.errorMessage != null) Text(state.errorMessage!),
+            if (state.errorMessage != null && state.items.isNotEmpty)
+              Text(state.errorMessage!),
             Expanded(
-              child: state.loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : ListView(
-                      padding: const EdgeInsets.all(16),
-                      children: [
-                        for (final item in state.items)
-                          ListTile(
-                            title: Text(
-                              '${item.status.label} · ${item.category.label}',
-                            ),
-                            subtitle: Text(
-                              '${item.subject}\n'
-                              'Booking ${item.bookingId}\n'
-                              '${item.customerDisplayName} / ${item.cleanerPublicName}\n'
-                              '${formatLocalDateTime(item.createdAt)}',
-                            ),
-                            isThreeLine: true,
-                            onTap: () => context.push(
-                              AppRoutes.adminDisputeDetailLocation(item.id),
-                            ),
-                          ),
-                        if (state.nextCursor != null)
-                          FilledButton(
-                            onPressed: state.loadingMore
-                                ? null
-                                : () => ref
-                                      .read(
-                                        adminDisputeControllerProvider.notifier,
-                                      )
-                                      .loadMore(),
-                            child: const Text('Load More'),
-                          ),
-                      ],
-                    ),
+              child: AppAsyncContent(
+                loading: state.loading,
+                hasData: state.items.isNotEmpty,
+                errorMessage: state.errorMessage,
+                onRetry: () =>
+                    ref.read(adminDisputeControllerProvider.notifier).load(),
+                emptyTitle: emptyTitle,
+                builder: (context) => ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    for (final item in state.items)
+                      ListTile(
+                        title: Text(
+                          '${item.status.label} · ${item.category.label}',
+                        ),
+                        subtitle: Text(
+                          '${item.subject}\n'
+                          'Booking ${item.bookingId}\n'
+                          '${item.customerDisplayName} / ${item.cleanerPublicName}\n'
+                          '${formatLocalDateTime(item.createdAt)}',
+                        ),
+                        isThreeLine: true,
+                        onTap: () => context.push(
+                          AppRoutes.adminDisputeDetailLocation(item.id),
+                        ),
+                      ),
+                    if (state.nextCursor != null)
+                      FilledButton(
+                        onPressed: state.loadingMore
+                            ? null
+                            : () => ref
+                                  .read(adminDisputeControllerProvider.notifier)
+                                  .loadMore(),
+                        child: const Text('Load More'),
+                      ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_cleaning_marketplace/core/network/api_failure.dart';
+import 'package:home_cleaning_marketplace/features/auth/presentation/auth_identity.dart';
 import 'package:home_cleaning_marketplace/features/notifications/data/notification_api.dart';
 import 'package:home_cleaning_marketplace/features/notifications/data/notification_models.dart';
 
@@ -61,7 +62,13 @@ class NotificationState {
 
 class NotificationController extends Notifier<NotificationState> {
   @override
-  NotificationState build() => const NotificationState(loading: false);
+  NotificationState build() {
+    watchAuthIdentityKey(ref);
+    if (!watchHasAuthSession(ref)) {
+      return const NotificationState(loading: false);
+    }
+    return const NotificationState(loading: false);
+  }
 
   NotificationApi get _api => ref.read(notificationApiProvider);
 

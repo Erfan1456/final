@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,6 +15,7 @@ class _FakeBookingDisputeApi extends BookingDisputeApi {
 
   BookingDispute? dispute;
   ApiFailure? nextError;
+  Completer<void>? createGate;
   int getCalls = 0;
   int createCalls = 0;
   int closeCalls = 0;
@@ -39,6 +42,9 @@ class _FakeBookingDisputeApi extends BookingDisputeApi {
     required String description,
   }) async {
     createCalls += 1;
+    if (createGate != null) {
+      await createGate!.future;
+    }
     _throwIfNeeded();
     dispute = testBookingDispute();
     return dispute!;
@@ -78,6 +84,32 @@ void main() {
     api.dispute = testBookingDispute(status: 'resolved', resolution: 'Noted.');
     await controller.close('booking');
     expect(api.closeCalls, 1);
+  });
+
+  test('create ignores duplicate presses while in flight', () async {
+    final api = _FakeBookingDisputeApi()..createGate = Completer<void>();
+    final container = ProviderContainer(
+      overrides: [bookingDisputeApiProvider.overrideWithValue(api)],
+    );
+    addTearDown(container.dispose);
+    final notifier = container.read(bookingDisputeControllerProvider.notifier);
+    final first = notifier.create(
+      bookingId: 'booking',
+      category: 'service_quality',
+      subject: 'Late arrival issue',
+      description: 'The cleaner arrived more than two hours late to the job.',
+    );
+    await pumpEventQueue();
+    final second = notifier.create(
+      bookingId: 'booking',
+      category: 'service_quality',
+      subject: 'Late arrival issue',
+      description: 'The cleaner arrived more than two hours late to the job.',
+    );
+    api.createGate!.complete();
+    final results = await Future.wait<bool>([first, second]);
+    expect(results, equals([true, false]));
+    expect(api.createCalls, equals(1));
   });
 
   test('surfaces safe errors', () async {

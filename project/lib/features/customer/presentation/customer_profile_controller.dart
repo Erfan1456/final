@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_cleaning_marketplace/core/network/api_failure.dart';
+import 'package:home_cleaning_marketplace/features/auth/presentation/auth_identity.dart';
 import 'package:home_cleaning_marketplace/features/customer/data/customer_profile.dart';
 import 'package:home_cleaning_marketplace/features/customer/data/customer_profile_api.dart';
 
@@ -48,6 +49,10 @@ class CustomerProfileState {
 class CustomerProfileController extends Notifier<CustomerProfileState> {
   @override
   CustomerProfileState build() {
+    watchAuthIdentityKey(ref);
+    if (!watchHasAuthSession(ref)) {
+      return const CustomerProfileState(loading: false);
+    }
     Future<void>(load);
     return const CustomerProfileState.loading();
   }

@@ -18,6 +18,7 @@ class SeededAuthController extends AuthController {
   Completer<void>? submitGate;
   String? nextError;
   String? nextErrorCode;
+  AuthUser? nextAuthenticatedUser;
 
   @override
   AuthState build() => _seed;
@@ -36,7 +37,7 @@ class SeededAuthController extends AuthController {
       );
       return;
     }
-    state = AuthState.authenticated(testUser());
+    state = AuthState.authenticated(nextAuthenticatedUser ?? testUser());
   }
 
   @override
@@ -51,19 +52,26 @@ class SeededAuthController extends AuthController {
     state = const AuthState.unauthenticated();
   }
 
-  void expireSession() {
+  @override
+  void clearAuthenticatedSession() {
     state = const AuthState.unauthenticated();
+  }
+
+  /// Test stand-in for current-session revoke / remote session invalidation.
+  void expireSession() {
+    clearAuthenticatedSession();
   }
 }
 
 AuthUser testUser({
+  String id = '507f1f77bcf86cd799439011',
   String role = 'customer',
   String email = 'person@example.com',
   bool emailVerified = true,
 }) {
   final created = DateTime.utc(2026, 8, 25, 12);
   return AuthUser(
-    id: '507f1f77bcf86cd799439011',
+    id: id,
     role: role,
     email: email,
     accountStatus: 'active',
@@ -71,6 +79,15 @@ AuthUser testUser({
     createdAt: created,
     updatedAt: created,
   );
+}
+
+/// Overrides [authControllerProvider] with an authenticated seeded session.
+List<dynamic> authenticatedAuthOverrides([AuthUser? user]) {
+  return [
+    authControllerProvider.overrideWith(
+      () => SeededAuthController(AuthState.authenticated(user ?? testUser())),
+    ),
+  ];
 }
 
 SignupResult testSignupResult({

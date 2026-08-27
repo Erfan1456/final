@@ -16,6 +16,10 @@ Future<void> pumpCleanerHome(
   WidgetTester tester,
   CleanerOnboardingState onboarding,
 ) async {
+  tester.view.physicalSize = const Size(800, 2400);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -43,7 +47,7 @@ void main() {
     await pumpCleanerHome(tester, const CleanerOnboardingState(loading: false));
     expect(find.text('Start onboarding'), findsOneWidget);
     expect(find.textContaining('Start onboarding to apply'), findsOneWidget);
-    expect(find.text('Booking Requests / Jobs'), findsOneWidget);
+    expect(find.text('Dashboard / Booking Requests'), findsOneWidget);
   });
 
   testWidgets('draft shows continue onboarding', (tester) async {
@@ -94,11 +98,11 @@ void main() {
         profile: testCleanerProfile(status: OnboardingStatus.approved),
       ),
     );
-    expect(find.text('Manage Services'), findsOneWidget);
-    expect(find.text('Manage Availability'), findsOneWidget);
+    expect(find.text('Services'), findsOneWidget);
+    expect(find.textContaining('Availability'), findsOneWidget);
     expect(find.text('My Reviews'), findsOneWidget);
     expect(find.text('Notifications'), findsOneWidget);
-    expect(find.text('Booking Requests / Jobs'), findsOneWidget);
+    expect(find.text('Dashboard / Booking Requests'), findsOneWidget);
     expect(find.text('Start onboarding'), findsNothing);
   });
 

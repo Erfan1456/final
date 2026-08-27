@@ -6,13 +6,10 @@ import 'package:home_cleaning_marketplace/features/availability/presentation/ava
 import 'package:home_cleaning_marketplace/features/catalog/presentation/catalog_controller.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/data/cleaner_profile.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/presentation/cleaner_onboarding_controller.dart';
+import 'package:home_cleaning_marketplace/shared/presentation/app_date_time.dart';
 
-String formatLocalDateTime(DateTime value) {
-  final local = value.toLocal();
-  String two(int n) => n.toString().padLeft(2, '0');
-  return '${local.year}-${two(local.month)}-${two(local.day)} '
-      '${two(local.hour)}:${two(local.minute)}';
-}
+export 'package:home_cleaning_marketplace/shared/presentation/app_date_time.dart'
+    show formatLocalDateTime;
 
 /// Future open availability slots for the authenticated cleaner.
 class CleanerAvailabilityScreen extends ConsumerWidget {

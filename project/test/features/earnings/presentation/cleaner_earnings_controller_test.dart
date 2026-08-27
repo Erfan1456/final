@@ -6,6 +6,7 @@ import 'package:home_cleaning_marketplace/features/earnings/data/earnings_api.da
 import 'package:home_cleaning_marketplace/features/earnings/data/earnings_models.dart';
 import 'package:home_cleaning_marketplace/features/earnings/presentation/cleaner_earnings_controller.dart';
 
+import '../../../helpers/auth_test_fakes.dart';
 import '../../../helpers/feature_test_fakes.dart';
 
 class _FakeApi extends CleanerEarningsApi {
@@ -95,7 +96,10 @@ void main() {
   test('load summary, select currency, and paginate ledger', () async {
     final api = _FakeApi();
     final container = ProviderContainer(
-      overrides: [cleanerEarningsApiProvider.overrideWithValue(api)],
+      overrides: [
+        ...authenticatedAuthOverrides(),
+        cleanerEarningsApiProvider.overrideWithValue(api),
+      ],
     );
     addTearDown(container.dispose);
     final controller = container.read(
@@ -120,7 +124,10 @@ void main() {
     () async {
       final api = _FakeApi();
       final container = ProviderContainer(
-        overrides: [cleanerEarningsApiProvider.overrideWithValue(api)],
+        overrides: [
+          ...authenticatedAuthOverrides(),
+          cleanerEarningsApiProvider.overrideWithValue(api),
+        ],
       );
       addTearDown(container.dispose);
       final controller = container.read(
@@ -145,7 +152,10 @@ void main() {
         message: 'Available payout balance is insufficient.',
       );
     final container = ProviderContainer(
-      overrides: [cleanerEarningsApiProvider.overrideWithValue(api)],
+      overrides: [
+        ...authenticatedAuthOverrides(),
+        cleanerEarningsApiProvider.overrideWithValue(api),
+      ],
     );
     addTearDown(container.dispose);
     final controller = container.read(

@@ -6,6 +6,7 @@ import 'package:home_cleaning_marketplace/features/auth/presentation/auth_contro
 import 'package:home_cleaning_marketplace/features/availability/presentation/cleaner_availability_screen.dart';
 import 'package:home_cleaning_marketplace/features/notifications/data/notification_models.dart';
 import 'package:home_cleaning_marketplace/features/notifications/presentation/notification_controller.dart';
+import 'package:home_cleaning_marketplace/shared/widgets/app_async_states.dart';
 
 class NotificationCenterScreen extends ConsumerStatefulWidget {
   const NotificationCenterScreen({super.key});
@@ -73,9 +74,12 @@ class _NotificationCenterScreenState
             if (state.errorMessage != null) Text(state.errorMessage!),
             Expanded(
               child: state.loading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const AppLoadingState(message: 'Loading notifications...')
                   : state.items.isEmpty
-                  ? const Center(child: Text('No notifications.'))
+                  ? const AppEmptyState(
+                      title: 'No notifications yet.',
+                      message: 'Updates about bookings and account activity will appear here.',
+                    )
                   : ListView(
                       padding: const EdgeInsets.all(16),
                       children: [

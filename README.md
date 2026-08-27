@@ -60,10 +60,14 @@ From the Git repository root:
 cd project
 flutter pub get
 flutter devices
+flutter test
+flutter test test/acceptance
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
 ```
 
 Use a connected device or emulator available on the local machine. This README does not assume that a specific emulator is currently running.
+
+Flutter acceptance tests under `project/test/acceptance/` use fakes only (no live Atlas). See `documentation/testing/acceptance-testing.md`.
 
 ## Running the Current Backend
 

@@ -54,11 +54,11 @@ void main() {
     expect(find.text('Customer'), findsOneWidget);
   });
 
-  testWidgets('customer session reaches customer home', (tester) async {
+  testWidgets('customer session reaches Customer Home', (tester) async {
     await pumpApp(tester, AuthState.authenticated(testUser()));
     expect(find.text('Home Cleaning Service Marketplace'), findsOneWidget);
-    expect(find.text('person@example.com'), findsOneWidget);
-    expect(find.text('Manage Profile'), findsOneWidget);
+    expect(find.textContaining('person@example.com'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
     expect(find.text('Security'), findsOneWidget);
   });
 
@@ -68,24 +68,24 @@ void main() {
     expect(find.text('Password'), findsNothing);
   });
 
-  testWidgets('cleaner session reaches cleaner home', (tester) async {
+  testWidgets('cleaner session reaches Cleaner Home', (tester) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
-    expect(find.text('Cleaner home'), findsOneWidget);
-    expect(find.text('person@example.com'), findsOneWidget);
+    expect(find.text('Cleaner Home'), findsOneWidget);
+    expect(find.textContaining('person@example.com'), findsOneWidget);
   });
 
   testWidgets('admin session reaches admin home', (tester) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
-    expect(find.text('Admin Dashboard'), findsOneWidget);
-    expect(find.text('Cleaner Approvals'), findsOneWidget);
+    expect(find.text('Admin Home'), findsOneWidget);
+    expect(find.text('Approvals'), findsOneWidget);
   });
 
-  testWidgets('/home redirects a customer to customer home', (tester) async {
+  testWidgets('/home redirects a customer to Customer Home', (tester) async {
     await pumpApp(tester, AuthState.authenticated(testUser()));
     final context = tester.element(find.byType(CustomerHomeScreen));
     GoRouter.of(context).go(AppRoutes.homePath);
     await tester.pumpAndSettle();
-    expect(find.text('Manage Profile'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
   });
 
   testWidgets('customer cannot remain on cleaner or admin routes', (
@@ -96,38 +96,38 @@ void main() {
     final router = GoRouter.of(context);
     router.go(AppRoutes.cleanerHomePath);
     await tester.pumpAndSettle();
-    expect(find.text('Manage Profile'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
     router.go(AppRoutes.adminHomePath);
     await tester.pumpAndSettle();
-    expect(find.text('Manage Profile'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
   });
 
   testWidgets('cleaner cannot remain on customer or admin routes', (
     tester,
   ) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
-    final context = tester.element(find.text('Cleaner home'));
+    final context = tester.element(find.text('Cleaner Home'));
     final router = GoRouter.of(context);
     router.go(AppRoutes.customerHomePath);
     await tester.pumpAndSettle();
-    expect(find.text('Cleaner home'), findsOneWidget);
+    expect(find.text('Cleaner Home'), findsOneWidget);
     router.go(AppRoutes.adminHomePath);
     await tester.pumpAndSettle();
-    expect(find.text('Cleaner home'), findsOneWidget);
+    expect(find.text('Cleaner Home'), findsOneWidget);
   });
 
   testWidgets('admin cannot remain on customer or cleaner routes', (
     tester,
   ) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
-    final context = tester.element(find.text('Admin Dashboard'));
+    final context = tester.element(find.text('Admin Home'));
     final router = GoRouter.of(context);
     router.go(AppRoutes.customerHomePath);
     await tester.pumpAndSettle();
-    expect(find.text('Admin Dashboard'), findsOneWidget);
+    expect(find.text('Admin Home'), findsOneWidget);
     router.go(AppRoutes.cleanerHomePath);
     await tester.pumpAndSettle();
-    expect(find.text('Admin Dashboard'), findsOneWidget);
+    expect(find.text('Admin Home'), findsOneWidget);
   });
 
   testWidgets('logout redirects to login', (tester) async {
@@ -219,7 +219,7 @@ void main() {
 
   testWidgets('cleaner can open shared notifications', (tester) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
-    final context = tester.element(find.text('Cleaner home'));
+    final context = tester.element(find.text('Cleaner Home'));
     GoRouter.of(context).go(AppRoutes.notificationsPath);
     await tester.pumpAndSettle();
     expect(find.text('Notifications'), findsWidgets);
@@ -227,7 +227,7 @@ void main() {
 
   testWidgets('admin can open shared notifications', (tester) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
-    final context = tester.element(find.text('Admin Dashboard'));
+    final context = tester.element(find.text('Admin Home'));
     GoRouter.of(context).go(AppRoutes.notificationsPath);
     await tester.pumpAndSettle();
     expect(find.text('Notifications'), findsWidgets);
@@ -256,7 +256,7 @@ void main() {
 
   testWidgets('cleaner can open booking chat and my reviews', (tester) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
-    final context = tester.element(find.text('Cleaner home'));
+    final context = tester.element(find.text('Cleaner Home'));
     final router = GoRouter.of(context);
     router.go(AppRoutes.cleanerBookingChatLocation('507f1f77bcf86cd799439091'));
     await tester.pumpAndSettle();
@@ -273,7 +273,7 @@ void main() {
 
   testWidgets('admin can open review moderation', (tester) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
-    final context = tester.element(find.text('Admin Dashboard'));
+    final context = tester.element(find.text('Admin Home'));
     final router = GoRouter.of(context);
     router.go(AppRoutes.adminReviewsPath);
     await tester.pumpAndSettle();
@@ -303,68 +303,68 @@ void main() {
     final router = GoRouter.of(context);
     router.go(AppRoutes.cleanerBookingChatLocation('507f1f77bcf86cd799439091'));
     await tester.pumpAndSettle();
-    expect(find.text('Manage Profile'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
     router.go(AppRoutes.adminReviewsPath);
     await tester.pumpAndSettle();
-    expect(find.text('Manage Profile'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
     router.go(AppRoutes.adminDisputesPath);
     await tester.pumpAndSettle();
-    expect(find.text('Manage Profile'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
     router.go(
       AppRoutes.cleanerBookingDisputeLocation('507f1f77bcf86cd799439091'),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Manage Profile'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
   });
 
   testWidgets('cleaner is redirected from customer chat and admin reviews', (
     tester,
   ) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
-    final context = tester.element(find.text('Cleaner home'));
+    final context = tester.element(find.text('Cleaner Home'));
     final router = GoRouter.of(context);
     router.go(
       AppRoutes.customerBookingChatLocation('507f1f77bcf86cd799439091'),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Cleaner home'), findsOneWidget);
+    expect(find.text('Cleaner Home'), findsOneWidget);
     router.go(AppRoutes.adminReviewsPath);
     await tester.pumpAndSettle();
-    expect(find.text('Cleaner home'), findsOneWidget);
+    expect(find.text('Cleaner Home'), findsOneWidget);
     router.go(AppRoutes.adminUsersPath);
     await tester.pumpAndSettle();
-    expect(find.text('Cleaner home'), findsOneWidget);
+    expect(find.text('Cleaner Home'), findsOneWidget);
     router.go(
       AppRoutes.customerBookingDisputeLocation('507f1f77bcf86cd799439091'),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Cleaner home'), findsOneWidget);
+    expect(find.text('Cleaner Home'), findsOneWidget);
   });
 
   testWidgets('admin is redirected from customer chat and cleaner reviews', (
     tester,
   ) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
-    final context = tester.element(find.text('Admin Dashboard'));
+    final context = tester.element(find.text('Admin Home'));
     final router = GoRouter.of(context);
     router.go(
       AppRoutes.customerBookingChatLocation('507f1f77bcf86cd799439091'),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Admin Dashboard'), findsOneWidget);
+    expect(find.text('Admin Home'), findsOneWidget);
     router.go(AppRoutes.cleanerReviewsPath);
     await tester.pumpAndSettle();
-    expect(find.text('Admin Dashboard'), findsOneWidget);
+    expect(find.text('Admin Home'), findsOneWidget);
     router.go(
       AppRoutes.customerBookingDisputeLocation('507f1f77bcf86cd799439091'),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Admin Dashboard'), findsOneWidget);
+    expect(find.text('Admin Home'), findsOneWidget);
   });
 
   testWidgets('cleaner can open booking list and detail', (tester) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
-    final context = tester.element(find.text('Cleaner home'));
+    final context = tester.element(find.text('Cleaner Home'));
     final router = GoRouter.of(context);
     router.go(AppRoutes.cleanerBookingsPath);
     await tester.pumpAndSettle();
@@ -383,36 +383,36 @@ void main() {
     final customerContext = tester.element(find.byType(CustomerHomeScreen));
     GoRouter.of(customerContext).go(AppRoutes.cleanerBookingsPath);
     await tester.pumpAndSettle();
-    expect(find.text('Manage Profile'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
   });
 
   testWidgets('cleaner is redirected from customer booking routes', (
     tester,
   ) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
-    final cleanerContext = tester.element(find.text('Cleaner home'));
+    final cleanerContext = tester.element(find.text('Cleaner Home'));
     GoRouter.of(cleanerContext).go(AppRoutes.customerBookingsPath);
     await tester.pumpAndSettle();
-    expect(find.text('Cleaner home'), findsOneWidget);
+    expect(find.text('Cleaner Home'), findsOneWidget);
   });
 
   testWidgets('admin is redirected from customer and cleaner booking routes', (
     tester,
   ) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
-    final adminContext = tester.element(find.text('Admin Dashboard'));
+    final adminContext = tester.element(find.text('Admin Home'));
     final router = GoRouter.of(adminContext);
     router.go(AppRoutes.customerBookingsPath);
     await tester.pumpAndSettle();
-    expect(find.text('Admin Dashboard'), findsOneWidget);
+    expect(find.text('Admin Home'), findsOneWidget);
     router.go(AppRoutes.cleanerBookingsPath);
     await tester.pumpAndSettle();
-    expect(find.text('Admin Dashboard'), findsOneWidget);
+    expect(find.text('Admin Home'), findsOneWidget);
   });
 
   testWidgets('cleaner can open services and availability', (tester) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
-    final context = tester.element(find.text('Cleaner home'));
+    final context = tester.element(find.text('Cleaner Home'));
     final router = GoRouter.of(context);
     router.go(AppRoutes.cleanerServicesPath);
     await tester.pumpAndSettle();
@@ -429,36 +429,36 @@ void main() {
     final context = tester.element(find.byType(CustomerHomeScreen));
     GoRouter.of(context).go(AppRoutes.cleanerServicesPath);
     await tester.pumpAndSettle();
-    expect(find.text('Manage Profile'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
   });
 
   testWidgets('cleaner trying customer discovery is redirected', (
     tester,
   ) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
-    final context = tester.element(find.text('Cleaner home'));
+    final context = tester.element(find.text('Cleaner Home'));
     GoRouter.of(context).go(AppRoutes.customerDiscoverPath);
     await tester.pumpAndSettle();
-    expect(find.text('Cleaner home'), findsOneWidget);
+    expect(find.text('Cleaner Home'), findsOneWidget);
   });
 
   testWidgets('admin cannot remain on customer discovery or cleaner services', (
     tester,
   ) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
-    final context = tester.element(find.text('Admin Dashboard'));
+    final context = tester.element(find.text('Admin Home'));
     final router = GoRouter.of(context);
     router.go(AppRoutes.customerDiscoverPath);
     await tester.pumpAndSettle();
-    expect(find.text('Admin Dashboard'), findsOneWidget);
+    expect(find.text('Admin Home'), findsOneWidget);
     router.go(AppRoutes.cleanerAvailabilityPath);
     await tester.pumpAndSettle();
-    expect(find.text('Admin Dashboard'), findsOneWidget);
+    expect(find.text('Admin Home'), findsOneWidget);
   });
 
   testWidgets('admin can open payment list and detail', (tester) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
-    final context = tester.element(find.text('Admin Dashboard'));
+    final context = tester.element(find.text('Admin Home'));
     final router = GoRouter.of(context);
     router.go(AppRoutes.adminPaymentsPath);
     await tester.pumpAndSettle();
@@ -473,34 +473,34 @@ void main() {
     final context = tester.element(find.byType(CustomerHomeScreen));
     GoRouter.of(context).go(AppRoutes.adminPaymentsPath);
     await tester.pumpAndSettle();
-    expect(find.text('Manage Profile'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
   });
 
   testWidgets('cleaner cannot remain on customer payment routes', (
     tester,
   ) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
-    final cleanerContext = tester.element(find.text('Cleaner home'));
+    final cleanerContext = tester.element(find.text('Cleaner Home'));
     GoRouter.of(
       cleanerContext,
     ).go(AppRoutes.customerBookingPaymentLocation('507f1f77bcf86cd799439091'));
     await tester.pumpAndSettle();
-    expect(find.text('Cleaner home'), findsOneWidget);
+    expect(find.text('Cleaner Home'), findsOneWidget);
   });
 
   testWidgets('admin cannot remain on customer payment routes', (tester) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
-    final adminContext = tester.element(find.text('Admin Dashboard'));
+    final adminContext = tester.element(find.text('Admin Home'));
     GoRouter.of(
       adminContext,
     ).go(AppRoutes.customerBookingPaymentLocation('507f1f77bcf86cd799439091'));
     await tester.pumpAndSettle();
-    expect(find.text('Admin Dashboard'), findsOneWidget);
+    expect(find.text('Admin Home'), findsOneWidget);
   });
 
   testWidgets('cleaner can open earnings and payout routes', (tester) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
-    final context = tester.element(find.text('Cleaner home'));
+    final context = tester.element(find.text('Cleaner Home'));
     final router = GoRouter.of(context);
     router.go(AppRoutes.cleanerEarningsPath);
     await tester.pumpAndSettle();
@@ -523,14 +523,14 @@ void main() {
     final context = tester.element(find.byType(CustomerHomeScreen));
     GoRouter.of(context).go(AppRoutes.cleanerEarningsPath);
     await tester.pumpAndSettle();
-    expect(find.text('Manage Profile'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
   });
 
   testWidgets('admin can open payouts, finance, and reconciliation', (
     tester,
   ) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
-    final context = tester.element(find.text('Admin Dashboard'));
+    final context = tester.element(find.text('Admin Home'));
     final router = GoRouter.of(context);
     router.go(AppRoutes.adminPayoutsPath);
     await tester.pumpAndSettle();
@@ -554,15 +554,15 @@ void main() {
     final customerContext = tester.element(find.byType(CustomerHomeScreen));
     GoRouter.of(customerContext).go(AppRoutes.adminFinancePath);
     await tester.pumpAndSettle();
-    expect(find.text('Manage Profile'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
   });
 
   testWidgets('cleaner cannot remain on admin payout routes', (tester) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
-    final cleanerContext = tester.element(find.text('Cleaner home'));
+    final cleanerContext = tester.element(find.text('Cleaner Home'));
     GoRouter.of(cleanerContext).go(AppRoutes.adminPayoutsPath);
     await tester.pumpAndSettle();
-    expect(find.text('Cleaner home'), findsOneWidget);
+    expect(find.text('Cleaner Home'), findsOneWidget);
   });
 
   testWidgets('unauthenticated can open forgot password', (tester) async {
@@ -592,9 +592,9 @@ void main() {
     tester,
   ) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
-    final context = tester.element(find.text('Admin Dashboard'));
+    final context = tester.element(find.text('Admin Home'));
     GoRouter.of(context).go(AppRoutes.cleanerPayoutRequestPath);
     await tester.pumpAndSettle();
-    expect(find.text('Admin Dashboard'), findsOneWidget);
+    expect(find.text('Admin Home'), findsOneWidget);
   });
 }
