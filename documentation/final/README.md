@@ -6,6 +6,8 @@ These documents distinguish **software release readiness** from **full productio
 
 ## Documents
 
+* [CSE489-project-report.md](CSE489-project-report.md) — course project report (cover page, features, references, future work)
+* [viva-file-function-map.md](viva-file-function-map.md) — viva cheat sheet: which files own which function
 * [project-completion-summary.md](project-completion-summary.md) — executive summary and readiness verdict
 * [functional-completeness.md](functional-completeness.md) — FR-01..FR-15 and role matrix
 * [production-readiness-gap-register.md](production-readiness-gap-register.md) — P0 / P1 / P2 gaps

@@ -64,6 +64,7 @@ Stores end-of-project functional completeness, production-readiness gaps, and th
 
 Current documents:
 
+* [viva-file-function-map.md](final/viva-file-function-map.md) — file-to-function map for viva
 * [project-completion-summary.md](final/project-completion-summary.md)
 * [functional-completeness.md](final/functional-completeness.md)
 * [production-readiness-gap-register.md](final/production-readiness-gap-register.md)
