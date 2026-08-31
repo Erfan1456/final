@@ -41,8 +41,16 @@ class AvailabilitySlot {
 
   Duration get duration => endAt.difference(startAt);
 
-  /// ISO-8601 UTC timestamp with explicit Z offset.
+  /// ISO-8601 UTC timestamp with an explicit `Z` offset, whole minutes only.
   static String toApiTimestamp(DateTime value) {
-    return value.toUtc().toIso8601String();
+    final utc = value.toUtc();
+    final trimmed = DateTime.utc(
+      utc.year,
+      utc.month,
+      utc.day,
+      utc.hour,
+      utc.minute,
+    );
+    return trimmed.toIso8601String();
   }
 }

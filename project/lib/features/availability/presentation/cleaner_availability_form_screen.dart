@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_cleaning_marketplace/features/availability/data/availability_slot.dart';
+import 'package:home_cleaning_marketplace/features/availability/data/availability_window.dart';
 import 'package:home_cleaning_marketplace/features/availability/presentation/availability_controller.dart';
 import 'package:home_cleaning_marketplace/features/catalog/presentation/catalog_controller.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/data/cleaner_profile.dart';
@@ -22,6 +23,17 @@ class _CleanerAvailabilityFormScreenState
   String? _serviceId;
   DateTime? _start;
   DateTime? _end;
+  String? _localError;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.slotId == null) {
+      final start = AvailabilityWindow.nextValidStart();
+      _start = start;
+      _end = AvailabilityWindow.defaultEnd(start);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +53,7 @@ class _CleanerAvailabilityFormScreenState
         (catalog.items.isEmpty ? null : catalog.items.first.id);
     _start ??= existing?.startAt.toLocal();
     _end ??= existing?.endAt.toLocal();
+    final errorText = _localError ?? availability.errorMessage;
 
     return Scaffold(
       appBar: AppBar(
@@ -69,6 +82,12 @@ class _CleanerAvailabilityFormScreenState
                       decoration: const InputDecoration(labelText: 'Service'),
                     ),
                     const SizedBox(height: 16),
+                    Text(
+                      'Windows must start in the future, last 60 minutes to 8 '
+                      'hours, and use 30-minute steps (for example 10:00–12:00).',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 8),
                     ListTile(
                       title: const Text('Start date'),
                       subtitle: Text(_label(_start)),
@@ -89,8 +108,7 @@ class _CleanerAvailabilityFormScreenState
                       subtitle: Text(_timeLabel(_end)),
                       onTap: () => _pick(isStart: false, timeOnly: true),
                     ),
-                    if (availability.errorMessage != null)
-                      Text(availability.errorMessage!),
+                    if (errorText != null) Text(errorText),
                     const SizedBox(height: 16),
                     FilledButton(
                       onPressed: availability.saving ? null : _submit,
@@ -132,18 +150,24 @@ class _CleanerAvailabilityFormScreenState
         return;
       }
       setState(() {
-        final merged = DateTime(
-          date.year,
-          date.month,
-          date.day,
-          current.hour,
-          current.minute,
+        final merged = AvailabilityWindow.alignToIncrement(
+          DateTime(
+            date.year,
+            date.month,
+            date.day,
+            current.hour,
+            current.minute,
+          ),
         );
         if (isStart) {
           _start = merged;
+          if (_end == null || !_start!.isBefore(_end!)) {
+            _end = AvailabilityWindow.defaultEnd(_start!);
+          }
         } else {
           _end = merged;
         }
+        _localError = null;
       });
       return;
     }
@@ -155,18 +179,24 @@ class _CleanerAvailabilityFormScreenState
       return;
     }
     setState(() {
-      final merged = DateTime(
-        current.year,
-        current.month,
-        current.day,
-        time.hour,
-        time.minute,
+      final merged = AvailabilityWindow.alignToIncrement(
+        DateTime(
+          current.year,
+          current.month,
+          current.day,
+          time.hour,
+          time.minute,
+        ),
       );
       if (isStart) {
         _start = merged;
+        if (_end == null || !_start!.isBefore(_end!)) {
+          _end = AvailabilityWindow.defaultEnd(_start!);
+        }
       } else {
         _end = merged;
       }
+      _localError = null;
     });
   }
 
@@ -175,23 +205,37 @@ class _CleanerAvailabilityFormScreenState
     final start = _start;
     final end = _end;
     if (serviceId == null || start == null || end == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Service, start, and end are required.')),
-      );
+      setState(() {
+        _localError = 'Service, start, and end are required.';
+      });
+      return;
+    }
+    final alignedStart = AvailabilityWindow.alignToIncrement(start);
+    final alignedEnd = AvailabilityWindow.alignToIncrement(end);
+    final invalid = AvailabilityWindow.validate(
+      start: alignedStart,
+      end: alignedEnd,
+    );
+    if (invalid != null) {
+      setState(() {
+        _start = alignedStart;
+        _end = alignedEnd;
+        _localError = invalid;
+      });
       return;
     }
     final notifier = ref.read(availabilityControllerProvider.notifier);
     final ok = widget.slotId == null
         ? await notifier.create(
             serviceId: serviceId,
-            startAt: AvailabilitySlot.toApiTimestamp(start),
-            endAt: AvailabilitySlot.toApiTimestamp(end),
+            startAt: AvailabilitySlot.toApiTimestamp(alignedStart),
+            endAt: AvailabilitySlot.toApiTimestamp(alignedEnd),
           )
         : await notifier.update(
             slotId: widget.slotId!,
             serviceId: serviceId,
-            startAt: AvailabilitySlot.toApiTimestamp(start),
-            endAt: AvailabilitySlot.toApiTimestamp(end),
+            startAt: AvailabilitySlot.toApiTimestamp(alignedStart),
+            endAt: AvailabilitySlot.toApiTimestamp(alignedEnd),
           );
     if (ok && mounted) {
       Navigator.of(context).pop();

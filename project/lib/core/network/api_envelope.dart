@@ -58,6 +58,12 @@ abstract final class ApiEnvelope {
       if (nested is Map) {
         final code = nested['code'];
         if (code is String && code.isNotEmpty) {
+          final serverMessage = nested['message'];
+          if (code == 'invalid_availability_window' &&
+              serverMessage is String &&
+              serverMessage.trim().isNotEmpty) {
+            return ApiFailure(code: code, message: serverMessage.trim());
+          }
           return ApiFailure(code: code, message: messageForApiCode(code));
         }
       }

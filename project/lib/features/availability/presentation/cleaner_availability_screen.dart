@@ -45,6 +45,12 @@ class CleanerAvailabilityScreen extends ConsumerWidget {
                       const SizedBox(height: 12),
                       Text(state.errorMessage!),
                     ],
+                    const SizedBox(height: 8),
+                    Text(
+                      'New slots must start in the future, last 1–8 hours, '
+                      'and use 30-minute steps.',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                     const SizedBox(height: 16),
                     Expanded(
                       child: state.loading
