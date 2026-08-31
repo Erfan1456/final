@@ -65,13 +65,13 @@ void main() {
     expect(find.text('Approvals'), findsOneWidget);
     expect(find.text('Users'), findsOneWidget);
     expect(find.text('Bookings'), findsOneWidget);
-    expect(find.text('Payments'), findsOneWidget);
-    expect(find.text('Payouts'), findsOneWidget);
-    expect(find.text('Disputes'), findsOneWidget);
     expect(find.text('Review Moderation'), findsOneWidget);
-    expect(find.text('Finance'), findsOneWidget);
     expect(find.text('Audit Log'), findsOneWidget);
     expect(find.text('Security'), findsOneWidget);
+    expect(find.text('Payments'), findsNothing);
+    expect(find.text('Payouts'), findsNothing);
+    expect(find.text('Disputes'), findsNothing);
+    expect(find.text('Finance'), findsNothing);
 
     final router = routerOf(tester, find.byType(AdminHomeScreen));
 
@@ -94,34 +94,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Bookings'), findsWidgets);
 
-    router.go(AppRoutes.adminPaymentsPath);
-    await tester.pumpAndSettle();
-    expect(find.text('Payments'), findsWidgets);
-
-    router.go(AppRoutes.adminPaymentDetailLocation('507f1f77bcf86cd7994390c1'));
-    await tester.pumpAndSettle();
-    expect(find.textContaining(RegExp(r'[Pp]ayment')), findsWidgets);
-    expect(find.text('Refund'), findsOneWidget);
-
-    router.go(AppRoutes.adminDisputesPath);
-    await tester.pumpAndSettle();
-    expect(find.text('Disputes'), findsWidgets);
-
     router.go(AppRoutes.adminReviewsPath);
     await tester.pumpAndSettle();
     expect(find.text('Review Moderation'), findsWidgets);
-
-    router.go(AppRoutes.adminPayoutsPath);
-    await tester.pumpAndSettle();
-    expect(find.text('Payouts'), findsWidgets);
-
-    router.go(AppRoutes.adminFinancePath);
-    await tester.pumpAndSettle();
-    expect(find.text('Finance'), findsWidgets);
-
-    router.go(AppRoutes.adminFinanceReconciliationPath);
-    await tester.pumpAndSettle();
-    expect(find.text('Reconciliation'), findsWidgets);
 
     router.go(AppRoutes.adminAuditLogsPath);
     await tester.pumpAndSettle();

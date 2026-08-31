@@ -154,7 +154,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('1 Test Street'), findsOneWidget);
-    expect(find.text('Report a Problem'), findsOneWidget);
+    expect(find.text('Report a Problem'), findsNothing);
     expect(find.text('Cancel'), findsOneWidget);
     expect(find.text('Accept'), findsNothing);
     await tester.tap(find.text('Cancel'));

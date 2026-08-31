@@ -43,13 +43,15 @@ void main() {
     expect(find.text('admin@example.com'), findsNothing);
     expect(find.textContaining('person@example.com'), findsOneWidget);
     expect(find.text('Approvals'), findsOneWidget);
-    expect(find.text('Payments'), findsOneWidget);
     expect(find.text('Review Moderation'), findsOneWidget);
-    expect(find.text('Disputes'), findsOneWidget);
     expect(find.text('Users'), findsOneWidget);
     expect(find.text('Bookings'), findsOneWidget);
     expect(find.text('Audit Log'), findsOneWidget);
     expect(find.text('Notifications'), findsOneWidget);
+    expect(find.text('Payments'), findsNothing);
+    expect(find.text('Disputes'), findsNothing);
+    expect(find.text('Payouts'), findsNothing);
+    expect(find.text('Finance'), findsNothing);
   });
 
   testWidgets('approval list shows pending items and filters', (tester) async {

@@ -49,21 +49,6 @@ class AdminHomeScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSpacing.small),
                   OutlinedButton(
-                    onPressed: () => context.push(AppRoutes.adminPaymentsPath),
-                    child: const Text('Payments'),
-                  ),
-                  const SizedBox(height: AppSpacing.small),
-                  OutlinedButton(
-                    onPressed: () => context.push(AppRoutes.adminPayoutsPath),
-                    child: const Text('Payouts'),
-                  ),
-                  const SizedBox(height: AppSpacing.small),
-                  OutlinedButton(
-                    onPressed: () => context.push(AppRoutes.adminDisputesPath),
-                    child: const Text('Disputes'),
-                  ),
-                  const SizedBox(height: AppSpacing.small),
-                  OutlinedButton(
                     onPressed: () => context.push(AppRoutes.adminReviewsPath),
                     child: const Text('Review Moderation'),
                   ),
@@ -71,13 +56,8 @@ class AdminHomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.section),
               AppSection(
-                title: 'Finance & audit',
+                title: 'Audit',
                 children: [
-                  FilledButton.tonal(
-                    onPressed: () => context.push(AppRoutes.adminFinancePath),
-                    child: const Text('Finance'),
-                  ),
-                  const SizedBox(height: AppSpacing.small),
                   OutlinedButton(
                     onPressed: () => context.push(AppRoutes.adminAuditLogsPath),
                     child: const Text('Audit Log'),

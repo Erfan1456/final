@@ -10,6 +10,7 @@ import 'package:home_cleaning_marketplace/features/auth/domain/auth_session_stat
 import 'package:home_cleaning_marketplace/features/auth/domain/auth_user.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/auth_controller.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/login_screen.dart';
+import 'package:home_cleaning_marketplace/features/bookings/presentation/cleaner_booking_controller.dart';
 import 'package:home_cleaning_marketplace/features/bookings/presentation/customer_booking_controller.dart';
 import 'package:home_cleaning_marketplace/features/chat/presentation/booking_chat_controller.dart';
 import 'package:home_cleaning_marketplace/features/cleaner/data/cleaner_profile.dart';
@@ -18,8 +19,6 @@ import 'package:home_cleaning_marketplace/features/cleaner/presentation/cleaner_
 import 'package:home_cleaning_marketplace/features/customer/data/customer_profile.dart';
 import 'package:home_cleaning_marketplace/features/customer/presentation/customer_home_screen.dart';
 import 'package:home_cleaning_marketplace/features/customer/presentation/customer_profile_controller.dart';
-import 'package:home_cleaning_marketplace/features/earnings/data/earnings_models.dart';
-import 'package:home_cleaning_marketplace/features/earnings/presentation/cleaner_earnings_controller.dart';
 import 'package:home_cleaning_marketplace/features/notifications/presentation/notification_controller.dart';
 
 import '../helpers/auth_test_fakes.dart';
@@ -214,19 +213,20 @@ void main() {
           loading: false,
           profile: testCleanerProfile(status: OnboardingStatus.approved),
         ),
-        cleanerEarnings: CleanerEarningsState(
+        cleanerBooking: CleanerBookingState(
           loading: false,
-          summary: EarningsSummary(
-            currencies: [testEarningsSummary(available: _userAEarningsAmount)],
-          ),
-          selectedCurrency: 'BDT',
+          items: [
+            testCleanerBooking(
+              customerDisplayName: '$_userAEarningsAmount Marker',
+            ),
+          ],
         ),
       ),
     );
     expect(find.byType(CleanerHomeScreen), findsOneWidget);
 
     final router = routerOf(tester, find.byType(CleanerHomeScreen));
-    router.go(AppRoutes.cleanerEarningsPath);
+    router.go(AppRoutes.cleanerBookingsPath);
     await tester.pumpAndSettle();
     expect(find.textContaining('$_userAEarningsAmount'), findsWidgets);
 
@@ -240,10 +240,9 @@ void main() {
     routerOf(
       tester,
       find.byType(CleanerHomeScreen),
-    ).go(AppRoutes.cleanerEarningsPath);
+    ).go(AppRoutes.cleanerBookingsPath);
     await tester.pumpAndSettle();
     expect(find.textContaining('$_userAEarningsAmount'), findsNothing);
-    expect(find.text('No earnings have been recorded yet.'), findsOneWidget);
   });
 
   testWidgets('same ProviderScope: logout isolates admin operational data', (

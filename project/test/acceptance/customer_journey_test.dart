@@ -184,11 +184,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Booking details'), findsOneWidget);
 
-    router.go(AppRoutes.customerBookingPaymentLocation(_bookingId));
-    await tester.pumpAndSettle();
-    expect(find.text('Payment'), findsWidgets);
-    expect(find.text('Paid'), findsWidgets);
-
     router.go(AppRoutes.customerBookingChatLocation(_bookingId));
     await tester.pumpAndSettle();
     expect(find.text('Ada Cleaner'), findsWidgets);
@@ -201,10 +196,6 @@ void main() {
     router.go(AppRoutes.customerBookingReviewLocation(_bookingId));
     await tester.pumpAndSettle();
     expect(find.text('Review'), findsWidgets);
-
-    router.go(AppRoutes.customerBookingDisputeLocation(_bookingId));
-    await tester.pumpAndSettle();
-    expect(find.text('Dispute'), findsWidgets);
 
     router.go(AppRoutes.accountSecurityPath);
     await tester.pumpAndSettle();

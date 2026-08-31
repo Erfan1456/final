@@ -202,11 +202,6 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Booking details'), findsOneWidget);
-    router.go(
-      AppRoutes.customerBookingPaymentLocation('507f1f77bcf86cd799439091'),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Payment'), findsWidgets);
   });
 
   testWidgets('customer can open shared notifications', (tester) async {
@@ -247,11 +242,6 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Review'), findsWidgets);
-    router.go(
-      AppRoutes.customerBookingDisputeLocation('507f1f77bcf86cd799439091'),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Dispute'), findsWidgets);
   });
 
   testWidgets('cleaner can open booking chat and my reviews', (tester) async {
@@ -264,11 +254,6 @@ void main() {
     router.go(AppRoutes.cleanerReviewsPath);
     await tester.pumpAndSettle();
     expect(find.text('My Reviews'), findsWidgets);
-    router.go(
-      AppRoutes.cleanerBookingDisputeLocation('507f1f77bcf86cd799439091'),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Dispute'), findsWidgets);
   });
 
   testWidgets('admin can open review moderation', (tester) async {
@@ -281,9 +266,6 @@ void main() {
     router.go(AppRoutes.adminReviewDetailLocation('507f1f77bcf86cd7994390e1'));
     await tester.pumpAndSettle();
     expect(find.text('Review moderation'), findsOneWidget);
-    router.go(AppRoutes.adminDisputesPath);
-    await tester.pumpAndSettle();
-    expect(find.text('Disputes'), findsWidgets);
     router.go(AppRoutes.adminUsersPath);
     await tester.pumpAndSettle();
     expect(find.text('Users'), findsWidgets);
@@ -456,16 +438,16 @@ void main() {
     expect(find.text('Admin Home'), findsOneWidget);
   });
 
-  testWidgets('admin can open payment list and detail', (tester) async {
+  testWidgets('admin payment routes redirect to admin home', (tester) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
     final context = tester.element(find.text('Admin Home'));
     final router = GoRouter.of(context);
     router.go(AppRoutes.adminPaymentsPath);
     await tester.pumpAndSettle();
-    expect(find.text('Payments'), findsWidgets);
+    expect(find.text('Admin Home'), findsOneWidget);
     router.go(AppRoutes.adminPaymentDetailLocation('507f1f77bcf86cd7994390d1'));
     await tester.pumpAndSettle();
-    expect(find.text('Payment transaction'), findsOneWidget);
+    expect(find.text('Admin Home'), findsOneWidget);
   });
 
   testWidgets('customer cannot remain on admin payment routes', (tester) async {
@@ -498,22 +480,18 @@ void main() {
     expect(find.text('Admin Home'), findsOneWidget);
   });
 
-  testWidgets('cleaner can open earnings and payout routes', (tester) async {
+  testWidgets('cleaner earnings and payout routes redirect home', (
+    tester,
+  ) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'cleaner')));
     final context = tester.element(find.text('Cleaner Home'));
     final router = GoRouter.of(context);
     router.go(AppRoutes.cleanerEarningsPath);
     await tester.pumpAndSettle();
-    expect(find.text('Earnings & Payouts'), findsWidgets);
-    router.go(AppRoutes.cleanerEarningsLedgerPath);
-    await tester.pumpAndSettle();
-    expect(find.text('Earnings ledger'), findsWidgets);
-    router.go(AppRoutes.cleanerPayoutsPath);
-    await tester.pumpAndSettle();
-    expect(find.text('Payout history'), findsWidgets);
+    expect(find.text('Cleaner Home'), findsOneWidget);
     router.go(AppRoutes.cleanerPayoutRequestPath);
     await tester.pumpAndSettle();
-    expect(find.text('Request payout'), findsWidgets);
+    expect(find.text('Cleaner Home'), findsOneWidget);
   });
 
   testWidgets('customer is redirected from cleaner finance routes', (
@@ -526,7 +504,7 @@ void main() {
     expect(find.text('Profile'), findsOneWidget);
   });
 
-  testWidgets('admin can open payouts, finance, and reconciliation', (
+  testWidgets('admin finance and payout routes redirect to admin home', (
     tester,
   ) async {
     await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
@@ -534,19 +512,10 @@ void main() {
     final router = GoRouter.of(context);
     router.go(AppRoutes.adminPayoutsPath);
     await tester.pumpAndSettle();
-    expect(find.text('Payouts'), findsWidgets);
-    router.go(AppRoutes.adminPayoutDetailLocation('507f1f77bcf86cd7994390f1'));
-    await tester.pumpAndSettle();
-    expect(find.text('Payout detail'), findsOneWidget);
+    expect(find.text('Admin Home'), findsOneWidget);
     router.go(AppRoutes.adminFinancePath);
     await tester.pumpAndSettle();
-    expect(find.text('Finance'), findsWidgets);
-    router.go(AppRoutes.adminFinanceReconciliationPath);
-    await tester.pumpAndSettle();
-    expect(find.text('Reconciliation'), findsWidgets);
-    router.go(AppRoutes.adminUserFinanceLocation('507f1f77bcf86cd799439022'));
-    await tester.pumpAndSettle();
-    expect(find.text('Cleaner finance'), findsOneWidget);
+    expect(find.text('Admin Home'), findsOneWidget);
   });
 
   testWidgets('customer cannot remain on admin finance routes', (tester) async {

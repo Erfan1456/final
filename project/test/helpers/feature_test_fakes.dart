@@ -565,9 +565,10 @@ class SeededAdminPaymentController extends AdminPaymentController {
 }
 
 class SeededCleanerBookingController extends CleanerBookingController {
-  SeededCleanerBookingController(this._seed);
+  SeededCleanerBookingController(this._seed, {this.scopedToUserId});
 
   final CleanerBookingState _seed;
+  final String? scopedToUserId;
   int loadCalls = 0;
   int loadMoreCalls = 0;
   int loadDetailCalls = 0;
@@ -580,7 +581,12 @@ class SeededCleanerBookingController extends CleanerBookingController {
   BookingStatus? lastStatus;
 
   @override
-  CleanerBookingState build() => _seed;
+  CleanerBookingState build() {
+    if (!seededStateVisibleForAuth(ref, scopedToUserId)) {
+      return const CleanerBookingState(loading: false);
+    }
+    return _seed;
+  }
 
   @override
   Future<void> load({BookingStatus? status, bool clearFilter = false}) async {
@@ -1425,6 +1431,7 @@ List<dynamic> featureControllerOverrides({
     cleanerBookingControllerProvider.overrideWith(
       () => SeededCleanerBookingController(
         cleanerBooking ?? const CleanerBookingState(loading: false),
+        scopedToUserId: scopedToUserId,
       ),
     ),
     customerPaymentControllerProvider.overrideWith(
@@ -1617,6 +1624,7 @@ CleanerBooking testCleanerBooking({
   bool fullAddress = false,
   String startAt = '2026-09-01T03:00:00.000Z',
   String endAt = '2026-09-01T05:00:00.000Z',
+  String customerDisplayName = 'Test Customer',
 }) {
   return CleanerBooking.fromJson(
     cleanerBookingJson(
@@ -1625,6 +1633,7 @@ CleanerBooking testCleanerBooking({
       fullAddress: fullAddress,
       startAt: startAt,
       endAt: endAt,
+      customerDisplayName: customerDisplayName,
     ),
   );
 }
@@ -1833,11 +1842,12 @@ Map<String, dynamic> cleanerBookingJson({
   bool fullAddress = false,
   String startAt = '2026-09-01T03:00:00.000Z',
   String endAt = '2026-09-01T05:00:00.000Z',
+  String customerDisplayName = 'Test Customer',
 }) {
   return <String, dynamic>{
     'id': id,
     'status': status,
-    'customer_display_name': 'Test Customer',
+    'customer_display_name': customerDisplayName,
     'service_snapshot': <String, dynamic>{
       'slug': 'home-cleaning',
       'name': 'Home Cleaning',

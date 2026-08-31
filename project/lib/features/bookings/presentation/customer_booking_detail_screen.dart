@@ -7,10 +7,7 @@ import 'package:home_cleaning_marketplace/features/bookings/data/booking_models.
 import 'package:home_cleaning_marketplace/features/bookings/presentation/booking_widgets.dart';
 import 'package:home_cleaning_marketplace/features/bookings/presentation/customer_booking_controller.dart';
 import 'package:home_cleaning_marketplace/features/catalog/data/marketplace_service.dart';
-import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_controller.dart';
-import 'package:home_cleaning_marketplace/features/payments/presentation/customer_payment_section.dart';
 import 'package:home_cleaning_marketplace/features/reviews/presentation/customer_review_controller.dart';
-import 'package:home_cleaning_marketplace/features/disputes/presentation/booking_dispute_controller.dart';
 
 class CustomerBookingDetailScreen extends ConsumerStatefulWidget {
   const CustomerBookingDetailScreen({super.key, required this.bookingId});
@@ -35,13 +32,7 @@ class _CustomerBookingDetailScreenState
           .read(customerBookingControllerProvider.notifier)
           .loadDetail(widget.bookingId);
       ref
-          .read(customerPaymentControllerProvider.notifier)
-          .load(widget.bookingId);
-      ref
           .read(customerReviewControllerProvider.notifier)
-          .load(widget.bookingId);
-      ref
-          .read(bookingDisputeControllerProvider.notifier)
           .load(widget.bookingId);
     });
   }
@@ -90,8 +81,6 @@ class _CustomerBookingDetailScreenState
                       Text('Notes: ${booking.customerNotes}'),
                     ],
                     const SizedBox(height: 16),
-                    BookingPaymentSection(booking: booking),
-                    const SizedBox(height: 16),
                     FilledButton.tonal(
                       onPressed: () => context.push(
                         AppRoutes.customerBookingChatLocation(booking.id),
@@ -109,20 +98,6 @@ class _CustomerBookingDetailScreenState
                                   null
                               ? 'Leave Review'
                               : 'Edit Review',
-                        ),
-                      ),
-                    ],
-                    if (booking.status.canOpenDispute) ...[
-                      const SizedBox(height: 8),
-                      OutlinedButton(
-                        onPressed: () => context.push(
-                          AppRoutes.customerBookingDisputeLocation(booking.id),
-                        ),
-                        child: Text(
-                          ref.watch(bookingDisputeControllerProvider).dispute ==
-                                  null
-                              ? 'Report a Problem'
-                              : 'View Dispute',
                         ),
                       ),
                     ],

@@ -57,9 +57,7 @@ class AdminBookingListScreen extends ConsumerWidget {
                             subtitle: Text(
                               '${item.customerDisplayName} / ${item.cleanerPublicName}\n'
                               '${formatLocalDateTime(item.startAt)}\n'
-                              '${formatQuotedTotal(item.quotedTotalMinor, item.currencyCode)}'
-                              '${item.payment == null ? '' : ' · ${item.payment!.status.label}'}'
-                              '${item.dispute == null ? '' : ' · ${item.dispute!.status.label}'}',
+                              '${formatQuotedTotal(item.quotedTotalMinor, item.currencyCode)}',
                             ),
                             isThreeLine: true,
                             onTap: () => context.push(

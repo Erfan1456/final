@@ -60,7 +60,7 @@ void main() {
     expect(find.text('View Dispute'), findsNothing);
   });
 
-  testWidgets('eligible booking shows Report a Problem', (tester) async {
+  testWidgets('eligible booking does not show Report a Problem', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -96,7 +96,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Report a Problem'), findsOneWidget);
+    expect(find.text('Report a Problem'), findsNothing);
   });
 
   testWidgets('create form validates and submits', (tester) async {
@@ -188,7 +188,7 @@ void main() {
         child: const MaterialApp(home: AdminHomeScreen()),
       ),
     );
-    expect(find.text('Disputes'), findsOneWidget);
+    expect(find.text('Disputes'), findsNothing);
     expect(find.text('Users'), findsOneWidget);
     expect(find.text('Bookings'), findsOneWidget);
     expect(find.text('Audit Log'), findsOneWidget);

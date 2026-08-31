@@ -15,7 +15,7 @@ import 'package:home_cleaning_marketplace/features/reviews/presentation/customer
 import '../../../helpers/feature_test_fakes.dart';
 
 void main() {
-  testWidgets('confirmed booking without payment shows Pay Now', (
+  testWidgets('confirmed booking does not show Pay Now', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -68,14 +68,9 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Payment'), findsOneWidget);
-    expect(find.text('No payment'), findsOneWidget);
-    expect(find.text('Pay Now'), findsOneWidget);
+    expect(find.text('Pay Now'), findsNothing);
     expect(find.text('Card number'), findsNothing);
     expect(find.text('CVV'), findsNothing);
-    await tester.tap(find.text('Pay Now'));
-    await tester.pumpAndSettle();
-    expect(find.text('Payment route'), findsOneWidget);
   });
 
   testWidgets('pending payment shows cancel and sandbox when available', (
@@ -118,16 +113,16 @@ void main() {
           ),
         ],
         child: const MaterialApp(
-          home: CustomerBookingDetailScreen(
+          home: CustomerPaymentScreen(
             bookingId: '507f1f77bcf86cd799439091',
           ),
         ),
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Payment Pending'), findsOneWidget);
+    expect(find.text('Pending'), findsOneWidget);
     expect(find.text('Cancel Payment'), findsOneWidget);
-    expect(find.text('Development Sandbox'), findsOneWidget);
+    expect(find.textContaining('Development Sandbox'), findsWidgets);
     expect(find.text('Simulate Success'), findsOneWidget);
     expect(find.text('Simulate Failure'), findsOneWidget);
     await tester.tap(find.text('Cancel Payment'));
@@ -192,7 +187,7 @@ void main() {
             ),
           ],
           child: const MaterialApp(
-            home: CustomerBookingDetailScreen(
+            home: CustomerPaymentScreen(
               bookingId: '507f1f77bcf86cd799439091',
             ),
           ),
@@ -206,7 +201,7 @@ void main() {
     expect(find.text('Simulate Success'), findsNothing);
 
     await pumpStatus('failed');
-    expect(find.text('Payment Failed'), findsOneWidget);
+    expect(find.text('Failed'), findsOneWidget);
     expect(find.text('Retry Payment'), findsOneWidget);
 
     await pumpStatus('cancelled');
@@ -216,7 +211,7 @@ void main() {
     expect(find.textContaining('Refunded'), findsWidgets);
 
     await pumpStatus('partially_refunded', refunded: 100000);
-    expect(find.textContaining('Refunded:'), findsOneWidget);
+    expect(find.textContaining('Partially Refunded'), findsOneWidget);
   });
 
   testWidgets('payment screen starts payment and hides card fields', (

@@ -119,17 +119,6 @@ class CleanerHomeScreen extends ConsumerWidget {
               ],
               const SizedBox(height: AppSpacing.section),
               AppSection(
-                title: 'Money',
-                children: [
-                  FilledButton.tonal(
-                    onPressed: () =>
-                        context.push(AppRoutes.cleanerEarningsPath),
-                    child: const Text('Earnings & Payouts'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.section),
-              AppSection(
                 title: 'Account',
                 children: [
                   const NotificationHomeLink(),

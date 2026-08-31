@@ -14,7 +14,9 @@ import '../../../helpers/auth_test_fakes.dart';
 import '../../../helpers/feature_test_fakes.dart';
 
 void main() {
-  testWidgets('AdminHome shows Payouts and Finance', (tester) async {
+  testWidgets('AdminHome does not show Payouts, Finance, or Disputes', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(800, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -36,9 +38,9 @@ void main() {
         child: const MaterialApp(home: AdminHomeScreen()),
       ),
     );
-    expect(find.text('Payouts'), findsOneWidget);
-    expect(find.text('Finance'), findsOneWidget);
-    expect(find.text('Disputes'), findsOneWidget);
+    expect(find.text('Payouts'), findsNothing);
+    expect(find.text('Finance'), findsNothing);
+    expect(find.text('Disputes'), findsNothing);
   });
 
   testWidgets('payout list shows requested items and load more', (

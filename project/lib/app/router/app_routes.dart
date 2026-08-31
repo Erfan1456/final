@@ -133,6 +133,15 @@ abstract final class AppRoutes {
     return false;
   }
 
+  /// Payment, payout, dispute, finance, and earnings UI is retired.
+  static bool isRetiredCommercePath(String location) {
+    return location.contains('/payment') ||
+        location.contains('/payout') ||
+        location.contains('/dispute') ||
+        location.contains('/finance') ||
+        location.contains('/earnings');
+  }
+
   static String customerBookSlotLocation(String cleanerUserId, String slotId) {
     return '/customer/book/$cleanerUserId/$slotId';
   }

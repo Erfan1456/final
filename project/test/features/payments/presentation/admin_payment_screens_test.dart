@@ -14,7 +14,7 @@ import '../../../helpers/auth_test_fakes.dart';
 import '../../../helpers/feature_test_fakes.dart';
 
 void main() {
-  testWidgets('AdminHome shows Payments', (tester) async {
+  testWidgets('AdminHome does not show Payments', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -32,7 +32,7 @@ void main() {
         child: const MaterialApp(home: AdminHomeScreen()),
       ),
     );
-    expect(find.text('Payments'), findsOneWidget);
+    expect(find.text('Payments'), findsNothing);
     expect(find.text('Approvals'), findsOneWidget);
   });
 

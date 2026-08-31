@@ -82,7 +82,7 @@ void main() {
     expect(find.textContaining('person@example.com'), findsOneWidget);
     expect(find.text('Dashboard / Booking Requests'), findsOneWidget);
     expect(find.text('Services'), findsOneWidget);
-    expect(find.text('Earnings & Payouts'), findsOneWidget);
+    expect(find.text('Earnings & Payouts'), findsNothing);
     expect(find.text('Security'), findsOneWidget);
 
     final router = routerOf(tester, find.byType(CleanerHomeScreen));
@@ -183,19 +183,6 @@ void main() {
     resume.go(AppRoutes.cleanerBookingChatLocation(_bookingId));
     await tester.pumpAndSettle();
     expect(find.text('Chat'), findsWidgets);
-
-    resume.go(AppRoutes.cleanerEarningsPath);
-    await tester.pumpAndSettle();
-    expect(find.text('Earnings & Payouts'), findsWidgets);
-
-    resume.go(AppRoutes.cleanerPayoutRequestPath);
-    await tester.pumpAndSettle();
-    expect(find.text('Request payout'), findsWidgets);
-    expect(find.textContaining('Development Sandbox'), findsOneWidget);
-
-    resume.go(AppRoutes.cleanerPayoutsPath);
-    await tester.pumpAndSettle();
-    expect(find.text('Payout history'), findsWidgets);
 
     resume.go(AppRoutes.cleanerReviewsPath);
     await tester.pumpAndSettle();

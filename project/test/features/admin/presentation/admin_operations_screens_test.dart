@@ -102,7 +102,7 @@ void main() {
     expect(active.lastReason, 'Repeated no-show complaints');
   });
 
-  testWidgets('admin bookings list shows payment and dispute summary', (
+  testWidgets('admin bookings list shows bookings and load more', (
     tester,
   ) async {
     _useTallSurface(tester);
@@ -125,13 +125,12 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.textContaining('Home Cleaning'), findsWidgets);
-    expect(find.textContaining('Paid'), findsWidgets);
     await tester.tap(find.text('Load More'));
     await tester.pump();
     expect(list.loadMoreCalls, 1);
   });
 
-  testWidgets('paid booking detail warns and cancels with a reason', (
+  testWidgets('paid booking detail cancels with a reason', (
     tester,
   ) async {
     _useTallSurface(tester);
@@ -152,7 +151,6 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.textContaining('requires a refund'), findsOneWidget);
     await tester.tap(find.text('Cancel Booking'));
     await tester.pump();
     await tester.enterText(

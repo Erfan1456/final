@@ -74,30 +74,12 @@ class _AdminBookingDetailScreenState
                     if (detail.booking.customerNotes != null)
                       Text('Notes: ${detail.booking.customerNotes}'),
                     const SizedBox(height: 16),
-                    const Text('Payment summary'),
-                    if (detail.payments.isEmpty) const Text('No payment yet.'),
-                    for (final payment in detail.payments)
-                      Text(
-                        '${payment.status.label} · ${payment.currencyCode} ${payment.amountMinor}'
-                        '${payment.refundedAmountMinor == 0 ? '' : ' · refunded ${payment.refundedAmountMinor}'}',
-                      ),
-                    if (detail.dispute != null) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        'Dispute: ${detail.dispute!.status.label} · ${detail.dispute!.category.label}',
-                      ),
-                    ],
-                    const SizedBox(height: 16),
                     BookingStatusHistoryList(
                       history: detail.booking.statusHistory,
                     ),
                     if (state.errorMessage != null) Text(state.errorMessage!),
                     if (detail.canCancel) ...[
                       const SizedBox(height: 16),
-                      if (detail.paidCancelWarning)
-                        const Text(
-                          'This paid booking requires a refund before cancellation. The server remains authoritative.',
-                        ),
                       FilledButton(
                         onPressed: state.saving
                             ? null

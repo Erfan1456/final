@@ -98,6 +98,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           if (AppRoutes.isForeignRolePath(location, role)) {
             return home;
           }
+          if (AppRoutes.isRetiredCommercePath(location)) {
+            return home;
+          }
           if (location == AppRoutes.accountSessionsPath) {
             return AppRoutes.accountSecurityPath;
           }

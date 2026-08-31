@@ -15,7 +15,7 @@ import '../../../helpers/auth_test_fakes.dart';
 import '../../../helpers/feature_test_fakes.dart';
 
 void main() {
-  testWidgets('cleaner home shows Earnings & Payouts even when pending', (
+  testWidgets('cleaner home does not show Earnings & Payouts', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -43,7 +43,7 @@ void main() {
         child: const MaterialApp(home: CleanerHomeScreen()),
       ),
     );
-    expect(find.text('Earnings & Payouts'), findsOneWidget);
+    expect(find.text('Earnings & Payouts'), findsNothing);
     expect(find.textContaining('bank'), findsNothing);
   });
 
