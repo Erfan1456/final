@@ -43,14 +43,6 @@ class AuthenticatedHomeScreen extends ConsumerWidget {
                     : () => ref.read(authControllerProvider.notifier).logout(),
                 child: const Text('Log out'),
               ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: submitting
-                    ? null
-                    : () =>
-                          ref.read(authControllerProvider.notifier).logoutAll(),
-                child: const Text('Log out all devices'),
-              ),
             ],
           ),
         ),

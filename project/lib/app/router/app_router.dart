@@ -26,7 +26,6 @@ import 'package:home_cleaning_marketplace/features/auth/presentation/forgot_pass
 import 'package:home_cleaning_marketplace/features/auth/presentation/reset_password_screen.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/account_security_screen.dart';
 import 'package:home_cleaning_marketplace/features/auth/presentation/change_password_screen.dart';
-import 'package:home_cleaning_marketplace/features/auth/presentation/session_management_screen.dart';
 import 'package:home_cleaning_marketplace/features/availability/presentation/cleaner_availability_form_screen.dart';
 import 'package:home_cleaning_marketplace/features/availability/presentation/cleaner_availability_screen.dart';
 import 'package:home_cleaning_marketplace/features/bookings/presentation/booking_confirmation_screen.dart';
@@ -99,6 +98,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           if (AppRoutes.isForeignRolePath(location, role)) {
             return home;
           }
+          if (location == AppRoutes.accountSessionsPath) {
+            return AppRoutes.accountSecurityPath;
+          }
           return null;
       }
     },
@@ -161,7 +163,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.accountSessionsPath,
         name: AppRoutes.accountSessionsName,
-        builder: (context, state) => const SessionManagementScreen(),
+        redirect: (context, state) => AppRoutes.accountSecurityPath,
       ),
       GoRoute(
         path: AppRoutes.homePath,

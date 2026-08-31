@@ -26,7 +26,7 @@ void main() {
     expect(find.text('Role: customer'), findsOneWidget);
     expect(find.text('Email verified'), findsOneWidget);
     expect(find.text('Log out'), findsOneWidget);
-    expect(find.text('Log out all devices'), findsOneWidget);
+    expect(find.text('Log out all devices'), findsNothing);
   });
 
   testWidgets('home logout actions fire controller methods', (tester) async {
@@ -43,15 +43,6 @@ void main() {
     await tester.tap(find.text('Log out'));
     await tester.pump();
     expect(controller.logoutCalls, equals(1));
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [authControllerProvider.overrideWith(() => controller)],
-        child: const MaterialApp(home: AuthenticatedHomeScreen()),
-      ),
-    );
-    await tester.tap(find.text('Log out all devices'));
-    await tester.pump();
-    expect(controller.logoutAllCalls, equals(1));
+    expect(find.text('Log out all devices'), findsNothing);
   });
 }

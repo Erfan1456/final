@@ -24,11 +24,6 @@ class AccountSecurityScreen extends StatelessWidget {
                   context.push(AppRoutes.accountChangePasswordPath),
               child: const Text('Change password'),
             ),
-            const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: () => context.push(AppRoutes.accountSessionsPath),
-              child: const Text('Manage sessions'),
-            ),
           ],
         ),
       ),

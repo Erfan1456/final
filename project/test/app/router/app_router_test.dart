@@ -583,9 +583,28 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Account security'), findsOneWidget);
     expect(find.text('Change password'), findsOneWidget);
+    expect(find.text('Manage sessions'), findsNothing);
+    router.go(AppRoutes.accountSessionsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Account security'), findsOneWidget);
+    expect(find.text('Manage sessions'), findsNothing);
     router.go(AppRoutes.accountChangePasswordPath);
     await tester.pumpAndSettle();
     expect(find.text('Change password'), findsWidgets);
+  });
+
+  testWidgets('admin cannot open session management', (tester) async {
+    await pumpApp(tester, AuthState.authenticated(testUser(role: 'admin')));
+    final context = tester.element(find.text('Admin Home'));
+    final router = GoRouter.of(context);
+    router.go(AppRoutes.accountSecurityPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Manage sessions'), findsNothing);
+    expect(find.text('Log out all devices'), findsNothing);
+    router.go(AppRoutes.accountSessionsPath);
+    await tester.pumpAndSettle();
+    expect(find.text('Account security'), findsOneWidget);
+    expect(find.text('Manage sessions'), findsNothing);
   });
 
   testWidgets('admin is redirected from cleaner payout-request routes', (
